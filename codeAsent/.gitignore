@@ -1,0 +1,9 @@
+# Archivos de sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Entornos y dependencias en la raíz si existieran
+node_modules/
+.env
