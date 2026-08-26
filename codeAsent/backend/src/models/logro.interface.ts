@@ -1,3 +1,5 @@
+import { RowDataPacket } from 'mysql2';
+
 export interface Logro {
   id_logro?: number;
   nombre: string;
@@ -6,3 +8,5 @@ export interface Logro {
   requisito: string | null;
   estado: boolean;
 }
+
+export interface ILenguajeRow extends RowDataPacket, ILenguaje {}
