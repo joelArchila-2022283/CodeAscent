@@ -9,4 +9,4 @@ export interface Logro {
   estado: boolean;
 }
 
-export interface ILenguajeRow extends RowDataPacket, ILenguaje {}
+export interface LogroRow extends RowDataPacket, Logro {}
