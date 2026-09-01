@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface ILenguaje {
     id_lenguaje?: number;
     nombre: string;
@@ -7,4 +5,4 @@ export interface ILenguaje {
     estado?: boolean;
 }
 
-export interface ILenguajeRow extends RowDataPacket, ILenguaje {}
+export type ILenguajeRow = ILenguaje;

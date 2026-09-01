@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface IRespuesta {
     id_respuesta?: number;
     id_reto: number;
@@ -7,4 +5,4 @@ export interface IRespuesta {
     es_correcta?: boolean;
 }
 
-export interface IRespuestaRow extends IRespuesta, RowDataPacket {}
+export type IRespuestaRow = IRespuesta;

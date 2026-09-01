@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface IProgreso {
     id_progreso?: number;
     id_usuario: number;
@@ -10,4 +8,4 @@ export interface IProgreso {
     fecha_actualizacion?: Date;
 }
 
-export interface IProgresoRow extends RowDataPacket, IProgreso {}
+export type IProgresoRow = IProgreso;

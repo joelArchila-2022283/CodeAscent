@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface IUsuario {
     id_usuario?: number;
     nombre: string;
@@ -9,4 +7,4 @@ export interface IUsuario {
     fecha_registro?: Date;
 }
 
-export interface IUsuarioRow extends RowDataPacket, IUsuario {}
+export type IUsuarioRow = IUsuario;

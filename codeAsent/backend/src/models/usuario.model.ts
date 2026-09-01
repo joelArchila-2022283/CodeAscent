@@ -1,11 +1,10 @@
-import { ResultSetHeader } from 'mysql2';
 import { pool } from '../config/conexion';
 import { IUsuario, IUsuarioRow } from './usuario.interface';
 
 export class ModeloUsuario {
 
     static async obtenerTodos(): Promise<IUsuario[]> {
-        const [filas] = await pool.query<IUsuarioRow[]>(
+        const resultado = await pool.query<IUsuarioRow>(
             `SELECT 
                 id_usuario,
                 nombre,
@@ -16,12 +15,12 @@ export class ModeloUsuario {
             FROM usuario`
         );
 
-        return filas;
+        return resultado.rows;
     }
 
 
     static async obtenerPorId(id_usuario: number): Promise<IUsuario | null> {
-        const [filas] = await pool.query<IUsuarioRow[]>(
+        const resultado = await pool.query<IUsuarioRow>(
             `SELECT 
                 id_usuario,
                 nombre,
@@ -30,16 +29,16 @@ export class ModeloUsuario {
                 rol,
                 fecha_registro
             FROM usuario
-            WHERE id_usuario = ?`,
+            WHERE id_usuario = $1`,
             [id_usuario]
         );
 
-        return filas.length > 0 ? filas[0] : null;
+        return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
 
     static async obtenerPorCorreo(correo: string): Promise<IUsuario | null> {
-        const [filas] = await pool.query<IUsuarioRow[]>(
+        const resultado = await pool.query<IUsuarioRow>(
             `SELECT 
                 id_usuario,
                 nombre,
@@ -48,11 +47,11 @@ export class ModeloUsuario {
                 rol,
                 fecha_registro
             FROM usuario
-            WHERE correo = ?`,
+            WHERE correo = $1`,
             [correo]
         );
 
-        return filas.length > 0 ? filas[0] : null;
+        return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
 
@@ -65,10 +64,10 @@ export class ModeloUsuario {
             rol
         } = datosUsuario;
 
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `INSERT INTO usuario
                 (nombre, correo, password, rol)
-            VALUES (?, ?, ?, ?)`,
+            VALUES ($1, $2, $3, $4) RETURNING id_usuario`,
             [
                 nombre,
                 correo,
@@ -78,7 +77,7 @@ export class ModeloUsuario {
         );
 
         return {
-            id_usuario: resultado.insertId,
+            id_usuario: resultado.rows[0].id_usuario,
             nombre,
             correo,
             password,
@@ -99,14 +98,14 @@ export class ModeloUsuario {
             rol
         } = datosUsuario;
 
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `UPDATE usuario
             SET
-                nombre = COALESCE(?, nombre),
-                correo = COALESCE(?, correo),
-                password = COALESCE(?, password),
-                rol = COALESCE(?, rol)
-            WHERE id_usuario = ?`,
+                nombre = COALESCE($1, nombre),
+                correo = COALESCE($2, correo),
+                password = COALESCE($3, password),
+                rol = COALESCE($4, rol)
+            WHERE id_usuario = $5`,
             [
                 nombre || null,
                 correo || null,
@@ -116,18 +115,18 @@ export class ModeloUsuario {
             ]
         );
 
-        return resultado.affectedRows > 0;
+        return (resultado.rowCount ?? 0) > 0;
     }
 
 
     static async eliminar(id_usuario: number): Promise<boolean> {
 
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `DELETE FROM usuario
-            WHERE id_usuario = ?`,
+            WHERE id_usuario = $1`,
             [id_usuario]
         );
 
-        return resultado.affectedRows > 0;
+        return (resultado.rowCount ?? 0) > 0;
     }
 }

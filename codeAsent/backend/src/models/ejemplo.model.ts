@@ -1,11 +1,10 @@
-import { ResultSetHeader } from 'mysql2';
 import { pool } from '../config/conexion';
 import { IEjemplo, IEjemploRow } from './ejemplo.interface';
 
 export class ModeloEjemplo {
 
     static async obtenerTodos(): Promise<IEjemplo[]> {
-        const [filas] = await pool.query<IEjemploRow[]>(
+        const resultado = await pool.query<IEjemploRow>(
             `SELECT 
                 id_ejemplo,
                 id_leccion,
@@ -15,11 +14,11 @@ export class ModeloEjemplo {
             FROM ejemplo`
         );
 
-        return filas;
+        return resultado.rows;
     }
 
     static async obtenerPorId(id_ejemplo: number): Promise<IEjemplo | null> {
-        const [filas] = await pool.query<IEjemploRow[]>(
+        const resultado = await pool.query<IEjemploRow>(
             `SELECT 
                 id_ejemplo,
                 id_leccion,
@@ -27,15 +26,15 @@ export class ModeloEjemplo {
                 codigo,
                 explicacion
             FROM ejemplo
-            WHERE id_ejemplo = ?`,
+            WHERE id_ejemplo = $1`,
             [id_ejemplo]
         );
 
-        return filas.length > 0 ? filas[0] : null;
+        return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
     static async obtenerPorLeccion(id_leccion: number): Promise<IEjemplo[]> {
-        const [filas] = await pool.query<IEjemploRow[]>(
+        const resultado = await pool.query<IEjemploRow>(
             `SELECT 
                 id_ejemplo,
                 id_leccion,
@@ -43,11 +42,11 @@ export class ModeloEjemplo {
                 codigo,
                 explicacion
             FROM ejemplo
-            WHERE id_leccion = ?`,
+            WHERE id_leccion = $1`,
             [id_leccion]
         );
 
-        return filas;
+        return resultado.rows;
     }
 
     static async crear(datosEjemplo: IEjemplo): Promise<IEjemplo> {
@@ -59,10 +58,10 @@ export class ModeloEjemplo {
             explicacion
         } = datosEjemplo;
 
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `INSERT INTO ejemplo
                 (id_leccion, titulo, codigo, explicacion)
-            VALUES (?, ?, ?, ?)`,
+            VALUES ($1, $2, $3, $4) RETURNING id_ejemplo`,
             [
                 id_leccion,
                 titulo || null,
@@ -72,7 +71,7 @@ export class ModeloEjemplo {
         );
 
         return {
-            id_ejemplo: resultado.insertId,
+            id_ejemplo: resultado.rows[0].id_ejemplo,
             id_leccion,
             titulo,
             codigo,
@@ -92,14 +91,14 @@ export class ModeloEjemplo {
             explicacion
         } = datosEjemplo;
 
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `UPDATE ejemplo
             SET
-                id_leccion = COALESCE(?, id_leccion),
-                titulo = COALESCE(?, titulo),
-                codigo = COALESCE(?, codigo),
-                explicacion = COALESCE(?, explicacion)
-            WHERE id_ejemplo = ?`,
+                id_leccion = COALESCE($1, id_leccion),
+                titulo = COALESCE($2, titulo),
+                codigo = COALESCE($3, codigo),
+                explicacion = COALESCE($4, explicacion)
+            WHERE id_ejemplo = $5`,
             [
                 id_leccion ?? null,
                 titulo ?? null,
@@ -109,17 +108,17 @@ export class ModeloEjemplo {
             ]
         );
 
-        return resultado.affectedRows > 0;
+        return (resultado.rowCount ?? 0) > 0;
     }
 
     static async eliminar(id_ejemplo: number): Promise<boolean> {
 
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `DELETE FROM ejemplo
-            WHERE id_ejemplo = ?`,
+            WHERE id_ejemplo = $1`,
             [id_ejemplo]
         );
 
-        return resultado.affectedRows > 0;
+        return (resultado.rowCount ?? 0) > 0;
     }
 }

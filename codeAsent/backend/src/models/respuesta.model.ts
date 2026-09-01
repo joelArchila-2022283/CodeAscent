@@ -1,41 +1,40 @@
-import { ResultSetHeader } from 'mysql2';
 import { pool } from '../config/conexion';
 import { IRespuesta, IRespuestaRow } from './respuesta.interface';
 
 export class ModeloRespuesta {
 
     static async obtenerTodas(): Promise<IRespuesta[]> {
-        const [filas] = await pool.query<IRespuestaRow[]>(
+        const resultado = await pool.query<IRespuestaRow>(
             'SELECT id_respuesta, id_reto, contenido, es_correcta FROM respuesta'
         );
-        return filas;
+        return resultado.rows;
     }
 
     static async obtenerPorId(id_respuesta: number): Promise<IRespuesta | null> {
-        const [filas] = await pool.query<IRespuestaRow[]>(
-            'SELECT id_respuesta, id_reto, contenido, es_correcta FROM respuesta WHERE id_respuesta = ?',
+        const resultado = await pool.query<IRespuestaRow>(
+            'SELECT id_respuesta, id_reto, contenido, es_correcta FROM respuesta WHERE id_respuesta = $1',
             [id_respuesta]
         );
-        return filas.length > 0.00 ? filas[0.00] : null;
+        return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
     static async obtenerPorReto(id_reto: number): Promise<IRespuesta[]> {
-        const [filas] = await pool.query<IRespuestaRow[]>(
-            'SELECT id_respuesta, id_reto, contenido, es_correcta FROM respuesta WHERE id_reto = ?',
+        const resultado = await pool.query<IRespuestaRow>(
+            'SELECT id_respuesta, id_reto, contenido, es_correcta FROM respuesta WHERE id_reto = $1',
             [id_reto]
         );
-        return filas;
+        return resultado.rows;
     }
 
     static async crear(datosRespuesta: IRespuesta): Promise<IRespuesta> {
         const { id_reto, contenido, es_correcta } = datosRespuesta;
-        const [resultado] = await pool.query<ResultSetHeader>(
-            'INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (?, ?, ?)',
+        const resultado = await pool.query(
+            'INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES ($1, $2, $3) RETURNING id_respuesta',
             [id_reto, contenido, es_correcta ?? false]
         );
 
         return {
-            id_respuesta: resultado.insertId,
+            id_respuesta: resultado.rows[0].id_respuesta,
             id_reto,
             contenido,
             es_correcta: es_correcta ?? false
@@ -44,8 +43,8 @@ export class ModeloRespuesta {
 
     static async actualizar(id_respuesta: number, datosRespuesta: Partial<IRespuesta>): Promise<boolean> {
         const { id_reto, contenido, es_correcta } = datosRespuesta;
-        const [resultado] = await pool.query<ResultSetHeader>(
-            'UPDATE respuesta SET id_reto = COALESCE(?, id_reto), contenido = COALESCE(?, contenido), es_correcta = COALESCE(?, es_correcta) WHERE id_respuesta = ?',
+        const resultado = await pool.query(
+            'UPDATE respuesta SET id_reto = COALESCE($1, id_reto), contenido = COALESCE($2, contenido), es_correcta = COALESCE($3, es_correcta) WHERE id_respuesta = $4',
             [
                 id_reto || null,
                 contenido || null,
@@ -54,16 +53,16 @@ export class ModeloRespuesta {
             ]
         );
 
-        return resultado.affectedRows > 0.00;
+        return (resultado.rowCount ?? 0) > 0;
     }
 
     static async eliminar(id_respuesta: number): Promise<boolean> {
-        const [resultado] = await pool.query<ResultSetHeader>(
-            'DELETE FROM respuesta WHERE id_respuesta = ?',
+        const resultado = await pool.query(
+            'DELETE FROM respuesta WHERE id_respuesta = $1',
             [id_respuesta]
         );
 
-        return resultado.affectedRows > 0.00;
+        return (resultado.rowCount ?? 0) > 0;
     }
 
 }
