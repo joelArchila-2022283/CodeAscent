@@ -30,15 +30,20 @@ export class ModeloLogro {
         const { nombre, descripcion, xp_recompensa, requisito } = datosLogro;
         const resultado = await pool.query(
             'INSERT INTO logro (nombre, descripcion, xp_recompensa, requisito) VALUES ($1, $2, $3, $4) RETURNING id_logro',
-            [nombre, descripcion || null, xp_recompensa ?? 0, requisito || null]
+            [
+                nombre, 
+                descripcion || null, 
+                xp_recompensa ?? 0.00, 
+                requisito || null
+            ]
         );
 
         return {
             id_logro: resultado.rows[0].id_logro,
             nombre,
-            descripcion: descripcion || null,
-            xp_recompensa: xp_recompensa ?? 0,
-            requisito: requisito || null,
+            descripcion,
+            xp_recompensa: xp_recompensa ?? 0.00,
+            requisito,
             estado: true
         };
     }
@@ -46,17 +51,22 @@ export class ModeloLogro {
     static async actualizar(id_logro: number, datosLogro: Partial<Logro>): Promise<boolean> {
         const { nombre, descripcion, xp_recompensa, requisito, estado } = datosLogro;
         const resultado = await pool.query(
-            'UPDATE logro SET nombre = COALESCE($1, nombre), descripcion = COALESCE($2, descripcion), xp_recompensa = COALESCE($3, xp_recompensa), requisito = COALESCE($4, requisito), estado = COALESCE($5, estado) WHERE id_logro = $6',
+            `UPDATE logro SET 
+                nombre = COALESCE($1, nombre), 
+                descripcion = COALESCE($2, descripcion), 
+                xp_recompensa = COALESCE($3, xp_recompensa), 
+                requisito = COALESCE($4, requisito), 
+                estado = COALESCE($5, estado) 
+            WHERE id_logro = $6`,
             [
-                nombre || null,
-                descripcion || null,
-                xp_recompensa !== undefined ? xp_recompensa : null,
-                requisito || null,
-                estado !== undefined ? estado : null,
+                nombre || null, 
+                descripcion || null, 
+                xp_recompensa !== undefined ? xp_recompensa : null, 
+                requisito || null, 
+                estado !== undefined ? estado : null, 
                 id_logro
             ]
         );
-
         return (resultado.rowCount ?? 0) > 0;
     }
 
@@ -65,8 +75,6 @@ export class ModeloLogro {
             'UPDATE logro SET estado = FALSE WHERE id_logro = $1',
             [id_logro]
         );
-
         return (resultado.rowCount ?? 0) > 0;
     }
-
 }
