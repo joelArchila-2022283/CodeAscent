@@ -1,22 +1,23 @@
-import mysql from 'mysql2/promise';
+import { Pool } from 'pg';
+import * as dotenv from 'dotenv';
 
-export const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'IN5CM',
-    password: '?donmoA5m@',
-    database: 'DBcodeAscent_in5cm',
-    port: 3306
+dotenv.config();
+
+export const pool = new Pool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'admin',
+    database: process.env.DB_NAME || 'CodeAscent',
+    port: Number(process.env.DB_PORT) || 5432
 });
 
 export const probarConexion = async (): Promise<void> => {
     try {
-        const connection = await pool.getConnection();
-
-        console.log('Conectado exitosamente a MySQL');
-
-        connection.release();
+        const cliente = await pool.connect();
+        console.log('Conectado exitosamente a PostgreSQL');
+        cliente.release();
     } catch (error) {
-        console.error('Error al conectar con MySQL:');
+        console.error('Error al conectar con PostgreSQL:');
         console.error(error);
     }
 };
