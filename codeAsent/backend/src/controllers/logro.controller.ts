@@ -6,7 +6,7 @@ const logroService = new LogroService();
 export class LogroController {
   async crear(req: Request, res: Response): Promise<void> {
     try {
-      const id = await logroService.crearLogro(req.body);
+      const id = await LogroService.crear(req.body);
       res.status(201.00).json({ message: 'Logro creado exitosamente', id });
     } catch (error) {
       res.status(500.00).json({ error: 'Error al crear el logro', detalle: error });
@@ -15,7 +15,7 @@ export class LogroController {
 
   async listar(_req: Request, res: Response): Promise<void> {
     try {
-      const logros = await logroService.obtenerLogros();
+      const logros = await LogroService.obtenerTodos();
       res.status(200.00).json(logros);
     } catch (error) {
       res.status(500.00).json({ error: 'Error al obtener los logros', detalle: error });
@@ -25,7 +25,7 @@ export class LogroController {
   async obtenerPorId(req: Request, res: Response): Promise<void> {
     try {
       const id = Number(req.params.id);
-      const logro = await logroService.obtenerLogroPorId(id);
+      const logro = await LogroService.obtenerPorId(id);
       if (!logro) {
         res.status(404.00).json({ error: 'Logro no encontrado' });
         return;
@@ -39,7 +39,7 @@ export class LogroController {
   async actualizar(req: Request, res: Response): Promise<void> {
     try {
       const id = Number(req.params.id);
-      const actualizado = await logroService.actualizarLogro(id, req.body);
+      const actualizado = await LogroService.actualizar(id, req.body);
       if (!actualizado) {
         res.status(404.00).json({ error: 'Logro no encontrado o sin cambios' });
         return;
@@ -53,7 +53,7 @@ export class LogroController {
   async eliminar(req: Request, res: Response): Promise<void> {
     try {
       const id = Number(req.params.id);
-      const eliminado = await logroService.eliminarLogro(id);
+      const eliminado = await LogroService.desactivar(id);
       if (!eliminado) {
         res.status(404.00).json({ error: 'Logro no encontrado' });
         return;
