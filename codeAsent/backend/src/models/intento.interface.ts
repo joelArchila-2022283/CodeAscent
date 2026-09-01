@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface IIntento {
     id_intento?: number;
     id_usuario: number;
@@ -10,4 +8,4 @@ export interface IIntento {
     fecha_intento?: Date;
 }
 
-export interface IIntentoRow extends RowDataPacket, IIntento {}
+export type IIntentoRow = IIntento;

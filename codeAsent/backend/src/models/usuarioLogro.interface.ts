@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface IUsuarioLogro {
     id_usuario_logro?: number;
     id_usuario: number;
@@ -13,5 +11,5 @@ export interface IUsuarioLogroDetalle extends IUsuarioLogro {
     xp_recompensa?: number;
 }
 
-export interface IUsuarioLogroRow extends RowDataPacket, IUsuarioLogro {}
-export interface IUsuarioLogroDetalleRow extends RowDataPacket, IUsuarioLogroDetalle {}
+export type IUsuarioLogroRow = IUsuarioLogro;
+export type IUsuarioLogroDetalleRow = IUsuarioLogroDetalle;

@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export type TipoReto = 'opcion_multiple' | 'codigo' | 'verdadero_falso' | 'completar';
 export type DificultadReto = 'facil' | 'medio' | 'dificil';
 
@@ -14,4 +12,4 @@ export interface IReto {
     estado?: boolean;
 }
 
-export interface IRetoRow extends RowDataPacket, IReto {}
+export type IRetoRow = IReto;

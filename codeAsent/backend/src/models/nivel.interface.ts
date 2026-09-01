@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface INivel {
     id_nivel?: number;
     id_lenguaje: number;
@@ -10,4 +8,4 @@ export interface INivel {
     estado?: boolean;
 }
 
-export interface INivelRow extends RowDataPacket, INivel {}
+export type INivelRow = INivel;

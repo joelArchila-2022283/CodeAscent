@@ -1,11 +1,10 @@
-import { ResultSetHeader } from 'mysql2';
 import { pool } from '../config/conexion';
 import { IIntento, IIntentoRow } from './intento.interface';
 
 export class ModeloIntento {
 
     static async obtenerTodos(): Promise<IIntento[]> {
-        const [filas] = await pool.query<IIntentoRow[]>(
+        const resultado = await pool.query<IIntentoRow>(
             `SELECT
                 id_intento,
                 id_usuario,
@@ -17,12 +16,12 @@ export class ModeloIntento {
             FROM intento`
         );
 
-        return filas;
+        return resultado.rows;
     }
 
 
     static async obtenerPorId(id_intento: number): Promise<IIntento | null> {
-        const [filas] = await pool.query<IIntentoRow[]>(
+        const resultado = await pool.query<IIntentoRow>(
             `SELECT
                 id_intento,
                 id_usuario,
@@ -32,16 +31,16 @@ export class ModeloIntento {
                 xp_obtenida,
                 fecha_intento
             FROM intento
-            WHERE id_intento = ?`,
+            WHERE id_intento = $1`,
             [id_intento]
         );
 
-        return filas.length > 0 ? filas[0] : null;
+        return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
 
     static async obtenerPorUsuario(id_usuario: number): Promise<IIntento[]> {
-        const [filas] = await pool.query<IIntentoRow[]>(
+        const resultado = await pool.query<IIntentoRow>(
             `SELECT
                 id_intento,
                 id_usuario,
@@ -51,17 +50,17 @@ export class ModeloIntento {
                 xp_obtenida,
                 fecha_intento
             FROM intento
-            WHERE id_usuario = ?
+            WHERE id_usuario = $1
             ORDER BY fecha_intento DESC`,
             [id_usuario]
         );
 
-        return filas;
+        return resultado.rows;
     }
 
 
     static async obtenerPorReto(id_reto: number): Promise<IIntento[]> {
-        const [filas] = await pool.query<IIntentoRow[]>(
+        const resultado = await pool.query<IIntentoRow>(
             `SELECT
                 id_intento,
                 id_usuario,
@@ -71,12 +70,12 @@ export class ModeloIntento {
                 xp_obtenida,
                 fecha_intento
             FROM intento
-            WHERE id_reto = ?
+            WHERE id_reto = $1
             ORDER BY fecha_intento DESC`,
             [id_reto]
         );
 
-        return filas;
+        return resultado.rows;
     }
 
 
@@ -90,7 +89,7 @@ export class ModeloIntento {
             xp_obtenida
         } = datosIntento;
 
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `INSERT INTO intento
                 (
                     id_usuario,
@@ -99,7 +98,7 @@ export class ModeloIntento {
                     correcto,
                     xp_obtenida
                 )
-            VALUES (?, ?, ?, ?, ?)`,
+            VALUES ($1, $2, $3, $4, $5) RETURNING id_intento`,
             [
                 id_usuario,
                 id_reto,
@@ -110,7 +109,7 @@ export class ModeloIntento {
         );
 
         return {
-            id_intento: resultado.insertId,
+            id_intento: resultado.rows[0].id_intento,
             id_usuario,
             id_reto,
             respuesta_usuario,
@@ -131,13 +130,13 @@ export class ModeloIntento {
             xp_obtenida
         } = datosIntento;
 
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `UPDATE intento
             SET
-                respuesta_usuario = COALESCE(?, respuesta_usuario),
-                correcto = COALESCE(?, correcto),
-                xp_obtenida = COALESCE(?, xp_obtenida)
-            WHERE id_intento = ?`,
+                respuesta_usuario = COALESCE($1, respuesta_usuario),
+                correcto = COALESCE($2, correcto),
+                xp_obtenida = COALESCE($3, xp_obtenida)
+            WHERE id_intento = $4`,
             [
                 respuesta_usuario ?? null,
                 correcto ?? null,
@@ -146,17 +145,17 @@ export class ModeloIntento {
             ]
         );
 
-        return resultado.affectedRows > 0;
+        return (resultado.rowCount ?? 0) > 0;
     }
 
 
     static async eliminar(id_intento: number): Promise<boolean> {
-        const [resultado] = await pool.query<ResultSetHeader>(
+        const resultado = await pool.query(
             `DELETE FROM intento
-            WHERE id_intento = ?`,
+            WHERE id_intento = $1`,
             [id_intento]
         );
 
-        return resultado.affectedRows > 0;
+        return (resultado.rowCount ?? 0) > 0;
     }
 }

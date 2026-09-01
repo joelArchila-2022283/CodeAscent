@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface ILeccion {
     id_leccion?: number;
     id_nivel: number;
@@ -9,4 +7,4 @@ export interface ILeccion {
     estado?: boolean;
 }
 
-export interface ILeccionRow extends RowDataPacket, ILeccion {}
+export type ILeccionRow = ILeccion;

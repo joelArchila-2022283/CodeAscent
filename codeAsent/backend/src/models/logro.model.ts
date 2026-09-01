@@ -1,41 +1,40 @@
-import { ResultSetHeader } from 'mysql2';
 import { pool } from '../config/conexion';
 import { Logro, LogroRow } from './logro.interface';
 
 export class ModeloLogro {
 
     static async obtenerTodos(): Promise<Logro[]> {
-        const [filas] = await pool.query<LogroRow[]>(
+        const resultado = await pool.query<LogroRow>(
             'SELECT id_logro, nombre, descripcion, xp_recompensa, requisito, estado FROM logro WHERE estado = TRUE'
         );
-        return filas;
+        return resultado.rows;
     }
 
     static async obtenerPorId(id_logro: number): Promise<Logro | null> {
-        const [filas] = await pool.query<LogroRow[]>(
-            'SELECT id_logro, nombre, descripcion, xp_recompensa, requisito, estado FROM logro WHERE id_logro = ? AND estado = TRUE',
+        const resultado = await pool.query<LogroRow>(
+            'SELECT id_logro, nombre, descripcion, xp_recompensa, requisito, estado FROM logro WHERE id_logro = $1 AND estado = TRUE',
             [id_logro]
         );
-        return filas.length > 0 ? filas[0] : null;
+        return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
     static async obtenerPorNombre(nombre: string): Promise<Logro | null> {
-        const [filas] = await pool.query<LogroRow[]>(
-            'SELECT id_logro, nombre, descripcion, xp_recompensa, requisito, estado FROM logro WHERE nombre = ?',
+        const resultado = await pool.query<LogroRow>(
+            'SELECT id_logro, nombre, descripcion, xp_recompensa, requisito, estado FROM logro WHERE nombre = $1',
             [nombre]
         );
-        return filas.length > 0 ? filas[0] : null;
+        return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
     static async crear(datosLogro: Logro): Promise<Logro> {
         const { nombre, descripcion, xp_recompensa, requisito } = datosLogro;
-        const [resultado] = await pool.query<ResultSetHeader>(
-            'INSERT INTO logro (nombre, descripcion, xp_recompensa, requisito) VALUES (?, ?, ?, ?)',
+        const resultado = await pool.query(
+            'INSERT INTO logro (nombre, descripcion, xp_recompensa, requisito) VALUES ($1, $2, $3, $4) RETURNING id_logro',
             [nombre, descripcion || null, xp_recompensa ?? 0, requisito || null]
         );
 
         return {
-            id_logro: resultado.insertId,
+            id_logro: resultado.rows[0].id_logro,
             nombre,
             descripcion: descripcion || null,
             xp_recompensa: xp_recompensa ?? 0,
@@ -46,8 +45,8 @@ export class ModeloLogro {
 
     static async actualizar(id_logro: number, datosLogro: Partial<Logro>): Promise<boolean> {
         const { nombre, descripcion, xp_recompensa, requisito, estado } = datosLogro;
-        const [resultado] = await pool.query<ResultSetHeader>(
-            'UPDATE logro SET nombre = COALESCE(?, nombre), descripcion = COALESCE(?, descripcion), xp_recompensa = COALESCE(?, xp_recompensa), requisito = COALESCE(?, requisito), estado = COALESCE(?, estado) WHERE id_logro = ?',
+        const resultado = await pool.query(
+            'UPDATE logro SET nombre = COALESCE($1, nombre), descripcion = COALESCE($2, descripcion), xp_recompensa = COALESCE($3, xp_recompensa), requisito = COALESCE($4, requisito), estado = COALESCE($5, estado) WHERE id_logro = $6',
             [
                 nombre || null,
                 descripcion || null,
@@ -58,16 +57,16 @@ export class ModeloLogro {
             ]
         );
 
-        return resultado.affectedRows > 0;
+        return (resultado.rowCount ?? 0) > 0;
     }
 
     static async desactivar(id_logro: number): Promise<boolean> {
-        const [resultado] = await pool.query<ResultSetHeader>(
-            'UPDATE logro SET estado = FALSE WHERE id_logro = ?',
+        const resultado = await pool.query(
+            'UPDATE logro SET estado = FALSE WHERE id_logro = $1',
             [id_logro]
         );
 
-        return resultado.affectedRows > 0;
+        return (resultado.rowCount ?? 0) > 0;
     }
 
 }

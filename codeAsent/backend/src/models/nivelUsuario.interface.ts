@@ -1,5 +1,3 @@
-import { RowDataPacket } from 'mysql2';
-
 export interface INivelUsuario {
     id_nivel_usuario?: number;
     id_usuario: number;
@@ -10,4 +8,4 @@ export interface INivelUsuario {
     fecha_completado?: Date | string | null;
 }
 
-export interface INivelUsuarioRow extends INivelUsuario, RowDataPacket {}
+export type INivelUsuarioRow = INivelUsuario;
