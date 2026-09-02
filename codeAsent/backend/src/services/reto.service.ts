@@ -1,5 +1,5 @@
 import { ModeloReto } from '../models/reto.model';
-import { IReto, TipoReto, DificultadReto } from '../models/reto.interface';
+import { IReto, TipoReto, DificultadReto } from '../interfaces/reto.interface';
 
 const TIPOS_VALIDOS: TipoReto[] = ['opcion_multiple', 'codigo', 'verdadero_falso', 'completar'];
 const DIFICULTADES_VALIDAS: DificultadReto[] = ['facil', 'medio', 'dificil'];

@@ -1,4 +1,4 @@
-import { IEjemplo } from '../models/ejemplo.interface';
+import { IEjemplo } from '../interfaces/ejemplo.interface';
 import { ModeloEjemplo } from '../models/ejemplo.model';
 
 export class EjemploService {

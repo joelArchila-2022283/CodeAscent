@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { IIntento, IIntentoRow } from './intento.interface';
+import { IIntento, IIntentoRow } from '../interfaces/intento.interface';
 
 export class ModeloIntento {
 

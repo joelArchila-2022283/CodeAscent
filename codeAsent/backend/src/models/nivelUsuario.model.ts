@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { INivelUsuario, INivelUsuarioRow } from './nivelUsuario.interface';
+import { INivelUsuario, INivelUsuarioRow } from '../interfaces/nivelUsuario.interface';
 
 export class ModeloNivelUsuario {
 

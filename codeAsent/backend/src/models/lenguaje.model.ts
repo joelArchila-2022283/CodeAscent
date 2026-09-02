@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion'; // Se importa la constante 'pool' que creó tu compañero
-import { ILenguaje, ILenguajeRow } from './lenguaje.interface';
+import { ILenguaje, ILenguajeRow } from '../interfaces/lenguaje.interface';
 
 export class ModeloLenguaje {
 

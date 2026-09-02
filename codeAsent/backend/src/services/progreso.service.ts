@@ -1,5 +1,5 @@
 import { ModeloProgreso } from '../models/progreso.model';
-import { IProgreso } from '../models/progreso.interface';
+import { IProgreso } from '../interfaces/progreso.interface';
 
 export class ServicioProgreso {
 

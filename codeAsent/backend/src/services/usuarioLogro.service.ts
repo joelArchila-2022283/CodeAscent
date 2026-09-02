@@ -1,5 +1,5 @@
 import { ModeloUsuarioLogro } from '../models/usuarioLogro.model';
-import { IUsuarioLogro, IUsuarioLogroDetalle } from '../models/usuarioLogro.interface';
+import { IUsuarioLogro, IUsuarioLogroDetalle } from '../interfaces/usuarioLogro.interface';
 
 export class ServicioUsuarioLogro {
 

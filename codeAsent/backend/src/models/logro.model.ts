@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { Logro, LogroRow } from './logro.interface';
+import { Logro, LogroRow } from '../interfaces/logro.interface';
 
 export class ModeloLogro {
 

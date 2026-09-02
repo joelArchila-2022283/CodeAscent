@@ -1,5 +1,5 @@
 import { ModeloLeccion } from '../models/leccion.model';
-import { ILeccion } from '../models/leccion.interface';
+import { ILeccion } from '../interfaces/leccion.interface';
 
 export class ServicioLeccion {
 

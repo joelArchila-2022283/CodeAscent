@@ -1,4 +1,4 @@
-import { IIntento } from '../models/intento.interface';
+import { IIntento } from '../interfaces/intento.interface';
 import { ModeloIntento } from '../models/intento.model';
 
 export class IntentoService {

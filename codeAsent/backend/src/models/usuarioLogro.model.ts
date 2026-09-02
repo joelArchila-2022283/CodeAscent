@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { IUsuarioLogro, IUsuarioLogroRow, IUsuarioLogroDetalle, IUsuarioLogroDetalleRow } from './usuarioLogro.interface';
+import { IUsuarioLogro, IUsuarioLogroRow, IUsuarioLogroDetalle, IUsuarioLogroDetalleRow } from '../interfaces/usuarioLogro.interface';
 
 export class ModeloUsuarioLogro {
 

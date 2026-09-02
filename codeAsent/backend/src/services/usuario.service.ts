@@ -1,4 +1,4 @@
-import { IUsuario } from '../models/usuario.interface';
+import { IUsuario } from '../interfaces/usuario.interface';
 import { ModeloUsuario } from '../models/usuario.model';
 
 export class UsuarioService {
