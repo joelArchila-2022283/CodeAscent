@@ -1,5 +1,5 @@
 import { ModeloNivel } from '../models/nivel.model';
-import { INivel } from '../models/nivel.interface';
+import { INivel } from '../interfaces/nivel.interface';
 
 export class ServicioNivel {
     static async obtenerTodos(): Promise<INivel[]> {

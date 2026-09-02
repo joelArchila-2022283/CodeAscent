@@ -1,5 +1,5 @@
 import { ModeloNivelUsuario } from '../models/nivelUsuario.model';
-import { INivelUsuario } from '../models/nivelUsuario.interface';
+import { INivelUsuario } from '../interfaces/nivelUsuario.interface';
 
 export class NivelUsuarioService {
 

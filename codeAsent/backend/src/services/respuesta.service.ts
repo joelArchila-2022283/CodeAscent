@@ -1,5 +1,5 @@
 import { ModeloRespuesta } from '../models/respuesta.model';
-import { IRespuesta } from '../models/respuesta.interface';
+import { IRespuesta } from '../interfaces/respuesta.interface';
 
 export class RespuestaService {
 

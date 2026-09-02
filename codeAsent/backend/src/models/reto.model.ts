@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { IReto, IRetoRow } from './reto.interface';
+import { IReto, IRetoRow } from '../interfaces/reto.interface';
 
 export class ModeloReto {
 

@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { IUsuario, IUsuarioRow } from './usuario.interface';
+import { IUsuario, IUsuarioRow } from '../interfaces/usuario.interface';
 
 export class ModeloUsuario {
 

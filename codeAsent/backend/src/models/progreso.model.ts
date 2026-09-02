@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { IProgreso, IProgresoRow } from './progreso.interface';
+import { IProgreso, IProgresoRow } from '../interfaces/progreso.interface';
 
 export class ModeloProgreso {
 

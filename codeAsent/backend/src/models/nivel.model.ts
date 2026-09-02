@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { INivel, INivelRow } from './nivel.interface';
+import { INivel, INivelRow } from '../interfaces/nivel.interface';
 
 export class ModeloNivel {
 

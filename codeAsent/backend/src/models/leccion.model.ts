@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { ILeccion, ILeccionRow } from './leccion.interface';
+import { ILeccion, ILeccionRow } from '../interfaces/leccion.interface';
 
 export class ModeloLeccion {
 

@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { IRespuesta, IRespuestaRow } from './respuesta.interface';
+import { IRespuesta, IRespuestaRow } from '../interfaces/respuesta.interface';
 
 export class ModeloRespuesta {
 

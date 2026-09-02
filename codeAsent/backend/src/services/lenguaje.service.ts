@@ -1,5 +1,5 @@
 import { ModeloLenguaje } from '../models/lenguaje.model';
-import { ILenguaje } from '../models/lenguaje.interface';
+import { ILenguaje } from '../interfaces/lenguaje.interface';
 
 export class ServicioLenguaje {
 

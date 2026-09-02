@@ -1,5 +1,5 @@
 import { pool } from '../config/conexion';
-import { IEjemplo, IEjemploRow } from './ejemplo.interface';
+import { IEjemplo, IEjemploRow } from '../interfaces/ejemplo.interface';
 
 export class ModeloEjemplo {
 

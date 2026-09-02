@@ -1,5 +1,5 @@
 import { ModeloLogro } from '../models/logro.model';
-import { Logro } from '../models/logro.interface';
+import { Logro } from '../interfaces/logro.interface';
 
 export class LogroService {
     static async obtenerTodos(): Promise<Logro[]> {
