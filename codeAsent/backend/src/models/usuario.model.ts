@@ -5,128 +5,63 @@ export class ModeloUsuario {
 
     static async obtenerTodos(): Promise<IUsuario[]> {
         const resultado = await pool.query<IUsuarioRow>(
-            `SELECT 
-                id_usuario,
-                nombre,
-                correo,
-                password,
-                rol,
-                fecha_registro
-            FROM usuario`
+            'SELECT * FROM fn_obtener_usuarios()'
         );
-
         return resultado.rows;
     }
 
-
     static async obtenerPorId(id_usuario: number): Promise<IUsuario | null> {
         const resultado = await pool.query<IUsuarioRow>(
-            `SELECT 
-                id_usuario,
-                nombre,
-                correo,
-                password,
-                rol,
-                fecha_registro
-            FROM usuario
-            WHERE id_usuario = $1`,
+            'SELECT * FROM fn_obtener_usuario_por_id($1)',
             [id_usuario]
         );
-
         return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
-
 
     static async obtenerPorCorreo(correo: string): Promise<IUsuario | null> {
         const resultado = await pool.query<IUsuarioRow>(
-            `SELECT 
-                id_usuario,
-                nombre,
-                correo,
-                password,
-                rol,
-                fecha_registro
-            FROM usuario
-            WHERE correo = $1`,
+            'SELECT * FROM fn_obtener_usuarios() WHERE correo = $1',
             [correo]
         );
-
         return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
-
-    static async crear(datosUsuario: IUsuario): Promise<IUsuario> {
-
-        const {
-            nombre,
-            correo,
-            password,
-            rol
-        } = datosUsuario;
-
-        const resultado = await pool.query(
-            `INSERT INTO usuario
-                (nombre, correo, password, rol)
-            VALUES ($1, $2, $3, $4) RETURNING id_usuario`,
-            [
-                nombre,
-                correo,
-                password,
-                rol || 'jugador'
-            ]
+    static async crear(datosUsuario: IUsuario): Promise<boolean> {
+        const { nombre, correo, password, rol } = datosUsuario;
+        await pool.query(
+            'CALL sp_crear_usuario($1, $2, $3, $4)',
+            [nombre, correo, password, rol || 'jugador']
         );
-
-        return {
-            id_usuario: resultado.rows[0].id_usuario,
-            nombre,
-            correo,
-            password,
-            rol: rol || 'jugador'
-        };
+        return true;
     }
-
 
     static async actualizar(
         id_usuario: number,
         datosUsuario: Partial<IUsuario>
     ): Promise<boolean> {
+        const actual = await this.obtenerPorId(id_usuario);
+        if (!actual) return false;
 
-        const {
-            nombre,
-            correo,
-            password,
-            rol
-        } = datosUsuario;
+        const nombre = datosUsuario.nombre ?? actual.nombre;
+        const correo = datosUsuario.correo ?? actual.correo;
+        const password = datosUsuario.password ?? actual.password;
+        const rol = datosUsuario.rol ?? actual.rol;
 
-        const resultado = await pool.query(
-            `UPDATE usuario
-            SET
-                nombre = COALESCE($1, nombre),
-                correo = COALESCE($2, correo),
-                password = COALESCE($3, password),
-                rol = COALESCE($4, rol)
-            WHERE id_usuario = $5`,
-            [
-                nombre || null,
-                correo || null,
-                password || null,
-                rol || null,
-                id_usuario
-            ]
+        await pool.query(
+            'CALL sp_actualizar_usuario($1, $2, $3, $4, $5)',
+            [id_usuario, nombre, correo, password, rol]
         );
-
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 
-
     static async eliminar(id_usuario: number): Promise<boolean> {
+        const actual = await this.obtenerPorId(id_usuario);
+        if (!actual) return false;
 
-        const resultado = await pool.query(
-            `DELETE FROM usuario
-            WHERE id_usuario = $1`,
+        await pool.query(
+            'CALL sp_eliminar_usuario($1)',
             [id_usuario]
         );
-
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 }
