@@ -5,120 +5,62 @@ export class ModeloEjemplo {
 
     static async obtenerTodos(): Promise<IEjemplo[]> {
         const resultado = await pool.query<IEjemploRow>(
-            `SELECT 
-                id_ejemplo,
-                id_leccion,
-                titulo,
-                codigo,
-                explicacion
-            FROM ejemplo`
+            'SELECT * FROM fn_obtener_ejemplos()'
         );
-
         return resultado.rows;
     }
 
     static async obtenerPorId(id_ejemplo: number): Promise<IEjemplo | null> {
         const resultado = await pool.query<IEjemploRow>(
-            `SELECT 
-                id_ejemplo,
-                id_leccion,
-                titulo,
-                codigo,
-                explicacion
-            FROM ejemplo
-            WHERE id_ejemplo = $1`,
+            'SELECT * FROM fn_obtener_ejemplo_por_id($1)',
             [id_ejemplo]
         );
-
         return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
     static async obtenerPorLeccion(id_leccion: number): Promise<IEjemplo[]> {
         const resultado = await pool.query<IEjemploRow>(
-            `SELECT 
-                id_ejemplo,
-                id_leccion,
-                titulo,
-                codigo,
-                explicacion
-            FROM ejemplo
-            WHERE id_leccion = $1`,
+            'SELECT * FROM fn_obtener_ejemplos() WHERE id_leccion = $1',
             [id_leccion]
         );
-
         return resultado.rows;
     }
 
-    static async crear(datosEjemplo: IEjemplo): Promise<IEjemplo> {
-
-        const {
-            id_leccion,
-            titulo,
-            codigo,
-            explicacion
-        } = datosEjemplo;
-
-        const resultado = await pool.query(
-            `INSERT INTO ejemplo
-                (id_leccion, titulo, codigo, explicacion)
-            VALUES ($1, $2, $3, $4) RETURNING id_ejemplo`,
-            [
-                id_leccion,
-                titulo || null,
-                codigo,
-                explicacion || null
-            ]
+    static async crear(datosEjemplo: IEjemplo): Promise<boolean> {
+        const { id_leccion, titulo, codigo, explicacion } = datosEjemplo;
+        await pool.query(
+            'CALL sp_crear_ejemplo($1, $2, $3, $4)',
+            [id_leccion, titulo || null, codigo, explicacion || null]
         );
-
-        return {
-            id_ejemplo: resultado.rows[0].id_ejemplo,
-            id_leccion,
-            titulo,
-            codigo,
-            explicacion
-        };
+        return true;
     }
 
     static async actualizar(
         id_ejemplo: number,
         datosEjemplo: Partial<IEjemplo>
     ): Promise<boolean> {
+        const ejemploActual = await this.obtenerPorId(id_ejemplo);
+        if (!ejemploActual) return false;
 
-        const {
-            id_leccion,
-            titulo,
-            codigo,
-            explicacion
-        } = datosEjemplo;
+        const titulo = datosEjemplo.titulo ?? ejemploActual.titulo;
+        const codigo = datosEjemplo.codigo ?? ejemploActual.codigo;
+        const explicacion = datosEjemplo.explicacion ?? ejemploActual.explicacion;
 
-        const resultado = await pool.query(
-            `UPDATE ejemplo
-            SET
-                id_leccion = COALESCE($1, id_leccion),
-                titulo = COALESCE($2, titulo),
-                codigo = COALESCE($3, codigo),
-                explicacion = COALESCE($4, explicacion)
-            WHERE id_ejemplo = $5`,
-            [
-                id_leccion ?? null,
-                titulo ?? null,
-                codigo ?? null,
-                explicacion ?? null,
-                id_ejemplo
-            ]
+        await pool.query(
+            'CALL sp_actualizar_ejemplo($1, $2, $3, $4)',
+            [id_ejemplo, titulo, codigo, explicacion]
         );
-
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 
     static async eliminar(id_ejemplo: number): Promise<boolean> {
+        const ejemploActual = await this.obtenerPorId(id_ejemplo);
+        if (!ejemploActual) return false;
 
-        const resultado = await pool.query(
-            `DELETE FROM ejemplo
-            WHERE id_ejemplo = $1`,
+        await pool.query(
+            'CALL sp_eliminar_ejemplo($1)',
             [id_ejemplo]
         );
-
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 }
