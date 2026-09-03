@@ -5,14 +5,14 @@ export class ModeloNivelUsuario {
 
     static async obtenerTodos(): Promise<INivelUsuario[]> {
         const resultado = await pool.query<INivelUsuarioRow>(
-            'SELECT id_nivel_usuario, id_usuario, id_nivel, desbloqueado, completado, fecha_desbloqueo, fecha_completado FROM nivel_usuario'
+            'SELECT * FROM fn_obtener_niveles_usuario()'
         );
         return resultado.rows;
     }
 
     static async obtenerPorId(id_nivel_usuario: number): Promise<INivelUsuario | null> {
         const resultado = await pool.query<INivelUsuarioRow>(
-            'SELECT id_nivel_usuario, id_usuario, id_nivel, desbloqueado, completado, fecha_desbloqueo, fecha_completado FROM nivel_usuario WHERE id_nivel_usuario = $1',
+            'SELECT * FROM fn_obtener_nivel_usuario_por_id($1)',
             [id_nivel_usuario]
         );
         return resultado.rows.length > 0 ? resultado.rows[0] : null;
@@ -20,16 +20,16 @@ export class ModeloNivelUsuario {
 
     static async obtenerPorUsuarioYNivel(id_usuario: number, id_nivel: number): Promise<INivelUsuario | null> {
         const resultado = await pool.query<INivelUsuarioRow>(
-            'SELECT id_nivel_usuario, id_usuario, id_nivel, desbloqueado, completado, fecha_desbloqueo, fecha_completado FROM nivel_usuario WHERE id_usuario = $1 AND id_nivel = $2',
+            'SELECT * FROM fn_obtener_niveles_usuario() WHERE id_usuario = $1 AND id_nivel = $2',
             [id_usuario, id_nivel]
         );
         return resultado.rows.length > 0 ? resultado.rows[0] : null;
     }
 
-    static async crear(datosNivelUsuario: INivelUsuario): Promise<INivelUsuario> {
+    static async crear(datosNivelUsuario: INivelUsuario): Promise<boolean> {
         const { id_usuario, id_nivel, desbloqueado, completado, fecha_desbloqueo, fecha_completado } = datosNivelUsuario;
-        const resultado = await pool.query(
-            'INSERT INTO nivel_usuario (id_usuario, id_nivel, desbloqueado, completado, fecha_desbloqueo, fecha_completado) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_nivel_usuario',
+        await pool.query(
+            'CALL sp_crear_nivel_usuario($1, $2, $3, $4, $5, $6)',
             [
                 id_usuario,
                 id_nivel,
@@ -39,43 +39,43 @@ export class ModeloNivelUsuario {
                 fecha_completado || null
             ]
         );
-
-        return {
-            id_nivel_usuario: resultado.rows[0].id_nivel_usuario,
-            id_usuario,
-            id_nivel,
-            desbloqueado: desbloqueado ?? false,
-            completado: completado ?? false,
-            fecha_desbloqueo: fecha_desbloqueo || null,
-            fecha_completado: fecha_completado || null
-        };
+        return true;
     }
 
     static async actualizar(id_nivel_usuario: number, datosNivelUsuario: Partial<INivelUsuario>): Promise<boolean> {
-        const { id_usuario, id_nivel, desbloqueado, completado, fecha_desbloqueo, fecha_completado } = datosNivelUsuario;
-        const resultado = await pool.query(
-            'UPDATE nivel_usuario SET id_usuario = COALESCE($1, id_usuario), id_nivel = COALESCE($2, id_nivel), desbloqueado = COALESCE($3, desbloqueado), completado = COALESCE($4, completado), fecha_desbloqueo = COALESCE($5, fecha_desbloqueo), fecha_completado = COALESCE($6, fecha_completado) WHERE id_nivel_usuario = $7',
+        const actual = await this.obtenerPorId(id_nivel_usuario);
+        if (!actual) return false;
+
+        const id_usuario = datosNivelUsuario.id_usuario ?? actual.id_usuario;
+        const id_nivel = datosNivelUsuario.id_nivel ?? actual.id_nivel;
+        const desbloqueado = datosNivelUsuario.desbloqueado ?? actual.desbloqueado;
+        const completado = datosNivelUsuario.completado ?? actual.completado;
+        const fecha_desbloqueo = datosNivelUsuario.fecha_desbloqueo ?? actual.fecha_desbloqueo;
+        const fecha_completado = datosNivelUsuario.fecha_completado ?? actual.fecha_completado;
+
+        await pool.query(
+            'CALL sp_actualizar_nivel_usuario($1, $2, $3, $4, $5, $6, $7)',
             [
-                id_usuario || null,
-                id_nivel || null,
-                desbloqueado !== undefined ? desbloqueado : null,
-                completado !== undefined ? completado : null,
+                id_nivel_usuario,
+                id_usuario,
+                id_nivel,
+                desbloqueado,
+                completado,
                 fecha_desbloqueo || null,
-                fecha_completado || null,
-                id_nivel_usuario
+                fecha_completado || null
             ]
         );
-
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 
     static async eliminar(id_nivel_usuario: number): Promise<boolean> {
-        const resultado = await pool.query(
-            'DELETE FROM nivel_usuario WHERE id_nivel_usuario = $1',
+        const actual = await this.obtenerPorId(id_nivel_usuario);
+        if (!actual) return false;
+
+        await pool.query(
+            'CALL sp_eliminar_nivel_usuario($1)',
             [id_nivel_usuario]
         );
-
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
-
 }
