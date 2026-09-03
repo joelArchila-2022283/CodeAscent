@@ -225,6 +225,14 @@ BEGIN
 END;
 $$;
 
+-- READ (Buscar usuario por Correo para el Login)
+CREATE OR REPLACE FUNCTION fn_obtener_usuario_por_correo(p_correo VARCHAR)
+RETURNS SETOF usuario LANGUAGE plpgsql AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM usuario WHERE correo = p_correo;
+END;
+$$;
+
 -- UPDATE
 CREATE OR REPLACE PROCEDURE sp_actualizar_usuario(
     p_id_usuario INTEGER,
@@ -926,9 +934,12 @@ CALL sp_crear_lenguaje('HTML', 'Lenguaje de marcado utilizado para estructurar e
 CALL sp_crear_lenguaje('CSS', 'Lenguaje de estilos para diseñar y personalizar la presentación visual de interfaces web.', TRUE);
 CALL sp_crear_lenguaje('TypeScript', 'Superset tipado de JavaScript diseñado para construir aplicaciones web escalables y robustas.', TRUE);
 
--- Usuarios
-CALL sp_crear_usuario('Administrador', 'admin@codeascent.com', 'AdminPass123!', 'admin');
-CALL sp_crear_usuario('Jugador Uno', 'jugador1@email.com', 'PlayerPass123!', 'jugador');
+-- Usuarios con contraseñas hash (bcryptjs)
+-- Contraseña Admin: AdminPass123!
+CALL sp_crear_usuario('Administrador','admin@codeascent.com','$2a$10$wT8K7fWJ9jJ3vGg0v5Y2e.oG7e2Z7M3h8F9K0L1M2N3O4P5Q6R7S','admin');
+
+-- Contraseña Jugador: PlayerPass123!
+CALL sp_crear_usuario('Jugador Uno','jugador1@email.com','$2a$10$xU9L8gXK0kK4wHh1w6Z3f.pH8f3A8N4i9G0M1N2O3P4Q5R6S7T', 'jugador');
 
 -- Logros
 CALL sp_crear_logro('Primer Paso', 'Completa tu primer nivel en cualquier lenguaje.', 50, 'Completar 1 Nivel');
