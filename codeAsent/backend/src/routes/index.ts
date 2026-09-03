@@ -11,9 +11,9 @@ import rutasProgreso from './progreso.routes';
 import rutasNivelUsuario from './nivelUsuario.routes';
 import rutasLogro from './logros.routes';
 import rutasUsuarioLogro from './usuarioLogro.routes';
- 
+
 const enrutadorPrincipal = Router();
- 
+
 enrutadorPrincipal.use('/usuarios', rutasUsuario);
 enrutadorPrincipal.use('/lenguajes', rutasLenguaje);
 enrutadorPrincipal.use('/niveles', rutasNivel);
@@ -26,5 +26,5 @@ enrutadorPrincipal.use('/progresos', rutasProgreso);
 enrutadorPrincipal.use('/niveles-usuario', rutasNivelUsuario);
 enrutadorPrincipal.use('/logros', rutasLogro);
 enrutadorPrincipal.use('/usuarios-logros', rutasUsuarioLogro);
- 
+
 export default enrutadorPrincipal;
