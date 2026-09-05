@@ -1,66 +1,54 @@
 import { Request, Response } from 'express';
 import { UsuarioService } from '../services/usuario.service';
-import * as bcrypt from 'bcryptjs';
-import { generarToken } from '../utils/jwt.util';
 
 export class UsuarioController {
 
-    static async login(
-        req: Request,
-        res: Response
-    ): Promise<void> {
+   static async login(
+    req: Request,
+    res: Response
+): Promise<void> {
 
-        try {
-            const { correo, password } = req.body;
+    try {
+        const correo = req.body.correo;
+        const contrasena = req.body.contrasena || req.body.password;
 
-            if (!correo || !password) {
-                res.status(400).json({
-                    mensaje: 'Correo y contraseña son obligatorios'
-                });
-                return;
-            }
-
-            const usuario = await UsuarioService.obtenerPorCorreo(correo);
-
-            if (!usuario) {
-                res.status(401).json({
-                    mensaje: 'Correo o contraseña incorrectos'
-                });
-                return;
-            }
-
-            const passwordValida = await bcrypt.compare(
-                password,
-                usuario.password
-            );
-
-            if (!passwordValida) {
-                res.status(401).json({
-                    mensaje: 'Correo o contraseña incorrectos'
-                });
-                return;
-            }
-
-            const token = generarToken({
-                id_usuario: usuario.id_usuario!,
-                correo: usuario.correo,
-                rol: usuario.rol || 'jugador'
+        if (!correo || !contrasena) {
+            res.status(400).json({
+                exito: false,
+                mensaje: 'Correo y contraseña son obligatorios'
             });
-
-            res.status(200).json({
-                mensaje: 'Inicio de sesión exitoso',
-                token
-            });
-
-        } catch (error) {
-            res.status(500).json({
-                mensaje: 'Error al iniciar sesión',
-                error: error instanceof Error
-                    ? error.message
-                    : 'Error desconocido'
-            });
+            return;
         }
+
+        const resultado = await UsuarioService.iniciarSesion(
+            correo,
+            contrasena
+        );
+
+        if (!resultado) {
+            res.status(401).json({
+                exito: false,
+                mensaje: 'Correo o contraseña incorrectos'
+            });
+            return;
+        }
+
+        res.status(200).json({
+            exito: true,
+            mensaje: 'Inicio de sesión exitoso',
+            datos: resultado
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            exito: false,
+            mensaje: 'Error interno del servidor al iniciar sesión',
+            error: error instanceof Error
+                ? error.message
+                : 'Error desconocido'
+        });
     }
+}
 
 
     static async obtenerTodos(
