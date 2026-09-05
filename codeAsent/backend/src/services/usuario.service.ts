@@ -1,7 +1,44 @@
 import { IUsuario } from '../interfaces/usuario.interface';
 import { ModeloUsuario } from '../models/usuario.model';
+import * as bcrypt from 'bcryptjs';
+import { generarToken } from '../utils/jwt.util';
 
 export class UsuarioService {
+
+    static async iniciarSesion(
+    correo: string,
+    contrasenaIngresada: string
+): Promise<{ token: string; usuario: Partial<IUsuario> } | null> {
+
+    const usuario = await ModeloUsuario.obtenerPorCorreo(correo);
+
+    if (!usuario || !usuario.password) {
+        return null;
+    }
+
+    const contrasenaValida = await bcrypt.compare(
+        contrasenaIngresada,
+        usuario.password
+    );
+
+    if (!contrasenaValida) {
+        return null;
+    }
+
+    const token = generarToken({
+        id_usuario: usuario.id_usuario!,
+        correo: usuario.correo,
+        rol: usuario.rol ?? 'jugador'
+    });
+
+    const { password, ...usuarioSinPassword } = usuario;
+
+    return {
+        token,
+        usuario: usuarioSinPassword
+    };
+}
+
 
     static async obtenerTodos(): Promise<IUsuario[]> {
         return await ModeloUsuario.obtenerTodos();
