@@ -2,8 +2,6 @@ import { Router } from 'express';
 import { ControladorLeccion } from '../controllers/leccion.controller';
 import { verificarAutenticacion } from '../middlewares/autenticacion.middleware';
 import { esAdmin } from '../middlewares/autorizacion.middleware';
-import { verificarAutenticacion } from '../middlewares/autenticacion.middleware';
-import { esAdmin } from '../middlewares/autorizacion.middleware';
 
 const router = Router();
 

@@ -2,8 +2,6 @@ import { Router } from 'express';
 import { ControladorReto } from '../controllers/reto.controller';
 import { verificarAutenticacion } from '../middlewares/autenticacion.middleware';
 import { esAdmin } from '../middlewares/autorizacion.middleware';
-import { verificarAutenticacion } from '../middlewares/autenticacion.middleware';
-import { esAdmin } from '../middlewares/autorizacion.middleware';
 
 const router = Router();
 
