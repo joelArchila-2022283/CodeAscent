@@ -62,7 +62,12 @@ export class UsuarioService {
             throw new Error('El correo ya está registrado');
         }
 
-        return await ModeloUsuario.crear(datosUsuario);
+        const passwordHash = await bcrypt.hash(datosUsuario.password, 10);
+
+        return await ModeloUsuario.crear({
+            ...datosUsuario,
+            password: passwordHash
+        });
     }
 
     static async actualizar(
@@ -76,9 +81,16 @@ export class UsuarioService {
             throw new Error('Usuario no encontrado');
         }
 
+        const datosActualizados = datosUsuario.password
+            ? {
+                ...datosUsuario,
+                password: await bcrypt.hash(datosUsuario.password, 10)
+            }
+            : datosUsuario;
+
         return await ModeloUsuario.actualizar(
             id_usuario,
-            datosUsuario
+            datosActualizados
         );
     }
 
