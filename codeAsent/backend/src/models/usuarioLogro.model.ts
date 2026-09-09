@@ -5,14 +5,14 @@ export class ModeloUsuarioLogro {
 
     static async obtenerTodos(): Promise<IUsuarioLogro[]> {
         const resultado = await pool.query<IUsuarioLogroRow>(
-            'SELECT id_usuario_logro, id_usuario, id_logro, fecha_obtenido FROM usuario_logro'
+            'SELECT * FROM fn_obtener_usuarios_logros()'
         );
         return resultado.rows;
     }
 
     static async obtenerPorId(id_usuario_logro: number): Promise<IUsuarioLogro | null> {
         const resultado = await pool.query<IUsuarioLogroRow>(
-            'SELECT id_usuario_logro, id_usuario, id_logro, fecha_obtenido FROM usuario_logro WHERE id_usuario_logro = $1',
+            'SELECT * FROM fn_obtener_usuario_logro_por_id($1)',
             [id_usuario_logro]
         );
         return resultado.rows.length > 0 ? resultado.rows[0] : null;
@@ -28,8 +28,8 @@ export class ModeloUsuarioLogro {
                 l.nombre AS nombre_logro,
                 l.descripcion AS descripcion_logro,
                 l.xp_recompensa
-             FROM usuario_logro ul
-             INNER JOIN logro l ON ul.id_logro = l.id_logro
+             FROM fn_obtener_usuarios_logros() ul
+             INNER JOIN fn_obtener_logros() l ON ul.id_logro = l.id_logro
              WHERE ul.id_usuario = $1 AND l.estado = TRUE
              ORDER BY ul.fecha_obtenido DESC`,
             [id_usuario]
@@ -39,31 +39,28 @@ export class ModeloUsuarioLogro {
 
     static async verificarExiste(id_usuario: number, id_logro: number): Promise<boolean> {
         const resultado = await pool.query<IUsuarioLogroRow>(
-            'SELECT id_usuario_logro FROM usuario_logro WHERE id_usuario = $1 AND id_logro = $2',
+            'SELECT * FROM fn_obtener_usuarios_logros() WHERE id_usuario = $1 AND id_logro = $2',
             [id_usuario, id_logro]
         );
         return resultado.rows.length > 0;
     }
 
-    static async asignarLogro(id_usuario: number, id_logro: number): Promise<IUsuarioLogro> {
-        const resultado = await pool.query(
-            'INSERT INTO usuario_logro (id_usuario, id_logro) VALUES ($1, $2) RETURNING id_usuario_logro',
+    static async asignarLogro(id_usuario: number, id_logro: number): Promise<boolean> {
+        await pool.query(
+            'CALL sp_crear_usuario_logro($1, $2)',
             [id_usuario, id_logro]
         );
-
-        return {
-            id_usuario_logro: resultado.rows[0].id_usuario_logro,
-            id_usuario,
-            id_logro,
-            fecha_obtenido: new Date()
-        };
+        return true;
     }
 
     static async eliminar(id_usuario_logro: number): Promise<boolean> {
-        const resultado = await pool.query(
-            'DELETE FROM usuario_logro WHERE id_usuario_logro = $1',
+        const actual = await this.obtenerPorId(id_usuario_logro);
+        if (!actual) return false;
+
+        await pool.query(
+            'CALL sp_eliminar_usuario_logro($1)',
             [id_usuario_logro]
         );
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 }

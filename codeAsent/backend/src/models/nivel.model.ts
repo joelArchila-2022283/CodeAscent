@@ -5,14 +5,14 @@ export class ModeloNivel {
 
     static async obtenerTodos(): Promise<INivel[]> {
         const resultado = await pool.query<INivelRow>(
-            'SELECT id_nivel, id_lenguaje, nombre, numero_nivel, descripcion, xp_requerida, estado FROM nivel WHERE estado = TRUE'
+            'SELECT * FROM fn_obtener_niveles() WHERE estado = TRUE'
         );
         return resultado.rows;
     }
 
     static async obtenerPorId(id_nivel: number): Promise<INivel | null> {
         const resultado = await pool.query<INivelRow>(
-            'SELECT id_nivel, id_lenguaje, nombre, numero_nivel, descripcion, xp_requerida, estado FROM nivel WHERE id_nivel = $1 AND estado = TRUE',
+            'SELECT * FROM fn_obtener_nivel_por_id($1)',
             [id_nivel]
         );
         return resultado.rows.length > 0 ? resultado.rows[0] : null;
@@ -20,68 +20,54 @@ export class ModeloNivel {
 
     static async obtenerPorLenguaje(id_lenguaje: number): Promise<INivel[]> {
         const resultado = await pool.query<INivelRow>(
-            'SELECT id_nivel, id_lenguaje, nombre, numero_nivel, descripcion, xp_requerida, estado FROM nivel WHERE id_lenguaje = $1 AND estado = TRUE ORDER BY numero_nivel ASC',
+            'SELECT * FROM fn_obtener_niveles() WHERE id_lenguaje = $1 AND estado = TRUE ORDER BY numero_nivel ASC',
             [id_lenguaje]
         );
         return resultado.rows;
     }
 
-    static async crear(datosNivel: INivel): Promise<INivel> {
-        const { id_lenguaje, nombre, numero_nivel, descripcion, xp_requerida } = datosNivel;
-        
-        const resultado = await pool.query(
-            'INSERT INTO nivel (id_lenguaje, nombre, numero_nivel, descripcion, xp_requerida) VALUES ($1, $2, $3, $4, $5) RETURNING id_nivel',
+    static async crear(datosNivel: INivel & { nombre_lenguaje?: string }): Promise<boolean> {
+
+        const { nombre_lenguaje, nombre, numero_nivel, descripcion, xp_requerida } = datosNivel;
+
+        await pool.query(
+            'CALL sp_crear_nivel($1, $2, $3, $4, $5)',
             [
-                id_lenguaje,
+                nombre_lenguaje || '',
                 nombre,
                 numero_nivel,
                 descripcion || null,
-                xp_requerida !== undefined ? xp_requerida : 0
+                xp_requerida ?? 0
             ]
         );
-
-        return {
-            id_nivel: resultado.rows[0].id_nivel,
-            id_lenguaje,
-            nombre,
-            numero_nivel,
-            descripcion,
-            xp_requerida: xp_requerida ?? 0,
-            estado: true
-        };
+        return true;
     }
 
     static async actualizar(id_nivel: number, datosNivel: Partial<INivel>): Promise<boolean> {
-        const { id_lenguaje, nombre, numero_nivel, descripcion, xp_requerida, estado } = datosNivel;
+        const nivelActual = await this.obtenerPorId(id_nivel);
+        if (!nivelActual) return false;
 
-        const resultado = await pool.query(
-            `UPDATE nivel SET 
-                id_lenguaje = COALESCE($1, id_lenguaje),
-                nombre = COALESCE($2, nombre),
-                numero_nivel = COALESCE($3, numero_nivel),
-                descripcion = COALESCE($4, descripcion),
-                xp_requerida = COALESCE($5, xp_requerida),
-                estado = COALESCE($6, estado) 
-             WHERE id_nivel = $7`,
-            [
-                id_lenguaje || null,
-                nombre || null,
-                numero_nivel || null,
-                descripcion || null,
-                xp_requerida !== undefined ? xp_requerida : null,
-                estado !== undefined ? estado : null,
-                id_nivel
-            ]
+        const nombre = datosNivel.nombre ?? nivelActual.nombre;
+        const numero_nivel = datosNivel.numero_nivel ?? nivelActual.numero_nivel;
+        const descripcion = datosNivel.descripcion ?? nivelActual.descripcion;
+        const xp_requerida = datosNivel.xp_requerida ?? nivelActual.xp_requerida;
+        const estado = datosNivel.estado ?? nivelActual.estado ?? true;
+
+        await pool.query(
+            'CALL sp_actualizar_nivel($1, $2, $3, $4, $5, $6)',
+            [id_nivel, nombre, numero_nivel, descripcion, xp_requerida, estado]
         );
-
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 
     static async desactivar(id_nivel: number): Promise<boolean> {
-        const resultado = await pool.query(
-            'UPDATE nivel SET estado = FALSE WHERE id_nivel = $1',
-            [id_nivel]
+        const nivelActual = await this.obtenerPorId(id_nivel);
+        if (!nivelActual) return false;
+
+        await pool.query(
+            'CALL sp_actualizar_nivel($1, $2, $3, $4, $5, $6)',
+            [id_nivel, nivelActual.nombre, nivelActual.numero_nivel, nivelActual.descripcion, nivelActual.xp_requerida, false]
         );
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 }

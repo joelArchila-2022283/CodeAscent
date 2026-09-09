@@ -5,14 +5,14 @@ export class ModeloLeccion {
 
     static async obtenerTodas(): Promise<ILeccion[]> {
         const resultado = await pool.query<ILeccionRow>(
-            'SELECT id_leccion, id_nivel, titulo, contenido, orden, estado FROM leccion WHERE estado = TRUE ORDER BY id_nivel ASC, orden ASC'
+            'SELECT * FROM fn_obtener_lecciones() WHERE estado = TRUE'
         );
         return resultado.rows;
     }
 
     static async obtenerPorId(id_leccion: number): Promise<ILeccion | null> {
         const resultado = await pool.query<ILeccionRow>(
-            'SELECT id_leccion, id_nivel, titulo, contenido, orden, estado FROM leccion WHERE id_leccion = $1 AND estado = TRUE',
+            'SELECT * FROM fn_obtener_leccion_por_id($1)',
             [id_leccion]
         );
         return resultado.rows.length > 0 ? resultado.rows[0] : null;
@@ -20,50 +20,45 @@ export class ModeloLeccion {
 
     static async obtenerPorNivel(id_nivel: number): Promise<ILeccion[]> {
         const resultado = await pool.query<ILeccionRow>(
-            'SELECT id_leccion, id_nivel, titulo, contenido, orden, estado FROM leccion WHERE id_nivel = $1 AND estado = TRUE ORDER BY orden ASC',
+            'SELECT * FROM fn_obtener_lecciones() WHERE id_nivel = $1 AND estado = TRUE',
             [id_nivel]
         );
         return resultado.rows;
     }
 
-    static async crear(datosLeccion: ILeccion): Promise<ILeccion> {
+    static async crear(datosLeccion: ILeccion): Promise<boolean> {
         const { id_nivel, titulo, contenido, orden } = datosLeccion;
-        const resultado = await pool.query(
-            'INSERT INTO leccion (id_nivel, titulo, contenido, orden) VALUES ($1, $2, $3, $4) RETURNING id_leccion',
+        await pool.query(
+            'CALL sp_crear_leccion($1, $2, $3, $4)',
             [id_nivel, titulo, contenido, orden]
         );
-
-        return {
-            id_leccion: resultado.rows[0].id_leccion,
-            id_nivel,
-            titulo,
-            contenido,
-            orden,
-            estado: true
-        };
+        return true;
     }
 
     static async actualizar(id_leccion: number, datosLeccion: Partial<ILeccion>): Promise<boolean> {
-        const { id_nivel, titulo, contenido, orden, estado } = datosLeccion;
-        const resultado = await pool.query(
-            'UPDATE leccion SET id_nivel = COALESCE($1, id_nivel), titulo = COALESCE($2, titulo), contenido = COALESCE($3, contenido), orden = COALESCE($4, orden), estado = COALESCE($5, estado) WHERE id_leccion = $6',
-            [
-                id_nivel || null,
-                titulo || null,
-                contenido || null,
-                orden !== undefined ? orden : null,
-                estado !== undefined ? estado : null,
-                id_leccion
-            ]
+        const leccionActual = await this.obtenerPorId(id_leccion);
+        if (!leccionActual) return false;
+
+        const titulo = datosLeccion.titulo ?? leccionActual.titulo;
+        const contenido = datosLeccion.contenido ?? leccionActual.contenido;
+        const orden = datosLeccion.orden ?? leccionActual.orden;
+        const estado = datosLeccion.estado ?? leccionActual.estado ?? true;
+
+        await pool.query(
+            'CALL sp_actualizar_leccion($1, $2, $3, $4, $5)',
+            [id_leccion, titulo, contenido, orden, estado]
         );
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 
     static async desactivar(id_leccion: number): Promise<boolean> {
-        const resultado = await pool.query(
-            'UPDATE leccion SET estado = FALSE WHERE id_leccion = $1',
-            [id_leccion]
+        const leccionActual = await this.obtenerPorId(id_leccion);
+        if (!leccionActual) return false;
+
+        await pool.query(
+            'CALL sp_actualizar_leccion($1, $2, $3, $4, $5)',
+            [id_leccion, leccionActual.titulo, leccionActual.contenido, leccionActual.orden, false]
         );
-        return (resultado.rowCount ?? 0) > 0;
+        return true;
     }
 }
