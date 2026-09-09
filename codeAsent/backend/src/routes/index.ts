@@ -15,6 +15,7 @@ import rutasUsuarioLogro from './usuarioLogro.routes';
 const enrutadorPrincipal = Router();
 
 enrutadorPrincipal.use('/usuarios', rutasUsuario);
+enrutadorPrincipal.use('/usuario', rutasUsuario);
 enrutadorPrincipal.use('/lenguajes', rutasLenguaje);
 enrutadorPrincipal.use('/niveles', rutasNivel);
 enrutadorPrincipal.use('/lecciones', rutasLeccion);

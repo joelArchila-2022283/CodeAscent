@@ -936,7 +936,7 @@ CALL sp_crear_lenguaje('TypeScript', 'Superset tipado de JavaScript diseñado pa
 
 -- Usuarios con contraseñas hash (bcryptjs)
 -- Contraseña Admin: AdminPass123!
-CALL sp_crear_usuario('Administrador','admin@codeascent.com','$2a$10$wT8K7fWJ9jJ3vGg0v5Y2e.oG7e2Z7M3h8F9K0L1M2N3O4P5Q6R7S','admin');
+CALL sp_crear_usuario('Administrador','admin@codeascent.com','$2b$10$Y.xseToumZS6PWjDRxsa9eeFNxCQMKEY7joioMVdkYxiBn3eIOtzq','admin');
 
 -- Contraseña Jugador: PlayerPass123!
 CALL sp_crear_usuario('Jugador Uno','jugador1@email.com','$2a$10$xU9L8gXK0kK4wHh1w6Z3f.pH8f3A8N4i9G0M1N2O3P4Q5R6S7T', 'jugador');

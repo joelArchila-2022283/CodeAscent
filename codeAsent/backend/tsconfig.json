@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
+    "esModuleInterop": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,

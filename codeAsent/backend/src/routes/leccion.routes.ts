@@ -5,14 +5,31 @@ import { esAdmin } from '../middlewares/autorizacion.middleware';
 
 const router = Router();
 
-router.use(verificarAutenticacion);
-
+// Consultas públicas
 router.get('/', ControladorLeccion.obtenerTodas);
-router.get('/:id', ControladorLeccion.obtenerPorId);
 router.get('/nivel/:id_nivel', ControladorLeccion.obtenerPorNivel);
+router.get('/:id', ControladorLeccion.obtenerPorId);
 
-router.post('/', esAdmin, ControladorLeccion.crear);
-router.put('/:id', esAdmin, ControladorLeccion.actualizar);
-router.delete('/:id', esAdmin, ControladorLeccion.desactivar);
+// Operaciones administrativas
+router.post(
+    '/',
+    verificarAutenticacion,
+    esAdmin,
+    ControladorLeccion.crear
+);
+
+router.put(
+    '/:id',
+    verificarAutenticacion,
+    esAdmin,
+    ControladorLeccion.actualizar
+);
+
+router.delete(
+    '/:id',
+    verificarAutenticacion,
+    esAdmin,
+    ControladorLeccion.desactivar
+);
 
 export default router;
