@@ -8,7 +8,7 @@ export const rolGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.Autenticado()) {
+  if (!authService.estaAutenticado()) {
     return router.createUrlTree(['/login']);
   }
 

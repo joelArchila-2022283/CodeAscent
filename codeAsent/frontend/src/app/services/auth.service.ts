@@ -44,7 +44,7 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
   }
 
-Autenticado(): boolean {
+estaAutenticado(): boolean {
     return this.obtenerToken() !== null;
   }
 
