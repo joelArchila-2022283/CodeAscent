@@ -4,7 +4,7 @@
   "description": "Backend para la plataforma educativa CodeAsent",
   "main": "dist/servidor.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch -r dotenv/config src/server.ts",
     "construir": "tsc",
     "iniciar": "node dist/server.js"
   },
