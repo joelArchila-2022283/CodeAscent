@@ -17,8 +17,10 @@ export class LoginComponent implements AfterViewInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Referencia al elemento <video #videoPlayer> 
   @ViewChild('videoPlayer') videoElement!: ElementRef<HTMLVideoElement>;
+
+  // Estado para mostrar/ocultar contraseña
+  mostrarPassword: boolean = false;
 
   loginForm: FormGroup = this.fb.group({
     correo: ['', [Validators.required, Validators.email]],
@@ -36,11 +38,19 @@ export class LoginComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     if (this.videoElement && this.videoElement.nativeElement) {
       const video = this.videoElement.nativeElement;
-      video.muted = true; // Asegurar estado silenciado para políticas de Autoplay
+      video.muted = true;
       video.play().catch(error => {
-        console.warn('El navegador previno la reproducción automática:', error);
+        console.warn('Autoplay bloqueado:', error);
       });
     }
+  }
+
+  toggleMostrarPassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
+
+  irARegistro(): void {
+    this.router.navigate(['/registro']);
   }
 
   onSubmit(): void {
@@ -60,10 +70,7 @@ export class LoginComponent implements AfterViewInit {
     this.authService.iniciarSesion(credenciales).subscribe({
       next: (respuesta) => {
         this.cargando = false;
-        
-        // Accedemos al token devuelto por la API
-        this.authService.guardarToken(respuesta.datos.token); 
-        
+        this.authService.guardarToken(respuesta.datos.token);
         this.router.navigate(['/inicio']);
       },
       error: (err) => {
