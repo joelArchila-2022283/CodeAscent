@@ -1,36 +1,13 @@
 import { Routes } from '@angular/router';
-
-import { autenticacionGuard } from './core/guards/autenticacion-guard';
-import { rolGuard } from './core/guards/rol-guard';
+import { LoginComponent } from './pages/login/login.component';
 
 export const routes: Routes = [
+  // Redirigir la raíz '/' directamente a '/login'
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   
-  {
-    path: 'login',
-    // component: LoginComponent
-  },
+  // Ruta del Login
+  { path: 'login', component: LoginComponent },
 
-  {
-    path: 'inicio',
-    // component: InicioComponent,
-    canActivate: [autenticacionGuard]
-  },
-
-  {
-    path: 'admin',
-    // component: AdminComponent,
-    canActivate: [autenticacionGuard, rolGuard]
-  },
-
-  {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full'
-  },
-
-  {
-    path: '**',
-    redirectTo: 'login'
-  }
-
+  // Ruta comodín para redirigir cualquier URL desconocida a login
+  { path: '**', redirectTo: 'login' }
 ];

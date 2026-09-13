@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import { probarConexion } from './config/conexion';
 import enrutadorPrincipal from './routes';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const app = express();
 const PORT = 3000;
  
