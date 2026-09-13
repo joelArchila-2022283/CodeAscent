@@ -1,0 +1,115 @@
+<div class="auth-container">
+  <div class="auth-split">
+    
+    <!-- Columna Izquierda: Video Frame -->
+    <div class="auth-video-pane">
+      <div class="film-corner tl">ESCENA 01</div>
+      <div class="film-corner tr">
+        <span class="rec-dot"></span>LOOP
+      </div>
+
+      <!-- Direccion del video .mp4-->
+      <video autoplay loop muted playsinline>
+        <source src="assets/videos/login-scene.mp4" type="video/mp4">
+        Tu navegador no soporta el formato de video.
+      </video>
+
+      <div class="auth-frame-caption">
+        <div class="cap-title">CODE ASCENT</div>
+        <div class="cap-sub">¡BIENVENIDO DE VUELTA!</div>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Formulario de Login -->
+    <div class="auth-form-pane">
+      <div class="auth-header">
+        <h2 class="auth-title">INICIAR SESIÓN</h2>
+        <div class="auth-sub">- CONTINÚA TU TRAVESÍA -</div>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="form-fields-group">
+          
+          <!-- Campo Correo -->
+          <div class="field">
+            <label for="correo">CORREO</label>
+            <input 
+              id="correo"
+              type="email" 
+              formControlName="correo"
+              placeholder="tu@correo.com"
+              [class.is-invalid]="f['correo'].touched && f['correo'].invalid"
+            >
+            @if (f['correo'].touched && f['correo'].invalid) {
+              <div class="text-danger small mt-1">
+                @if (f['correo'].errors?.['required']) { El correo es requerido. }
+                @if (f['correo'].errors?.['email']) { Ingresa un correo válido. }
+              </div>
+            }
+          </div>
+
+          <!-- Campo Contraseña -->
+          <div class="field">
+            <label for="password">CONTRASEÑA</label>
+            <input 
+              id="password"
+              type="password" 
+              formControlName="password"
+              placeholder="••••••••"
+              [class.is-invalid]="f['password'].touched && f['password'].invalid"
+            >
+            @if (f['password'].touched && f['password'].invalid) {
+              <div class="text-danger small mt-1">
+                La contraseña es requerida.
+              </div>
+            }
+          </div>
+
+          <!-- Opciones adicionales -->
+          <div class="field-row">
+            <label class="d-flex align-items-center gap-2">
+              <input type="checkbox" formControlName="recordarme" style="width: auto;"> 
+              Recordarme
+            </label>
+            <a href="#" class="forgot-link">¿Olvidaste clave?</a>
+          </div>
+
+        </div>
+
+        <!-- Alerta de Error HTTP -->
+        @if (mensajeError) {
+          <div class="alert alert-danger py-2 mb-3 text-center small">
+            {{ mensajeError }}
+          </div>
+        }
+
+        <!-- Botones de Acción -->
+        <div class="auth-action-group">
+          <button 
+            type="submit" 
+            class="pbtn green full"
+            [disabled]="cargando"
+          >
+            @if (cargando) {
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              PROCESANDO...
+            } @else {
+              ENTRAR ▶
+            }
+          </button>
+
+          <div class="auth-divider">O</div>
+
+          <button type="button" class="pbtn teal full">
+            CONTINUAR CON GOOGLE
+          </button>
+
+          <div class="auth-switch">
+            ¿No tienes cuenta? <a routerLink="/registro">Regístrate</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
