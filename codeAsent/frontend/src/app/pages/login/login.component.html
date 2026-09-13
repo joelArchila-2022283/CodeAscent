@@ -9,8 +9,16 @@
       </div>
 
       <!-- Direccion del video .mp4-->
-      <video autoplay loop muted playsinline>
-        <source src="/assets/videos/login-scene.mp4" type="video/mp4">
+      <video 
+        #videoPlayer
+        autoplay 
+        loop 
+        [muted]="true" 
+        playsinline 
+        preload="auto"
+        class="video-fondo">
+        <source src="assets/videos/login-scene.mp4" type="video/mp4">
+        Tu navegador no soporta el formato de video.
       </video>
 
       <div class="auth-frame-caption">
