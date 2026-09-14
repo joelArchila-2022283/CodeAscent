@@ -25,10 +25,16 @@ export class AuthService {
   iniciarSesion(
     credenciales: PeticionLogin
   ): Observable<RespuestaAuth> {
-
     return this.http.post<RespuestaAuth>(
       `${this.API_URL}/usuarios/login`,
       credenciales
+    );
+  }
+
+  registrar(datosUsuario: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_URL}/usuarios`,
+      datosUsuario
     );
   }
 
@@ -44,31 +50,24 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
   }
 
-estaAutenticado(): boolean {
+  estaAutenticado(): boolean {
     return this.obtenerToken() !== null;
   }
 
   obtenerRol(): string | null {
-
     const token = this.obtenerToken();
-
     if (!token) {
       return null;
     }
-
     try {
-        const partes = token.split('.');
-
+      const partes = token.split('.');
       if (partes.length !== 3) {
         return null;
       }
-
       const payload = JSON.parse(
         atob(partes[1].replace(/-/g, '+').replace(/_/g, '/'))
       );
-
       return payload.rol ?? null;
-
     } catch (error) {
       console.error('Error al decodificar el token:', error);
       return null;
