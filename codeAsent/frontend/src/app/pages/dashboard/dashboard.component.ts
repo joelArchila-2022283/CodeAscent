@@ -1,13 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface NodeMapa {
-  titulo: string;
-  estado: 'unlocked' | 'current' | 'locked';
-  subtexto: string;
-  icono: string;
-  posicion: { left: string; top: string };
-}
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { DashboardService } from '../../services/dashboard.service';
+import { DashboardData } from '../../interfaces/usuario.interface';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,20 +12,40 @@ interface NodeMapa {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
-  usuario = signal({
-    nombre: 'Joel',
-    nivel: 7,
-    estado: 'Proceso Activo',
-    puntosXP: 2450,
-    fragmentosDatos: 380,
-    progresoNivel: 68
-  });
+export class DashboardComponent implements OnInit {
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private dashboardService = inject(DashboardService);
 
-  nodosMapa = signal<NodeMapa[]>([
-    { titulo: 'HTML', estado: 'unlocked', subtexto: 'Completado', icono: 'bi-filetype-html', posicion: { left: '8%', top: '78%' } },
-    { titulo: 'CSS', estado: 'current', subtexto: 'En progreso', icono: 'bi-filetype-css', posicion: { left: '38%', top: '64%' } },
-    { titulo: 'SQL', estado: 'locked', subtexto: 'Bloqueado', icono: 'bi-lock-fill', posicion: { left: '62%', top: '64%' } },
-    { titulo: 'TypeScript', estado: 'locked', subtexto: 'Bloqueado', icono: 'bi-lock-fill', posicion: { left: '90%', top: '42%' } }
-  ]);
+  cargando = signal<boolean>(true);
+  errorCarga = signal<string | null>(null);
+  datosDashboard = signal<DashboardData | null>(null);
+
+  ngOnInit(): void {
+    this.cargarInformacion();
+  }
+
+  cargarInformacion(): void {
+    this.cargando.set(true);
+    this.dashboardService.obtenerDatosDashboard().subscribe({
+      next: (data) => {
+        this.datosDashboard.set(data);
+        this.cargando.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar dashboard:', err);
+        this.errorCarga.set('No se pudo conectar con el servidor.');
+        this.cargando.set(false);
+      }
+    });
+  }
+
+  cerrarSesion(): void {
+    if (this.authService && typeof this.authService.eliminarToken === 'function') {
+      this.authService.eliminarToken();
+    } else {
+      localStorage.removeItem('token');
+    }
+    this.router.navigate(['/login']);
+  }
 }
