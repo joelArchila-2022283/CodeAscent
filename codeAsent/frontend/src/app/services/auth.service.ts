@@ -74,6 +74,13 @@ export class AuthService {
     }
   }
 
+  loginConGoogle(idToken: string): Observable<RespuestaAuth> {
+    return this.http.post<RespuestaAuth>(
+      `${this.API_URL}/usuarios/google`,
+      { idToken }
+    );
+  }
+
   cerrarSesion(): void {
     this.eliminarToken();
     this.router.navigate(['/login']);
