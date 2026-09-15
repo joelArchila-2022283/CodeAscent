@@ -24,6 +24,9 @@ export class RegistroComponent implements AfterViewInit {
   mostrarPassword = false;
   private googleIniciado: boolean = false;
 
+  // Variable para controlar el modal de términos
+  mostrarModalTerminos: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -72,7 +75,7 @@ export class RegistroComponent implements AfterViewInit {
             type: 'standard', 
             shape: 'pill', 
             text: 'signup_with', 
-            width: anchoContenedor // Se pasa como número
+            width: anchoContenedor
           }
         );
       }
@@ -99,6 +102,21 @@ export class RegistroComponent implements AfterViewInit {
 
   toggleMostrarPassword(): void {
     this.mostrarPassword = !this.mostrarPassword;
+  }
+
+  // Funciones para el Modal de Términos
+  abrirModalTerminos(event: Event): void {
+    event.preventDefault(); 
+    this.mostrarModalTerminos = true;
+  }
+
+  cerrarModalTerminos(): void {
+    this.mostrarModalTerminos = false;
+  }
+
+  aceptarTerminosModal(): void {
+    this.registroForm.get('terminos')?.setValue(true);
+    this.cerrarModalTerminos();
   }
 
   onSubmit(): void {
