@@ -14,4 +14,5 @@ export const routes: Routes = [
 
   // Ruta comodín para redirigir cualquier URL desconocida a login
   { path: '**', redirectTo: 'login' }
+
 ];
