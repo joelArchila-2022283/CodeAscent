@@ -67,16 +67,15 @@
           </label>
         </div>
 
-        <!-- Botones -->
+        <!-- Botón Crear Cuenta -->
         <button type="submit" class="btn-principal" [disabled]="cargando">
           {{ cargando ? 'CREANDO...' : 'CREAR CUENTA ▶' }}
         </button>
 
         <div class="divisor-retro"><span>O</span></div>
 
-        <button type="button" class="btn-secundario">
-          REGISTRO CON GOOGLE
-        </button>
+        <!-- Contenedor Oficial Google Sign-In -->
+        <div id="googleBtnRegister" class="google-btn-wrapper"></div>
 
         <div class="registro-pie">
           ¿Ya tienes cuenta? 
@@ -92,8 +91,15 @@
         <span class="rec-dot"></span>LOOP
       </div>
       
-      <video autoplay loop muted playsinline class="video-fondo">
-        <source src="./assets/videos/register-scene.mp4" type="video/mp4">
+      <video 
+        #videoPlayer
+        autoplay 
+        loop 
+        [muted]="true" 
+        playsinline 
+        preload="auto"
+        class="video-fondo">
+        <source src="assets/videos/register-scene.mp4" type="video/mp4">
       </video>
 
       <div class="auth-frame-caption">

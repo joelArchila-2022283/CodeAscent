@@ -8,7 +8,6 @@
         <span class="rec-dot"></span>LOOP
       </div>
 
-      <!-- Direccion del video .mp4-->
       <video 
         #videoPlayer
         autoplay 
@@ -32,6 +31,10 @@
       <div class="auth-header">
         <h2 class="auth-title">INICIAR SESIÓN</h2>
         <div class="auth-sub">- CONTINÚA TU TRAVESÍA -</div>
+      </div>
+
+      <div *ngIf="mensajeError" class="error-alert">
+        {{ mensajeError }}
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
@@ -82,16 +85,20 @@
           <a routerLink="/recuperar" class="link-clave">¿Olvidaste clave?</a>
         </div>
 
-        <!-- Botones Principal y Secundario -->
+        <!-- Botón Entrar -->
         <button type="submit" class="btn-principal" [disabled]="cargando">
           {{ cargando ? 'ENTRANDO...' : 'ENTRAR ▶' }}
         </button>
 
         <div class="divisor-retro"><span>O</span></div>
 
-        <button type="button" class="btn-secundario" (click)="irARegistro()">
-          REGISTRARSE
-        </button>
+        <!-- Contenedor Oficial Google Sign-In -->
+        <div id="googleBtn" class="google-btn-wrapper"></div>
+
+        <div class="registro-pie">
+          ¿No tienes cuenta? 
+          <a (click)="irARegistro()" class="link-destacado" style="cursor: pointer;">Regístrate</a>
+        </div>
       </form>
     </div>
   </div>

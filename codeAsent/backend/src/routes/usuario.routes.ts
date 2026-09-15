@@ -8,6 +8,8 @@ const router = Router();
 // Rutas públicas
 router.post('/', UsuarioController.crear);
 router.post('/login', UsuarioController.login);
+// Ruta para rederigir a google login
+router.post('/google', UsuarioController.loginConGoogle)
 
 // A partir de aquí se necesita JWT
 router.use(verificarAutenticacion);
@@ -19,5 +21,7 @@ router.put('/:id', UsuarioController.actualizar);
 
 // Solo administrador
 router.delete('/:id', esAdmin, UsuarioController.eliminar);
+
+
 
 export default router;
