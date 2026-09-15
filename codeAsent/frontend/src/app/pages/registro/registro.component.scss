@@ -30,7 +30,6 @@
 
 .auth-split {
   display: grid;
-  /* El registro tiene el formulario a la izquierda (0.9fr) y el video a la derecha (1.8fr) */
   grid-template-columns: 0.9fr 1.8fr;
   width: 100%;
   height: 100%;
@@ -40,7 +39,6 @@
   box-shadow: 0 0 25px rgba(0, 230, 118, 0.25), 4px 5px 0 #000;
 }
 
-/* --- COLUMNA DERECHA: VIDEO --- */
 .auth-video-pane {
   position: relative;
   background: #000;
@@ -48,7 +46,6 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  /* Borde izquierdo porque el video está a la derecha */
   border-left: 2px solid var(--green-main);
   height: 100%;
 
@@ -114,7 +111,6 @@
   }
 }
 
-/* --- COLUMNA IZQUIERDA: FORMULARIO --- */
 .auth-form-pane {
   padding: 28px 24px;
   display: flex;
@@ -252,7 +248,6 @@
   }
 }
 
-/* --- BOTONES NEÓN RETRO --- */
 .btn-principal {
   width: 100%;
   font-family: 'Bangers', cursive;
@@ -300,24 +295,18 @@
   }
 }
 
-.btn-secundario {
+/* --- SOLUCIÓN: CONTENEDOR DEL BOTÓN DE GOOGLE CENTRADO --- */
+.google-btn-wrapper {
   width: 100%;
-  font-family: 'Bangers', cursive;
-  font-size: 18px;
-  letter-spacing: 1px;
-  background: transparent;
-  border: 2px solid var(--cyan-main);
-  color: var(--cyan-main);
-  border-radius: 30px;
-  padding: 10px 16px;
-  cursor: pointer;
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3), 2px 3px 0 #000;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: var(--cyan-main);
-    color: #000;
-    box-shadow: 0 0 18px rgba(0, 229, 255, 0.7), 2px 3px 0 #000;
+  display: flex;
+  justify-content: center !important;
+  align-items: center;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  
+  /* Esto obliga al div interno que crea Google a mantenerse centrado */
+  div {
+    margin: 0 auto !important;
   }
 }
 
