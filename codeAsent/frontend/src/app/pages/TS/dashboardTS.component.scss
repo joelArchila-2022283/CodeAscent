@@ -1,0 +1,1562 @@
+// =============================================================================
+// CODEASCENT: DASHBOARD DEL NIVEL HTML (CIUDAD FUTURISTA INFECTADA / NÚCLEO VIRAL)
+// Estilo: Cyberpunk Decadente + Neón Tóxico / Glitch Industrial + Vidrio Corrompido
+// =============================================================================
+
+// Variables de Color del Sistema (Variables CSS obligatorias actualizadas al ecosistema viral)
+$virus-red: var(--virus-red, #FF1744);
+$virus-amber: var(--virus-amber, #FF9100);
+$toxic-purple: var(--toxic-purple, #D500F9);
+$toxic-green: var(--toxic-green, #76FF03);
+$cyber-cyan: var(--cyber-cyan, #00E5FF);
+$steel-dim: var(--steel-dim, #546E7A);
+$steel-dark: var(--steel-dark, #263238);
+$bg-decay: var(--bg-decay, #050208);
+
+// Tipografías (Optimizadas para terminal cibernética y HUD de resistencia)
+$font-title: 'Bangers', cursive, sans-serif;
+$font-body: 'Baloo 2', cursive, sans-serif;
+$font-code: 'VT323', 'Fira Code', monospace;
+
+// ==========================================
+// ANIMACIONES DE CORRUPCIÓN, GLITCH Y PULSO VIRAL
+// ==========================================
+
+@keyframes virusGlitchPulse {
+  0%, 100% {
+    transform: translateY(0) scale(1, 1);
+    filter: drop-shadow(0 0 4px rgba(255, 23, 68, 0.6));
+  }
+  20% {
+    transform: translateY(-3px) skewX(-4deg);
+    filter: drop-shadow(0 0 10px rgba(213, 0, 249, 0.8));
+  }
+  40% {
+    transform: translateY(2px) skewX(3deg);
+  }
+  60% {
+    transform: translateY(-2px) scale(0.98, 1.02);
+  }
+  80% {
+    transform: translateY(1px);
+  }
+}
+
+@keyframes nodeCorruptWiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg) scale(0.97);
+  }
+  75% {
+    transform: rotate(3deg) scale(1.02);
+  }
+}
+
+@keyframes infectionFilamentPulse {
+  0%, 100% {
+    opacity: 0.5;
+    filter: drop-shadow(0 0 4px $virus-red) drop-shadow(0 0 10px rgba(213, 0, 249, 0.3));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px $toxic-green) drop-shadow(0 0 20px $virus-red);
+  }
+}
+
+@keyframes crtScanlines {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+@keyframes pulseGlowInfection {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(255, 23, 68, 0.4), inset 0 0 8px rgba(213, 0, 249, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(213, 0, 249, 0.7), inset 0 0 16px rgba(255, 23, 68, 0.4);
+  }
+}
+
+@keyframes corruptedArmGlitch {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(12deg) scale(1.05);
+  }
+}
+
+// ==========================================
+// CONTENEDOR PRINCIPAL (METRÓPOLI INFECTADA)
+// ==========================================
+
+.codeascent-dashboard {
+  min-height: 100vh;
+  width: 100%;
+  padding: 1.5rem;
+  background-color: $bg-decay;
+  background-image: 
+    radial-gradient(circle at 50% 15%, rgba(213, 0, 249, 0.12) 0%, transparent 70%),
+    linear-gradient(rgba(255, 23, 68, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+  color: #CFD8DC;
+  font-family: $font-body;
+  box-sizing: border-box;
+
+  // ----------------------------------------
+  // ENCABEZADO CHASSIS (NODOS Y SOBREVIVIENTE)
+  // ----------------------------------------
+  &__chassis-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem 1.75rem;
+    background: rgba(10, 5, 15, 0.9);
+    backdrop-filter: blur(16px);
+    border: 3px solid $virus-red;
+    border-radius: 14px;
+    box-shadow: 0 0 20px rgba(255, 23, 68, 0.35), inset 0 0 15px rgba(213, 0, 249, 0.15);
+    margin-bottom: 1.25rem;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+  }
+
+  &__logo-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  &__logo-icon {
+    font-size: 2.25rem;
+    color: $virus-red;
+    filter: drop-shadow(0 0 10px $virus-red);
+    animation: virusGlitchPulse 2s ease-in-out infinite;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: $font-title;
+    font-size: 2.5rem;
+    line-height: 1;
+    color: $toxic-green;
+    text-shadow: 0 0 10px rgba(118, 255, 3, 0.8), 0 0 20px rgba(255, 23, 68, 0.6);
+    letter-spacing: 0.08em;
+  }
+
+  &__subtitle {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: $virus-amber;
+    text-transform: uppercase;
+  }
+
+  // Nodos de Contención (Antiguas Válvulas)
+  &__vacuum-rack {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1.25rem;
+    background: rgba(5, 2, 8, 0.75);
+    border: 2px solid $toxic-purple;
+    border-radius: 10px;
+  }
+
+  &__rack-label {
+    font-family: $font-title;
+    font-size: 1rem;
+    color: $toxic-purple;
+    letter-spacing: 0.05em;
+  }
+
+  &__tubes-list {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.6rem;
+  }
+
+  // Panel de Operativo & Avatar Mutado
+  &__player-panel {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  &__player-stats {
+    min-width: 170px;
+  }
+
+  &__player-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.35rem;
+  }
+
+  &__player-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #ECEFF1;
+  }
+
+  &__player-rank {
+    font-family: $font-title;
+    font-size: 1.1rem;
+    color: $virus-red;
+    text-shadow: 0 0 8px rgba(255, 23, 68, 0.7);
+  }
+
+  &__xp-bar-container {
+    width: 100%;
+    height: 9px;
+    background: #120409;
+    border: 1px solid $virus-red;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 0.3rem;
+  }
+
+  &__xp-bar {
+    height: 100%;
+    background: linear-gradient(90deg, $virus-red, $toxic-purple);
+    box-shadow: 0 0 10px $toxic-purple;
+    border-radius: 999px;
+    transition: width 0.4s ease-out;
+  }
+
+  &__xp-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: $steel-dim;
+  }
+
+  &__watts-badge {
+    color: $cyber-cyan;
+    font-weight: 700;
+  }
+
+  // Transmisión de Emergencia (Banner de diálogo)
+  &__dialogue-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    background: rgba(20, 4, 10, 0.75);
+    border: 2px dashed rgba(255, 23, 68, 0.5);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  &__dialogue-bubble {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__dialogue-icon {
+    font-size: 1.4rem;
+  }
+
+  &__dialogue-text {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #FFCDD2;
+    font-style: italic;
+  }
+
+  &__crt-toggles {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+// ==========================================
+// NODOS DE CONTENCIÓN VIRAL (Antiguas Válvulas)
+// ==========================================
+
+.vacuum-tube {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 26px;
+  cursor: pointer;
+
+  &__glass {
+    position: relative;
+    width: 22px;
+    height: 38px;
+    background: rgba(213, 0, 249, 0.08);
+    border: 1.5px solid rgba(213, 0, 249, 0.4);
+    border-radius: 11px 11px 4px 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  &__filament {
+    width: 3px;
+    height: 22px;
+    background: #37474F;
+    border-radius: 2px;
+  }
+
+  &__base {
+    width: 24px;
+    height: 8px;
+    background: #111;
+    border: 1px solid #455A64;
+    border-radius: 2px;
+    display: flex;
+    justify-content: space-around;
+    padding-top: 1px;
+  }
+
+  &__pin {
+    width: 2px;
+    height: 4px;
+    background: #78909C;
+  }
+
+  // Estado sobrecargado / infectado activo
+  &--lit {
+    .vacuum-tube__glass {
+      border-color: $virus-red;
+      box-shadow: 0 0 12px rgba(255, 23, 68, 0.7);
+    }
+    .vacuum-tube__filament {
+      background: $toxic-green;
+      animation: infectionFilamentPulse 1.5s infinite alternate;
+      box-shadow: 0 0 8px $virus-red, 0 0 15px $toxic-green;
+    }
+  }
+
+  // Estado colapsado / muerto
+  &--cold {
+    opacity: 0.35;
+    filter: grayscale(0.8);
+  }
+}
+
+// ==========================================
+// DRON / ENTIDAD INFECTADA (Mascota Cyberpunk)
+// ==========================================
+
+.rubber-mascot {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  background: #0D0510;
+  border: 3px solid $virus-red;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(255, 23, 68, 0.5);
+
+  &--bounce {
+    animation: virusGlitchPulse 2.2s ease-in-out infinite;
+  }
+
+  &--cheering {
+    animation: virusGlitchPulse 0.9s ease-in-out infinite;
+    border-color: $toxic-green;
+    box-shadow: 0 0 20px rgba(118, 255, 3, 0.7);
+  }
+
+  &--shocked {
+    animation: nodeCorruptWiggle 0.35s ease-in-out infinite;
+    border-color: $virus-amber;
+  }
+
+  &__face {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  // Ópticos de la IA corrompida
+  &__eye {
+    position: absolute;
+    top: 13px;
+    width: 11px;
+    height: 15px;
+    background: $cyber-cyan;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0 6px $cyber-cyan;
+
+    &--left {
+      left: 10px;
+    }
+    &--right {
+      right: 10px;
+    }
+  }
+
+  &__pupil {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 6px;
+    height: 9px;
+    background: $virus-red;
+    border-radius: 50%;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 40% 70%, 0% 100%);
+  }
+
+  // Rejilla o sonrisa distorsionada de la IA
+  &__mouth {
+    position: absolute;
+    bottom: 10px;
+    left: 14px;
+    width: 24px;
+    height: 10px;
+    border-bottom: 3px solid $toxic-purple;
+    border-radius: 0 0 10px 10px;
+  }
+
+  // Cables de fibra óptica expuestos (Antiguos brazos)
+  &__limb {
+    position: absolute;
+    width: 5px;
+    height: 22px;
+    background: $virus-amber;
+    border-radius: 4px;
+    top: 24px;
+
+    &--arm-left {
+      left: -8px;
+      transform-origin: top center;
+      animation: corruptedArmGlitch 1.6s infinite ease-in-out alternate;
+    }
+    &--arm-right {
+      right: -8px;
+      transform-origin: top center;
+      animation: corruptedArmGlitch 1.6s infinite ease-in-out alternate-reverse;
+    }
+  }
+
+  // Nodos terminales infectados (Antiguos guantes)
+  &__glove {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    background: $toxic-green;
+    border-radius: 50%;
+    border: 2px solid $virus-red;
+    box-shadow: 0 0 6px $toxic-green;
+
+    &--left {
+      left: -13px;
+      bottom: 2px;
+    }
+    &--right {
+      right: -13px;
+      bottom: 2px;
+    }
+  }
+}
+
+// Botones de conmutación de red tácticos
+.toggle-knob {
+  background: #110515;
+  border: 1.5px solid $toxic-purple;
+  color: $steel-dim;
+  font-family: $font-code;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #ECEFF1;
+    border-color: $virus-red;
+  }
+
+  &--active {
+    background: rgba(255, 23, 68, 0.2);
+    color: $virus-red;
+    border-color: $virus-red;
+    box-shadow: 0 0 10px rgba(255, 23, 68, 0.5);
+  }
+}
+
+// ==========================================
+// BARRA DE NAVEGACIÓN (RED METROPOLITANA CORROMPIDA)
+// ==========================================
+
+.motherboard-nav {
+  margin-bottom: 2rem;
+
+  &__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  &__btn {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.9rem 1.2rem;
+    background: rgba(12, 5, 18, 0.85);
+    backdrop-filter: blur(10px);
+    border: 2px solid #37474F;
+    border-radius: 10px;
+    color: #CFD8DC;
+    font-family: $font-title;
+    font-size: 1.25rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    &:hover {
+      transform: translateY(-3px) scale(1.02);
+      border-color: $virus-red;
+      box-shadow: 0 0 15px rgba(255, 23, 68, 0.5);
+      color: $toxic-green;
+    }
+
+    &--active {
+      background: linear-gradient(135deg, rgba(255, 23, 68, 0.25), rgba(213, 0, 249, 0.2));
+      border-color: $virus-red;
+      color: $toxic-green;
+      box-shadow: 0 0 20px rgba(255, 23, 68, 0.5), inset 0 0 10px rgba(213, 0, 249, 0.3);
+    }
+  }
+
+  &__pipe-joint {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 6px;
+    background: $virus-red;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 0 8px $virus-red;
+  }
+
+  &__badge {
+    background: $toxic-purple;
+    color: #FFF;
+    font-family: $font-body;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    box-shadow: 0 0 6px $toxic-purple;
+  }
+}
+
+// ==========================================
+// ESTRUCTURA COMÚN DE SECCIONES
+// ==========================================
+
+.motherboard-section {
+  animation: virusGlitchPulse 0.5s ease-out 1;
+
+  &__grid-header {
+    margin-bottom: 1.5rem;
+  }
+
+  &__tag {
+    display: inline-block;
+    background: rgba(213, 0, 249, 0.15);
+    border: 1px solid $toxic-purple;
+    color: $toxic-purple;
+    font-family: $font-code;
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 0 6px rgba(213, 0, 249, 0.3);
+  }
+
+  &__title {
+    margin: 0;
+    font-family: $font-title;
+    font-size: 2.2rem;
+    color: $virus-red;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px rgba(255, 23, 68, 0.7);
+  }
+
+  &__desc {
+    margin: 0.35rem 0 0;
+    color: $steel-dim;
+    font-size: 1.05rem;
+  }
+}
+
+// ==========================================
+// SECCIÓN A: NÚCLEO DE LA CIUDAD INFECTADA
+// ==========================================
+
+.circuit-pipes-container {
+  width: 100%;
+  height: 80px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.circuit-pipes-svg {
+  width: 100%;
+  height: 100%;
+
+  .circuit-pipes__flow-pulse {
+    animation: circuitFlow 2.5s linear infinite;
+  }
+}
+
+.hub-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.motherboard-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: rgba(10, 4, 15, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &--cyan {
+    border-color: #37474F;
+    &:hover {
+      border-color: $cyber-cyan;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+      transform: translateY(-6px) scale(1.02);
+    }
+  }
+
+  &--green {
+    border-color: #4A148C;
+    &:hover {
+      border-color: $toxic-green;
+      box-shadow: 0 0 20px rgba(118, 255, 3, 0.4);
+      transform: translateY(-6px) scale(1.02);
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    font-family: $font-code;
+    font-size: 0.85rem;
+    color: $virus-amber;
+    margin-bottom: 1rem;
+  }
+
+  &__icon-wrap {
+    font-size: 2.75rem;
+    margin-bottom: 0.75rem;
+    animation: virusGlitchPulse 3s ease-in-out infinite;
+  }
+
+  &__name {
+    margin: 0 0 0.5rem;
+    font-family: $font-title;
+    font-size: 1.6rem;
+    color: #ECEFF1;
+    letter-spacing: 0.03em;
+  }
+
+  &__text {
+    margin: 0 0 1.25rem;
+    color: $steel-dim;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  &__btn-fake {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: $toxic-green;
+  }
+}
+
+// ==========================================
+// SECCIÓN B: ARCHIVOS DE RESISTENCIA (MANUAL CLANDESTINO)
+// ==========================================
+
+.lessons-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 840px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lessons-sidebar {
+  background: rgba(8, 3, 12, 0.85);
+  border: 2px solid $toxic-purple;
+  border-radius: 14px;
+  padding: 1.25rem;
+
+  &__title {
+    font-family: $font-title;
+    font-size: 1.2rem;
+    color: $toxic-green;
+    margin-bottom: 1rem;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(213, 0, 249, 0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 23, 68, 0.1);
+      border-color: $virus-red;
+    }
+
+    &--active {
+      background: rgba(213, 0, 249, 0.2);
+      border-color: $toxic-purple;
+      box-shadow: 0 0 12px rgba(213, 0, 249, 0.4);
+    }
+  }
+
+  &__badge {
+    background: #000;
+    color: $virus-red;
+    font-family: $font-code;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid $virus-red;
+  }
+
+  &__item-title {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ECEFF1;
+  }
+
+  &__item-diff {
+    font-size: 0.75rem;
+    color: $steel-dim;
+  }
+}
+
+.technical-manual {
+  background: #08030B;
+  border: 3px solid $virus-red;
+  border-radius: 14px;
+  padding: 1.75rem;
+  box-shadow: 8px 8px 0px rgba(255, 23, 68, 0.25);
+
+  &__header {
+    border-bottom: 2px dashed rgba(255, 23, 68, 0.3);
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  &__stamp {
+    font-family: $font-code;
+    color: $virus-red;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+  }
+
+  &__badge {
+    display: inline-block;
+    background: $toxic-purple;
+    color: #FFF;
+    font-family: $font-title;
+    font-size: 0.95rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    margin: 0.4rem 0;
+  }
+
+  &__title {
+    margin: 0.2rem 0;
+    font-family: $font-title;
+    font-size: 2rem;
+    color: #ECEFF1;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: $virus-amber;
+    font-size: 1.05rem;
+  }
+
+  &__heading {
+    font-family: $font-title;
+    font-size: 1.4rem;
+    color: $toxic-green;
+    margin: 1.25rem 0 0.5rem;
+  }
+
+  &__paragraph {
+    color: #CFD8DC;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  // Código Esquemático Corrompido
+  .blueprint-code {
+    background: #0D0512;
+    border: 2px solid $toxic-purple;
+    border-radius: 8px;
+    margin: 1.25rem 0;
+    overflow: hidden;
+
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0.8rem;
+      background: rgba(213, 0, 249, 0.15);
+      font-family: $font-code;
+      font-size: 0.8rem;
+      color: $toxic-green;
+    }
+
+    &__pre {
+      margin: 0;
+      padding: 1rem;
+      font-family: $font-code;
+      font-size: 1.05rem;
+      color: $toxic-green;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+  }
+
+  &__keypoints {
+    margin: 1.25rem 0;
+  }
+
+  &__points-title {
+    font-family: $font-title;
+    font-size: 1.1rem;
+    color: $virus-amber;
+    margin: 0 0 0.5rem;
+  }
+
+  &__points-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    li {
+      color: #CFD8DC;
+      font-size: 0.95rem;
+    }
+  }
+
+  &__tip-box {
+    display: flex;
+    gap: 0.85rem;
+    background: rgba(255, 145, 0, 0.1);
+    border-left: 4px solid $virus-amber;
+    padding: 0.85rem 1rem;
+    border-radius: 4px;
+    margin-top: 1.25rem;
+
+    p {
+      margin: 0.25rem 0 0;
+      color: #ECEFF1;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// ==========================================
+// SECCIÓN C: PROTOCOLOS DE MISIÓN (QUESTS)
+// ==========================================
+
+.quests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.quest-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: rgba(10, 4, 15, 0.85);
+  backdrop-filter: blur(10px);
+  border: 2px solid #37474F;
+  border-radius: 14px;
+  transition: all 0.25s ease;
+
+  &--in-progress {
+    border-color: $virus-red;
+    box-shadow: 0 0 18px rgba(255, 23, 68, 0.4);
+  }
+
+  &--completed {
+    border-color: $toxic-green;
+    background: rgba(4, 18, 10, 0.75);
+  }
+
+  &--locked {
+    opacity: 0.4;
+    filter: grayscale(0.8);
+  }
+
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  &__code {
+    font-family: $font-code;
+    font-size: 0.85rem;
+    background: #000;
+    color: $virus-amber;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #455A64;
+  }
+
+  &__status-badge {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #ECEFF1;
+  }
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-family: $font-title;
+    font-size: 1.5rem;
+    color: #ECEFF1;
+  }
+
+  &__desc {
+    color: $steel-dim;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin: 0 0 1rem;
+  }
+
+  &__requirement {
+    color: $virus-amber;
+    font-family: $font-code;
+    margin-bottom: 1.25rem;
+  }
+
+  &__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__xp {
+    font-family: $font-title;
+    font-size: 1.25rem;
+    color: $toxic-green;
+  }
+
+  &__btn {
+    padding: 0.55rem 1rem;
+    font-family: $font-title;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+
+    &--active {
+      background: $virus-red;
+      color: #FFF;
+      box-shadow: 0 0 12px rgba(255, 23, 68, 0.7);
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+
+    &--done {
+      background: #37474F;
+      color: #90A4AE;
+      cursor: default;
+    }
+
+    &--locked {
+      background: #111;
+      color: #555;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ==========================================
+// SECCIÓN D: TERMINAL DE INFECCIÓN / MONITOR CRT
+// ==========================================
+
+.crt-split-stage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.crt-chassis {
+  background: #09030D;
+  border: 4px solid #1A0A26;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(213, 0, 249, 0.15);
+
+  &__frame-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1.5px solid #28103B;
+  }
+
+  &__screws {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .chassis-screw {
+    width: 8px;
+    height: 8px;
+    background: #4A325C;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  &__title {
+    font-family: $font-code;
+    font-size: 0.95rem;
+    color: $virus-red;
+    letter-spacing: 0.08em;
+  }
+
+  &__controls {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .crt-micro-btn {
+    background: #140520;
+    border: 1px solid $toxic-purple;
+    color: $toxic-green;
+    font-family: $font-code;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background: $toxic-purple;
+      color: #FFF;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.85rem;
+  }
+
+  &__meta-text {
+    font-family: $font-code;
+    font-size: 0.75rem;
+    color: $steel-dim;
+  }
+}
+
+// Pantalla CRT Infectada (Fósforo rojizo / cian corrupto)
+.crt-screen {
+  position: relative;
+  background: #030105;
+  border: 3px solid $virus-red;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 0 40px rgba(255, 23, 68, 0.25), 0 0 20px rgba(213, 0, 249, 0.25);
+
+  &--glass-curve {
+    border-radius: 22px;
+    box-shadow: inset 0 0 50px rgba(255, 23, 68, 0.35), 0 0 25px rgba(255, 23, 68, 0.3);
+  }
+
+  // Scanlines de monitores destruidos por virus
+  &--scanlines::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.5) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 255, 0.02), rgba(118, 255, 3, 0.03));
+    z-index: 10;
+    background-size: 100% 4px, 6px 100%;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+
+  &--flicker {
+    animation: crtScanlines 0.1s infinite;
+  }
+
+  &__inner {
+    padding: 1rem;
+    min-height: 250px;
+  }
+
+  &__prompt-bar {
+    display: flex;
+    gap: 0.5rem;
+    font-family: $font-code;
+    font-size: 0.85rem;
+    color: #78909C;
+    margin-bottom: 0.5rem;
+
+    .prompt-cursor {
+      color: $virus-red;
+    }
+  }
+
+  &__textarea {
+    width: 100%;
+    min-height: 200px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: $toxic-green;
+    font-family: $font-code;
+    font-size: 1.15rem;
+    line-height: 1.5;
+    resize: vertical;
+    text-shadow: 0 0 6px rgba(118, 255, 3, 0.7);
+
+    &::placeholder {
+      color: rgba(255, 23, 68, 0.4);
+    }
+  }
+}
+
+// Sandbox HTML Corrompido
+.crt-html-render-sandbox {
+  padding: 1.25rem;
+  min-height: 200px;
+  background: rgba(20, 4, 15, 0.5);
+  border-radius: 8px;
+  color: #ECEFF1;
+  font-family: $font-body;
+
+  h1, h2, h3 {
+    font-family: $font-title;
+    color: $virus-red;
+    text-shadow: 0 0 10px rgba(255, 23, 68, 0.8);
+    margin: 0.3rem 0;
+  }
+
+  button {
+    background: $virus-red;
+    color: #FFF;
+    border: none;
+    font-family: $font-title;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    box-shadow: 0 0 10px rgba(255, 23, 68, 0.7);
+  }
+}
+
+.crt-badge-pulse {
+  color: $virus-amber;
+  font-family: $font-code;
+  font-size: 0.8rem;
+  animation: pulseGlowInfection 1.5s infinite;
+}
+
+.crt-ignite-btn {
+  background: $virus-red;
+  color: #FFF;
+  border: none;
+  font-family: $font-title;
+  font-size: 1.2rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(255, 23, 68, 0.8);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.04);
+  }
+}
+
+// Logs del Sistema Invasor
+.crt-system-logs {
+  margin-top: 0.85rem;
+  background: #030105;
+  border: 1px solid $toxic-purple;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+
+  &__bar {
+    display: flex;
+    justify-content: space-between;
+    font-family: $font-code;
+    font-size: 0.75rem;
+    color: $virus-red;
+    border-bottom: 1px dashed rgba(213, 0, 249, 0.3);
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.35rem;
+  }
+
+  &__stream {
+    font-family: $font-code;
+    font-size: 0.8rem;
+    color: $toxic-green;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+}
+
+// ==========================================
+// SECCIÓN E: TEST DE CUARENTENA (QUIZ)
+// ==========================================
+
+.quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.quiz-box {
+  background: rgba(10, 4, 15, 0.92);
+  backdrop-filter: blur(14px);
+  border: 3px solid $virus-red;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 8px 8px 0px rgba(213, 0, 249, 0.35);
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__counter {
+    font-family: $font-title;
+    font-size: 1.15rem;
+    color: $virus-amber;
+  }
+
+  &__progress-rail {
+    flex: 1;
+    min-width: 150px;
+    height: 8px;
+    background: #12041A;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid $toxic-purple;
+  }
+
+  &__progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, $toxic-purple, $virus-red);
+    box-shadow: 0 0 10px $virus-red;
+  }
+
+  &__score-badge {
+    font-family: $font-code;
+    color: $toxic-green;
+    background: #000;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid $toxic-purple;
+  }
+
+  &__question-text {
+    font-family: $font-title;
+    font-size: 1.75rem;
+    line-height: 1.3;
+    color: #ECEFF1;
+    margin: 0 0 1rem;
+  }
+
+  &__snippet {
+    background: #0D0512;
+    border: 1.5px solid $toxic-purple;
+    border-radius: 8px;
+    padding: 0.85rem;
+    margin-bottom: 1.25rem;
+
+    pre {
+      margin: 0;
+      font-family: $font-code;
+      font-size: 1.1rem;
+      color: $toxic-green;
+    }
+  }
+
+  &__options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  background: rgba(15, 6, 22, 0.8);
+  border: 2px solid #37474F;
+  border-radius: 12px;
+  color: #ECEFF1;
+  font-family: $font-body;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &:hover:not(:disabled) {
+    border-color: $virus-red;
+    transform: translateX(6px);
+    background: rgba(255, 23, 68, 0.1);
+  }
+
+  &__letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #000;
+    border: 1.5px solid $toxic-purple;
+    color: $toxic-purple;
+    border-radius: 50%;
+    font-family: $font-title;
+    font-size: 1.2rem;
+  }
+
+  &--selected {
+    border-color: $virus-red;
+    background: rgba(255, 23, 68, 0.2);
+    box-shadow: 0 0 12px rgba(255, 23, 68, 0.4);
+  }
+
+  &--correct {
+    border-color: $toxic-green !important;
+    background: rgba(118, 255, 3, 0.25) !important;
+    color: $toxic-green !important;
+    box-shadow: 0 0 15px rgba(118, 255, 3, 0.5);
+  }
+
+  &--wrong {
+    border-color: $virus-red !important;
+    background: rgba(255, 23, 68, 0.25) !important;
+    color: $virus-red !important;
+  }
+}
+
+.quiz-feedback {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  animation: virusGlitchPulse 0.5s ease-out;
+
+  &--correct {
+    background: rgba(118, 255, 3, 0.15);
+    border: 2px solid $toxic-green;
+    color: $toxic-green;
+  }
+
+  &--incorrect {
+    background: rgba(255, 23, 68, 0.15);
+    border: 2px solid $virus-red;
+    color: $virus-red;
+  }
+
+  &__cartoon-icon {
+    font-size: 2.25rem;
+    animation: virusGlitchPulse 1.5s infinite ease-in-out;
+  }
+
+  &__message {
+    strong {
+      display: block;
+      font-family: $font-title;
+      font-size: 1.3rem;
+      letter-spacing: 0.05em;
+    }
+    p {
+      margin: 0.25rem 0 0;
+      color: #ECEFF1;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// Pantalla de Resultados de Cuarentena
+.quiz-results-card {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: rgba(10, 4, 15, 0.95);
+  border: 4px solid $virus-red;
+  border-radius: 18px;
+  box-shadow: 0 0 35px rgba(255, 23, 68, 0.35);
+
+  .rubber-star-burst {
+    font-size: 4rem;
+    margin-bottom: 0.75rem;
+    animation: virusGlitchPulse 1.8s infinite ease-in-out;
+  }
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-family: $font-title;
+    font-size: 2.75rem;
+    color: $toxic-green;
+    text-shadow: 0 0 12px rgba(118, 255, 3, 0.7);
+  }
+
+  &__subtitle {
+    color: $steel-dim;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .result-metric {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid $toxic-purple;
+    border-radius: 12px;
+    padding: 1rem;
+
+    &__num {
+      display: block;
+      font-family: $font-title;
+      font-size: 2rem;
+      color: $toxic-green;
+    }
+
+    &__label {
+      font-size: 0.75rem;
+      color: $steel-dim;
+      font-weight: 700;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}
+
+// ==========================================
+// BOTONES TÁCTICOS UNIVERSALES
+// ==========================================
+
+.retro-action-btn {
+  padding: 0.85rem 1.75rem;
+  font-family: $font-title;
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  border-radius: 10px;
+  border: 2px solid #000;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.03);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--green {
+    background: $toxic-green;
+    color: #000;
+    box-shadow: 0 0 15px rgba(118, 255, 3, 0.6);
+  }
+
+  &--cyan {
+    background: $virus-red;
+    color: #FFF;
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.6);
+  }
+}
