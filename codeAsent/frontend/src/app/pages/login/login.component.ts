@@ -72,7 +72,7 @@ export class LoginComponent implements AfterViewInit {
             type: 'standard', 
             shape: 'pill', 
             text: 'signin_with',
-            width: anchoContenedor // Se pasa como número, no como porcentaje
+            width: anchoContenedor
           }
         );
       }
@@ -88,7 +88,7 @@ export class LoginComponent implements AfterViewInit {
       next: (respuesta) => {
         this.cargando = false;
         this.authService.guardarToken(respuesta.datos.token);
-        this.router.navigate(['/inicio']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.cargando = false;
@@ -123,7 +123,7 @@ export class LoginComponent implements AfterViewInit {
       next: (respuesta) => {
         this.cargando = false;
         this.authService.guardarToken(respuesta.datos.token);
-        this.router.navigate(['/inicio']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.cargando = false;

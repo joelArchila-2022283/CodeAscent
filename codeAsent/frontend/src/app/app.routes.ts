@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
@@ -10,6 +11,9 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
 
   { path: 'registro', component: RegistroComponent },
+
+  // Ruta del Dashboard
+  { path: 'dashboard', component: DashboardComponent },
 
   { path: 'error/:type', component: ErrorPageComponent },
   
