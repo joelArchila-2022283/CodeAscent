@@ -1,0 +1,63 @@
+<div class="error-page">
+  <div class="wrap">
+    <div class="brand">CODEASCENT · ERROR THEATER</div>
+
+    <div class="theater" [style.--accent]="accent">
+      <div class="curtain l"></div>
+      <div class="curtain r"></div>
+      <div class="stage"></div>
+
+      @if (type === '404') {
+        <section class="panel">
+          <div class="spot"></div>
+          <div class="marquee">CALLEJÓN DE TINTA · ACTO 404</div>
+          <div class="art">
+            <div class="computer404">
+              <div class="monitor-face"><i class="eye ce1"></i><i class="eye ce2"></i><b>404</b></div>
+              <div class="monitor-neck"></div><div class="monitor-base"></div><div class="broken-cable"></div>
+            </div>
+          </div>
+          <div class="title">¡ESTE CAMINO NO ESTÁ EN EL GUIÓN!</div>
+          <p class="msg">La ruta desapareció del mapa. Parece que esta escena nunca llegó a dibujarse.</p>
+          <button class="btn" type="button" (click)="goHome()">REGRESAR A LA BASE ▶</button>
+        </section>
+      }
+
+      @if (type === '500') {
+        <section class="panel">
+          <div class="spot"></div>
+          <div class="marquee">CORTOCIRCUITO · ACTO 500</div>
+          <div class="art"><i class="smoke"></i><i class="smoke s2"></i>
+            <div class="cpu500"><div class="cpu-screen">500</div><i class="cpu-light l1"></i><i class="cpu-light l2"></i><div class="cpu-slot"></div><i class="mini-gear mg1"></i><i class="mini-gear mg2"></i></div>
+          </div>
+          <div class="title">¡LA MÁQUINA SE VOLVIÓ LOCA!</div>
+          <p class="msg">El motor de CodeAscent tuvo un fallo detrás del escenario. Podemos intentar arrancarlo otra vez.</p>
+          <button class="btn" type="button" (click)="retry()">REINTENTAR ▶</button>
+          <button class="btn alt" type="button" (click)="report()">REPORTAR</button>
+        </section>
+      }
+
+      @if (type === '403') {
+        <section class="panel">
+          <div class="spot"></div>
+          <div class="marquee">ZONA PROHIBIDA · ACTO 403</div>
+          <div class="art"><div class="firewall403"><div class="shield403"><span>403</span><i class="keyhole"></i></div><div class="server-door"><i></i><i></i><i></i></div></div><div class="chain"></div></div>
+          <div class="title">¡ALTO AHÍ, JUGADOR!</div>
+          <p class="msg">Esta escena requiere permisos superiores. Identifícate con una cuenta autorizada para continuar.</p>
+          <button class="btn" type="button" (click)="goLogin()">IR AL LOGIN ▶</button>
+        </section>
+      }
+
+      @if (type === 'offline') {
+        <section class="panel">
+          <div class="spot"></div>
+          <div class="marquee">CABLE CORTADO · SIN SEÑAL</div>
+          <div class="art"><div class="router-off"><i class="antenna an1"></i><i class="antenna an2"></i><div class="router-body"><span>OFF</span><i class="led rd1"></i><i class="led rd2"></i><i class="led rd3"></i></div><div class="wifi-x">×</div></div><div class="retry">REINTENTANDO CONECTAR...</div></div>
+          <div class="title">¡SE CORTÓ LA TRANSMISIÓN!</div>
+          <p class="msg">Perdimos contacto con el estudio. Revisa tu conexión y vuelve a intentarlo.</p>
+          <button class="btn" type="button" (click)="retry()">REINTENTAR ▶</button>
+        </section>
+      }
+    </div>
+  </div>
+</div>
