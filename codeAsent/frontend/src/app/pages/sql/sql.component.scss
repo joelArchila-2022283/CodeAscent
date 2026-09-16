@@ -1,0 +1,381 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Baloo+2:wght@500;700&display=swap');
+
+$rock-dark: #0c0908;
+$rock-base: #1c1512;
+$rock-panel: #261e19;
+$rock-border: #42342c;
+$amber-fire: #d9a441;
+$amber-glow: #f2d078;
+$cyan-screen: #00e5ff;
+$valley-green: #8ed6a3;
+$purple-disk: #b55afe;
+$text-html: #e6ded6;
+$text-dim: #9a8a80;
+$copper-transistor: #D97724;
+
+@keyframes torchFlicker {
+  0% { opacity: .7; transform: scale(1) translate(0,0); }
+  25% { opacity: .95; transform: scale(1.03) translate(1px,-1px); }
+  50% { opacity: .6; transform: scale(.97) translate(-1px,1px); }
+  75% { opacity: .88; transform: scale(1.02) translate(0,1px); }
+  100% { opacity: .75; transform: scale(1) translate(0,0); }
+}
+
+@keyframes dustFloat {
+  0% { transform: translateY(0) translateX(0); opacity: .1; }
+  50% { transform: translateY(-40px) translateX(20px); opacity: .4; }
+  100% { transform: translateY(-80px) translateX(-10px); opacity: 0; }
+}
+
+@keyframes screenPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px $amber-fire); box-shadow: 0 0 10px rgba(255,145,0,.4); }
+  50% { filter: drop-shadow(0 0 14px $amber-glow); box-shadow: 0 0 20px rgba(255,183,0,.8); }
+}
+
+@keyframes rockRumble {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sql-dashboard {
+  min-height: 100vh;
+  width: 100%;
+  padding: 1.5rem;
+  background: #101916;
+  color: $text-html;
+  font-family: 'Baloo 2', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* --- FONDO CON IMAGEN fondo-sql.jpg Y ATMÓSFERA DISNEY 1930s --- */
+.sql-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sql-bg-image {
+  position: absolute;
+  inset: 0;
+  background: url('/assets/images/fondo-sql.jpg') no-repeat center center / cover;
+  opacity: .68;
+  filter: contrast(1.08) saturate(.9) brightness(.72);
+}
+
+.torch-ambient-glow {
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(142,214,163,.28) 0%, rgba(0,229,255,.08) 50%, transparent 70%);
+  animation: torchFlicker 3s infinite ease-in-out;
+  z-index: 1;
+}
+
+.torch-left {
+  top: 10rem;
+  left: -50px;
+}
+
+.torch-right {
+  top: 8rem;
+  right: -50px;
+  animation-delay: -1.5s;
+}
+
+.sql-dust-motes {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(184,240,197,.55) 2px, transparent 2px);
+  background-size: 120px 120px;
+  animation: dustFloat 10s infinite linear;
+  z-index: 2;
+  opacity: .25;
+}
+
+header, nav, .bunker-content-stage {
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* --- CABECERA BUNKER DISNEY 1930s --- */
+.bunker-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem 1.75rem;
+  background: rgba(13, 24, 20, .88);
+  backdrop-filter: blur(12px);
+  border: 4px solid $rock-border;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.8), inset 0 2px 5px rgba(142,214,163,.18);
+  margin-bottom: 1.5rem;
+}
+
+.bunker-brand, .bunker-logo-stone {
+  display: flex;
+  align-items: center;
+}
+
+.bunker-logo-stone {
+  gap: 1rem;
+}
+
+/* --- MASCOTA CARTOON 1930s (TUBO DE GOMA) --- */
+.miner-mascot-unit {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  background: #110e0d;
+  border: 3px solid #5a473e;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 12px rgba(255,145,0,.4);
+
+  &.bounce {
+    animation: rockRumble 2.2s infinite ease-in-out;
+  }
+
+  .transistor-coil {
+    position: absolute;
+    top: -13px;
+    width: 58px;
+    height: 26px;
+    background: $copper-transistor;
+    border-radius: 28px 28px 0 0;
+    border: 3px solid #221712;
+    box-shadow: 0 3px 6px rgba(0,0,0,.6);
+
+    .coil-spark {
+      position: absolute;
+      top: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      border: 2px solid #221712;
+      animation: screenPulse 1.8s infinite alternate;
+    }
+  }
+
+  .mascot-face {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+
+    .eye {
+      width: 11px;
+      height: 15px;
+      background: #e6ded6;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+
+      .pupil {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 6px;
+        height: 9px;
+        background: #000;
+        border-radius: 50%;
+      }
+    }
+  }
+}
+
+.bunker-title-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.bunker-title {
+  margin: 0;
+  font-family: 'Bangers', cursive;
+  font-size: 2.3rem;
+  line-height: 1;
+  color: $amber-fire;
+  text-shadow: 0 0 10px rgba(255,145,0,.6), 2px 2px 0 #000;
+  letter-spacing: .08em;
+}
+
+.bunker-subtitle {
+  display: block;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .15em;
+  color: $cyan-screen;
+  text-transform: uppercase;
+}
+
+/* --- HUD DEL JUGADOR --- */
+.bunker-player-hud {
+  min-width: 175px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+
+  .hud-stats-box {
+    min-width: 160px;
+  }
+
+  .hud-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: .3rem;
+
+    .hud-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .hud-rank {
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      color: $amber-fire;
+    }
+  }
+
+  .hud-xp-rail {
+    width: 100%;
+    height: 8px;
+    background: #0c0908;
+    border: 1px solid $rock-border;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: .3rem;
+
+    .hud-xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #d48806, $amber-fire);
+      box-shadow: 0 0 8px $amber-fire;
+      border-radius: 999px;
+      transition: width .4s ease;
+    }
+  }
+
+  .hud-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: .75rem;
+    color: $text-dim;
+
+    .hud-watts {
+      color: $amber-glow;
+      font-weight: 700;
+    }
+  }
+}
+
+/* --- BOTÓN DE REGRESO AL MAPA ESTILO 1930s --- */
+.map-return-button {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .7rem 1.1rem;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #2c1f1a, #130d0c);
+  border: 2px solid $amber-fire;
+  color: $amber-glow;
+  text-decoration: none;
+  font-family: 'Bangers', cursive;
+  font-size: 1rem;
+  letter-spacing: .06em;
+  box-shadow: 0 0 12px rgba(255,145,0,.25), inset 0 0 8px rgba(255,145,0,.1);
+  transition: transform .2s ease, box-shadow .2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 18px rgba(255,145,0,.4), inset 0 0 12px rgba(255,145,0,.15);
+    color: #fff;
+  }
+
+  i {
+    font-size: 1.15rem;
+  }
+}
+
+/* --- NAVEGACIÓN ESTILO PIEDRA Y COBRE 3D --- */
+.bunker-nav-rock {
+  margin-bottom: 1.75rem;
+
+  .bunker-nav__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: .85rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .rock-btn {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    padding: .85rem 1rem;
+    background: linear-gradient(145deg, #2a211b, #18120e);
+    border: 3px solid #4a3c32;
+    border-radius: 10px;
+    color: $text-html;
+    font-family: 'Bangers', cursive;
+    font-size: 1.15rem;
+    letter-spacing: .05em;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #0d0a08, 0 8px 15px rgba(0,0,0,.6);
+    transition: all .15s ease;
+
+    &:hover {
+      background: linear-gradient(145deg, #352a23, #201813);
+      border-color: $amber-fire;
+      color: $amber-fire;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #0d0a08, 0 10px 20px rgba(255,145,0,.25);
+    }
+
+    &:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #0d0a08, 0 4px 8px rgba(0,0,0,.6);
+    }
+
+    &.rock-btn--active {
+      background: linear-gradient(145deg, #382613, #24160a);
+      border-color: $amber-fire;
+      color: $amber-glow;
+      box-shadow: 0 4px 0 #0d0a08, 0 0 15px rgba(255,145,0,.4), inset 0 0 8px rgba(255,145,0,.2);
+    }
+
+    .rock-btn__icon {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.bunker-content-stage {
+  animation: rockRumble .5s ease-out 1;
+}

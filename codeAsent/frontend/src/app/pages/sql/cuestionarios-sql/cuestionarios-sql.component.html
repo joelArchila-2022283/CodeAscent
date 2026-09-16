@@ -1,0 +1,48 @@
+<div class="contenedor-quiz-sql">
+  @if (!quizFinalizado()) {
+    <div class="caja-quiz">
+      <h3>PREGUNTA {{ indicePreguntaActual() + 1 }} DE {{ preguntas.length }}</h3>
+      <p class="enunciado">{{ preguntas[indicePreguntaActual()].pregunta }}</p>
+
+      <div class="grid-opciones">
+        @for (opt of preguntas[indicePreguntaActual()].opciones; track $index) {
+          <button 
+            type="button"
+            class="opcion-quiz"
+            [class.seleccionada]="opcionSeleccionada() === $index"
+            [class.correcta]="respuestaVerificada() && $index === preguntas[indicePreguntaActual()].indiceCorrecto"
+            [class.incorrecta]="respuestaVerificada() && opcionSeleccionada() === $index && $index !== preguntas[indicePreguntaActual()].indiceCorrecto"
+            (click)="seleccionarRespuesta($index)">
+            {{ opt }}
+          </button>
+        }
+      </div>
+
+      @if (respuestaVerificada()) {
+        <div class="retroalimentacion-formativa">
+          <p>{{ preguntas[indicePreguntaActual()].explicacionFormativa }}</p>
+        </div>
+      }
+
+      <div class="acciones-quiz">
+        @if (!respuestaVerificada()) {
+          <button type="button" class="boton-verificar" [disabled]="opcionSeleccionada() === null" (click)="verificarRespuesta()">
+            VERIFICAR RESPUESTA
+          </button>
+        }
+        @if (respuestaVerificada()) {
+          <button type="button" class="boton-siguiente" (click)="siguientePregunta()">
+            SIGUIENTE PREGUNTA →
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (quizFinalizado()) {
+    <div class="caja-resultados">
+      <h2>🏆 DIAGNÓSTICO FINALIZADO</h2>
+      <p>Puntuación obtenida: <strong>{{ puntuacion() }} / {{ preguntas.length }}</strong></p>
+    </div>
+  }
+</div>

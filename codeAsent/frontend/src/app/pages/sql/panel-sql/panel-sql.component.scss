@@ -1,0 +1,76 @@
+@use 'sass:color';
+
+$madera-roble: #487b5a;
+$cobre-transistor: #d9a441;
+$pergamino-vintage: #d9ead8;
+$tinta-oscura: #102019;
+
+.panel-hub-valle {
+  .encabezado-hub {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      font-family: 'Bangers', cursive;
+      font-size: 2.2rem;
+      color: $pergamino-vintage;
+      text-shadow: 2px 2px 0px $tinta-oscura;
+      margin: 0;
+    }
+
+    p {
+      color: color.adjust($pergamino-vintage, $lightness: 10%);
+      font-size: 1.1rem;
+    }
+  }
+
+  .rejilla-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .tarjeta-nodo {
+    background: linear-gradient(145deg, rgba(24, 47, 38, .94), rgba(11, 25, 21, .94));
+    border: 2px solid #416b51;
+    border-radius: 10px;
+    padding: 1.5rem;
+    cursor: pointer;
+    box-shadow: 6px 6px 0px $tinta-oscura;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 8px 8px 0px $tinta-oscura;
+      background: color.adjust($pergamino-vintage, $lightness: 4%);
+    }
+
+    .icono-nodo {
+      font-size: 2.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      color: $cobre-transistor;
+      margin: 0 0 0.5rem;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: #c7dbca;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+    }
+
+    .enlace-nodo {
+      font-weight: bold;
+      color: $madera-roble;
+      font-size: 0.9rem;
+    }
+  }
+}

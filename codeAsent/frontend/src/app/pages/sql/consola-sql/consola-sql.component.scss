@@ -1,0 +1,161 @@
+@use 'sass:color';
+
+$madera-roble: #487b5a;
+$cobre-transistor: #d9a441;
+$verde-hoja: #3A5F43;
+$pergamino-vintage: #d9ead8;
+$tinta-oscura: #102019;
+
+.panel-consola-valle {
+  background: linear-gradient(145deg, rgba(24, 47, 38, .95), rgba(11, 25, 21, .95));
+  border: 2px solid #416b51;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 8px 8px 0px $tinta-oscura;
+  color: $pergamino-vintage;
+}
+
+.barra-andamiaje {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: color.adjust($pergamino-vintage, $lightness: 3%);
+  border: 2px solid $tinta-oscura;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.2rem;
+
+  .desafio-titulo {
+    font-family: 'Bangers', cursive;
+    font-size: 1.4rem;
+    color: $cobre-transistor;
+  }
+
+  .estrellas-recompensa {
+    font-weight: bold;
+    color: $tinta-oscura;
+  }
+}
+
+.caja-etapa {
+  background: rgba(219, 234, 216, .95);
+  border: 2px solid $cobre-transistor;
+  border-radius: 12px;
+  padding: 1.5rem;
+
+  h3 {
+    font-family: 'Bangers', cursive;
+    font-size: 1.6rem;
+    margin-top: 0;
+    color: $cobre-transistor;
+  }
+}
+
+.opciones-prediccion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+
+  .boton-opcion {
+    background: $pergamino-vintage;
+    border: 2px solid $tinta-oscura;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px $tinta-oscura;
+
+    &.correcta {
+      background: #81C784;
+      color: $tinta-oscura;
+    }
+
+    &.incorrecta {
+      background: #E57373;
+      color: #FFF;
+    }
+  }
+}
+
+.seccion-pistas {
+  margin-bottom: 1rem;
+
+  .boton-pista {
+    background: $cobre-transistor;
+    color: $pergamino-vintage;
+    border: 2px solid $tinta-oscura;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-family: 'Bangers', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px $tinta-oscura;
+  }
+
+  .tarjeta-pista {
+    background: #FFF;
+    border: 2px dashed $cobre-transistor;
+    border-radius: 8px;
+    padding: 0.6rem;
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+.editor-sql-vintage {
+  .entrada-sql {
+    width: 100%;
+    background: $tinta-oscura;
+    color: #81D4FA;
+    font-family: 'Fira Code', monospace;
+    font-size: 1.1rem;
+    border: 3px solid $tinta-oscura;
+    border-radius: 8px;
+    padding: 0.8rem;
+    box-sizing: border-box;
+    margin-bottom: 0.8rem;
+  }
+
+  .boton-ejecutar {
+    background: $verde-hoja;
+    color: $pergamino-vintage;
+    border: 3px solid $tinta-oscura;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 0px $tinta-oscura;
+  }
+}
+
+.banner-resultado {
+  padding: 1rem;
+  border-radius: 8px;
+  border: 2px solid $tinta-oscura;
+  font-weight: bold;
+  margin-bottom: 1rem;
+
+  &.exito {
+    background: #C8E6C9;
+    color: #1B5E20;
+  }
+
+  &.fallo {
+    background: #FFCDD2;
+    color: #B71C1C;
+  }
+}
+
+.boton-avanzar, .boton-reintentar {
+  background: $madera-roble;
+  color: $pergamino-vintage;
+  border: 2px solid $tinta-oscura;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-family: 'Bangers', cursive;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px $tinta-oscura;
+}

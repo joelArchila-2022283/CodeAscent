@@ -32,7 +32,7 @@ export class MapaComponent implements OnInit {
     },
     {
       id: 2,
-      nombre: 'VALLE DE TRANSISTORES Y CABLES',
+      nombre: 'CUEVA ANTIGUA',
       lenguaje: 'CSS',
       estado: 'bloqueado',
       posX: 22,
@@ -42,9 +42,9 @@ export class MapaComponent implements OnInit {
     },
     {
       id: 3,
-      nombre: 'CUEVA ANTIGUA',
+      nombre: 'VALLE DE TRANSISTORES Y CABLES',
       lenguaje: 'SQL',
-      estado: 'bloqueado',
+      estado: 'en_curso',
       posX: 52,
       posY: 56,
       ruta: '/curso/sql',
@@ -76,8 +76,26 @@ export class MapaComponent implements OnInit {
       next: (data: any) => {
         this.datosDashboard.set(data);
         
-        // Mapeo dinámico según la respuesta del backend
-        if (data?.progresoCursos) {
+        // Mapeo según la respuesta del backend (nodosMapa o progresoCursos)
+        if (data?.nodosMapa) {
+          this.territorios.update(lista =>
+            lista.map(t => {
+              const nodo = data.nodosMapa.find(
+                (n: any) => n.titulo?.toLowerCase() === t.lenguaje.toLowerCase()
+              );
+              if (nodo) {
+                let nuevoEstado: 'en_curso' | 'bloqueado' | 'completado' = 'bloqueado';
+                if (nodo.estado === 'unlocked') {
+                  nuevoEstado = 'completado';
+                } else if (nodo.estado === 'current' || t.lenguaje === 'SQL') {
+                  nuevoEstado = 'en_curso';
+                }
+                return { ...t, estado: nuevoEstado };
+              }
+              return t;
+            })
+          );
+        } else if (data?.progresoCursos) {
           this.territorios.update(lista =>
             lista.map(t => {
               const infoCurso = data.progresoCursos.find(
@@ -102,7 +120,7 @@ export class MapaComponent implements OnInit {
   }
 
   irATerritorio(territorio: PinTerritorio): void {
-    if (territorio.estado !== 'bloqueado') {
+    if (territorio.estado !== 'bloqueado' || territorio.lenguaje === 'SQL') {
       this.router.navigate([territorio.ruta]);
     }
   }

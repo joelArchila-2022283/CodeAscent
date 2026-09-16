@@ -1,0 +1,116 @@
+@use 'sass:color';
+
+$cobre-transistor: #d9a441;
+$pergamino-vintage: #d9ead8;
+$tinta-oscura: #102019;
+
+.contenedor-manual-sql {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.menu-lateral {
+  background: rgba(16, 32, 25, .92);
+  border: 2px solid #416b51;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 4px 4px 0px $tinta-oscura;
+
+  h3 {
+    font-family: 'Bangers', cursive;
+    color: $cobre-transistor;
+    margin-top: 0;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 0.6rem;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 0.4rem;
+      font-weight: bold;
+
+      &.activo {
+        border-color: $tinta-oscura;
+        background: rgba(142, 214, 163, .16);
+        color: $cobre-transistor;
+      }
+
+      .codigo-badge {
+        font-size: 0.75rem;
+        background: $tinta-oscura;
+        color: $pergamino-vintage;
+        padding: 0.1rem 0.3rem;
+        border-radius: 4px;
+        margin-right: 0.4rem;
+      }
+    }
+  }
+}
+
+.hoja-pergamino {
+  background: rgba(219, 234, 216, .95);
+  border: 2px solid $cobre-transistor;
+  border-radius: 14px;
+  padding: 1.8rem;
+  box-shadow: 6px 6px 0px $tinta-oscura;
+
+  .encabezado-hoja {
+    border-bottom: 2px dashed $tinta-oscura;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+
+    .badge-hoja {
+      background: $cobre-transistor;
+      color: $pergamino-vintage;
+      font-family: 'Bangers', cursive;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    h2 {
+      font-family: 'Bangers', cursive;
+      font-size: 2rem;
+      margin: 0.4rem 0 0.2rem;
+      color: #18251d;
+    }
+
+    .subtitulo {
+      color: $cobre-transistor;
+      font-weight: bold;
+      margin: 0;
+    }
+  }
+
+  .bloque-codigo {
+    background: $tinta-oscura;
+    color: #81D4FA;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.2rem 0;
+
+    .encabezado-codigo {
+      background: color.adjust($tinta-oscura, $lightness: 10%);
+      color: $pergamino-vintage;
+      font-size: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      font-weight: bold;
+    }
+
+    pre {
+      margin: 0;
+      padding: 0.8rem;
+      font-family: 'Fira Code', monospace;
+    }
+  }
+}

@@ -1,0 +1,84 @@
+<div class="panel-consola-valle">
+  <div class="barra-andamiaje">
+    <span class="desafio-titulo">RETO: {{ desafioActivo().tituloDesafio }}</span>
+    <div class="estrellas-recompensa">
+      ESTRELLAS EN JUEGO:
+      @for (e of [1,2,3]; track $index) {
+        <span>{{ $index &lt; estrellasRestantes() ? '⭐' : 'E' }}</span>
+      }
+    </div>
+  </div>
+
+  @if (etapaActual() === 1 || etapaActual() === 2) {
+    <div class="caja-etapa">
+      <h3>1. Planteamiento del Problema</h3>
+      <p>{{ desafioActivo().planteamientoProblema }}</p>
+
+      <hr>
+
+      <h3>2. Predicción Heurística</h3>
+      <p><strong>{{ desafioActivo().preguntaRazonamiento }}</strong></p>
+
+      <div class="opciones-prediccion">
+        @for (opcion of desafioActivo().opcionesPrediccion; track $index) {
+          <button 
+            type="button"
+            class="boton-opcion"
+            [class.correcta]="prediccionSeleccionada() === $index && prediccionCorrecta() === true"
+            [class.incorrecta]="prediccionSeleccionada() === $index && prediccionCorrecta() === false"
+            (click)="validarPrediccion($index)">
+            {{ opcion }}
+          </button>
+        }
+      </div>
+
+      @if (prediccionCorrecta() !== null) {
+        <div class="mensaje-prediccion">
+          @if (prediccionCorrecta()) {
+            <p>¡Correcto! La cláusula WHERE filtra registros según la condición dada.</p>
+          } @else {
+            <p>¡Casi! Revisa qué comando se utiliza para establecer condiciones.</p>
+          }
+          <button type="button" class="boton-avanzar" (click)="avanzarAEditor()">PROBAR EN LA CONSOLA →</button>
+        </div>
+      }
+    </div>
+  }
+
+  @if (etapaActual() === 3) {
+    <div class="caja-etapa">
+      <h3>3. Construye tu Consulta SQL</h3>
+      <div class="seccion-pistas">
+        <button type="button" class="boton-pista" (click)="solicitarPista()" [disabled]="pistasSolicitadas() >= 4">
+          💡 SOLICITAR PISTA (Nivel {{ pistasSolicitadas() + 1 }})
+        </button>
+
+        @for (p of desafioActivo().pistasAndamiaje.slice(0, pistasSolicitadas()); track p.nivelPista) {
+          <div class="tarjeta-pista">
+            <strong>Pista Nivel {{ p.nivelPista }}:</strong> {{ p.textoExplicativo }}
+          </div>
+        }
+      </div>
+
+      <div class="editor-sql-vintage">
+        <textarea [value]="codigoIngresado()" (input)="actualizarCodigo($event)" rows="4" class="entrada-sql"></textarea>
+        <button type="button" class="boton-ejecutar" (click)="ejecutarConsultaSql()">⚡ EJECUTAR EN EL VALLE</button>
+      </div>
+    </div>
+  }
+
+  @if (etapaActual() === 4) {
+    <div class="caja-etapa">
+      <h3>6. Retroalimentación del Sistema</h3>
+      <div [class.exito]="ejecucionExitosa()" [class.fallo]="!ejecucionExitosa()" class="banner-resultado">
+        <p>{{ resultadoEjecucion() }}</p>
+      </div>
+
+      @if (!ejecucionExitosa()) {
+        <button type="button" class="boton-reintentar" (click)="etapaActual.set(3)">
+          🔄 REVISAR CÓDIGO
+        </button>
+      }
+    </div>
+  }
+</div>

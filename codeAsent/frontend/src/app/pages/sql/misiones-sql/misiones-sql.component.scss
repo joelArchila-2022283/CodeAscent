@@ -1,0 +1,77 @@
+@use 'sass:color';
+
+$cobre-transistor: #d9a441;
+$pergamino-vintage: #d9ead8;
+$tinta-oscura: #102019;
+
+.contenedor-misiones {
+  h2 {
+    font-family: 'Bangers', cursive;
+    color: $pergamino-vintage;
+    font-size: 2rem;
+    text-shadow: 2px 2px 0px $tinta-oscura;
+  }
+
+  .grid-misiones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .tarjeta-mision {
+    background: linear-gradient(145deg, rgba(24, 47, 38, .95), rgba(11, 25, 21, .95));
+    border: 2px solid #416b51;
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 5px 5px 0px $tinta-oscura;
+
+    .cabecera-mision {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+
+      .codigo {
+        color: $cobre-transistor;
+      }
+    }
+
+    h3 {
+      font-family: 'Bangers', cursive;
+      margin: 0 0 0.4rem;
+      color: $pergamino-vintage;
+    }
+
+    p {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      color: #b8cdbb;
+    }
+
+    .pie-mision {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .recompensa {
+        font-weight: bold;
+        color: $cobre-transistor;
+      }
+
+      .boton-cumplir {
+        background: $cobre-transistor;
+        color: $pergamino-vintage;
+        border: 2px solid $tinta-oscura;
+        border-radius: 6px;
+        padding: 0.4rem 0.8rem;
+        font-family: 'Bangers', cursive;
+        cursor: pointer;
+
+        &:hover {
+          background: color.adjust($cobre-transistor, $lightness: 5%);
+        }
+      }
+    }
+  }
+}
