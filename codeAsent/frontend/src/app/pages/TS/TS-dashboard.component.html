@@ -1,0 +1,166 @@
+<main class="codeascent-dashboard" id="codeascent-dashboard-root">
+<!-- Contenedor Principal: Placa Base Retro CodeAscent (Nivel HTML) -->
+
+  
+  <!-- Encabezado Superior: Chasis de la Tarjeta Madre con Válvulas y Métricas -->
+  <header class="codeascent-dashboard__chassis-header" id="dashboard-header">
+    <div class="codeascent-dashboard__brand">
+      <div class="codeascent-dashboard__logo-badge">
+        <span class="codeascent-dashboard__logo-icon">⚡</span>
+        <div class="codeascent-dashboard__logo-text">
+          <h1 class="codeascent-dashboard__title">CODEASCENT</h1>
+          <span class="codeascent-dashboard__subtitle">NIVEL 01: LA TARJETA MADRE HTML</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Válvulas de Vacío Capacitivas (Indicadores de Carga del Nivel) -->
+    <div class="codeascent-dashboard__vacuum-rack" id="vacuum-rack-indicators" title="Filamentos de Capacidad Catódica">
+      <div class="codeascent-dashboard__rack-label">VÁLVULAS ACTIVAS:</div>
+      <div class="codeascent-dashboard__tubes-list">
+        <div 
+          *ngFor="let tube of [1, 2, 3, 4, 5]; let i = index"
+          class="vacuum-tube"
+          [class.vacuum-tube--lit]="i < player.vacuumTubesLit"
+          [class.vacuum-tube--cold]="i >= player.vacuumTubesLit"
+          [title]="'Válvula 0' + (i + 1) + (i < player.vacuumTubesLit ? ' - En ignición' : ' - Fría')">
+          <div class="vacuum-tube__glass">
+            <div class="vacuum-tube__filament"></div>
+            <div class="vacuum-tube__glow-layer"></div>
+          </div>
+          <div class="vacuum-tube__base">
+            <span class="vacuum-tube__pin"></span>
+            <span class="vacuum-tube__pin"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicadores de Jugador y Potencia -->
+    <div class="codeascent-dashboard__player-panel" id="player-profile-panel">
+      <div class="codeascent-dashboard__player-stats">
+        <div class="codeascent-dashboard__player-name-row">
+          <span class="codeascent-dashboard__player-name">{{ player.name }}</span>
+          <span class="codeascent-dashboard__player-rank">LVL {{ player.level }}</span>
+        </div>
+        <div class="codeascent-dashboard__xp-bar-container">
+          <div class="codeascent-dashboard__xp-bar" [style.width.%]="(player.currentXp / player.nextLevelXp) * 100"></div>
+        </div>
+        <div class="codeascent-dashboard__xp-meta">
+          <span>{{ player.currentXp }}/{{ player.nextLevelXp }} XP</span>
+          <span class="codeascent-dashboard__watts-badge">⚡ {{ player.energyWatts }}W</span>
+        </div>
+      </div>
+
+      <!-- Mascota Rubber Hose 1930s (Bit-Boy) -->
+      <div 
+        class="rubber-mascot"
+        [class.rubber-mascot--bounce]="cartoonMascotState === 'idle' || cartoonMascotState === 'happy'"
+        [class.rubber-mascot--cheering]="cartoonMascotState === 'cheering'"
+        [class.rubber-mascot--shocked]="cartoonMascotState === 'shocked'"
+        [title]="mascotDialogue">
+        <div class="rubber-mascot__face">
+          <div class="rubber-mascot__eye rubber-mascot__eye--left">
+            <div class="rubber-mascot__pupil"></div>
+          </div>
+          <div class="rubber-mascot__eye rubber-mascot__eye--right">
+            <div class="rubber-mascot__pupil"></div>
+          </div>
+          <div class="rubber-mascot__mouth"></div>
+        </div>
+        <div class="rubber-mascot__limb rubber-mascot__limb--arm-left"></div>
+        <div class="rubber-mascot__limb rubber-mascot__limb--arm-right"></div>
+        <div class="rubber-mascot__glove rubber-mascot__glove--left"></div>
+        <div class="rubber-mascot__glove rubber-mascot__glove--right"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner de Diálogo Rubber Hose Cartoon -->
+  <div class="codeascent-dashboard__dialogue-strip" id="mascot-dialogue-banner">
+    <div class="codeascent-dashboard__dialogue-bubble">
+      <span class="codeascent-dashboard__dialogue-icon">💬</span>
+      <p class="codeascent-dashboard__dialogue-text">"{{ mascotDialogue }}"</p>
+    </div>
+    
+    <div class="codeascent-dashboard__crt-toggles">
+      <button 
+        type="button"
+        class="toggle-knob" 
+        [class.toggle-knob--active]="crtScanlinesEnabled"
+        (click)="toggleScanlines()"
+        title="Alternar Scanlines CRT">
+        SCANLINES: {{ crtScanlinesEnabled ? 'ON' : 'OFF' }}
+      </button>
+      <button 
+        type="button"
+        class="toggle-knob" 
+        [class.toggle-knob--active]="vintageFlicker"
+        (click)="toggleCrtFlicker()"
+        title="Alternar Parpadeo 60Hz">
+        FLICKER: {{ vintageFlicker ? 'ON' : 'OFF' }}
+      </button>
+    </div>
+  </div>
+
+  <app-dashboard-navbar
+    [activeSection]="activeSection"
+    [questCount]="quests.length"
+    (sectionChange)="navigateTo($event)">
+  </app-dashboard-navbar>
+
+  <ng-container [ngSwitch]="activeSection">
+    <app-dashboard-home
+      *ngSwitchCase="'dashboard'"
+      [player]="player"
+      [lessonCount]="lessons.length"
+      [questCount]="quests.length"
+      (sectionChange)="navigateTo($event)">
+    </app-dashboard-home>
+
+    <app-dashboard-lessons
+      *ngSwitchCase="'lessons'"
+      [lessons]="lessons"
+      [selectedLessonIndex]="selectedLessonIndex"
+      (lessonChange)="selectLesson($event)"
+      (sectionChange)="navigateTo($event)">
+    </app-dashboard-lessons>
+
+    <app-dashboard-quests
+      *ngSwitchCase="'quests'"
+      [quests]="quests"
+      (sectionChange)="navigateTo($event)">
+    </app-dashboard-quests>
+
+    <app-dashboard-console
+      *ngSwitchCase="'console'"
+      [terminalInput]="terminalInput"
+      (terminalInputChange)="terminalInput = $event"
+      [terminalOutput]="terminalOutput"
+      [terminalLogs]="terminalLogs"
+      [terminalCompilationTime]="terminalCompilationTime"
+      [terminalCodeValid]="terminalCodeValid"
+      [vintageFlicker]="vintageFlicker"
+      [crtScanlinesEnabled]="crtScanlinesEnabled"
+      (execute)="executeTerminalCode()"
+      (clear)="clearTerminal()"
+      (reset)="resetTerminalSnippet()">
+    </app-dashboard-console>
+
+    <app-dashboard-quiz
+      *ngSwitchCase="'quiz'"
+      [quizQuestions]="quizQuestions"
+      [currentQuestionIndex]="currentQuestionIndex"
+      [selectedAnswerIndex]="selectedAnswerIndex"
+      [quizSubmitted]="quizSubmitted"
+      [quizScore]="quizScore"
+      [quizCompleted]="quizCompleted"
+      [quizFeedbackState]="quizFeedbackState"
+      (selectAnswer)="selectQuizOption($event)"
+      (submitAnswer)="submitQuizAnswer()"
+      (nextQuestion)="nextQuizQuestion()"
+      (restart)="restartQuiz()"
+      (sectionChange)="navigateTo($event)">
+    </app-dashboard-quiz>
+  </ng-container>
+</main>
