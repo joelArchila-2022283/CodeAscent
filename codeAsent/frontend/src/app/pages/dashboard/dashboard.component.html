@@ -13,17 +13,16 @@
   <!-- TOPBAR -->
   <header class="topbar">
     <div class="brand">
-      <!-- ICONO CIBERSEGURIDAD / TERMINAL -->
       <div class="brand-logo-animated">
         <i class="bi bi-shield-lock-fill"></i>
       </div>
       <span class="brand-name title-font">CODE ASCENT</span>
     </div>
 
-    <!-- NAVEGACIÓN PRINCIPAL (SIN BOTÓN RETOS) -->
+    <!-- NAVEGACIÓN PRINCIPAL -->
     <nav class="nav-pills-custom">
-      <a href="#" class="nav-pill active"><i class="bi bi-house-door-fill"></i> Inicio</a>
-      <a href="#" class="nav-pill"><i class="bi bi-diagram-3-fill"></i> Mapa</a>
+      <a routerLink="/dashboard" class="nav-pill active"><i class="bi bi-house-door-fill"></i> Inicio</a>
+      <a routerLink="/mapa" class="nav-pill"><i class="bi bi-diagram-3-fill"></i> Mapa</a>
       <a href="#" class="nav-pill"><i class="bi bi-person-fill"></i> Perfil</a>
     </nav>
 
@@ -69,7 +68,11 @@
         </span>
         <h2>¡BIENVENIDO DE VUELTA, {{ data.usuario.nombre | uppercase }}!</h2>
         <p>Un virus de tinta está corrompiendo los nodos del sistema. ¡Compila tu código y purga la amenaza antes de que consuma el servidor!</p>
-        <button class="hero-cta">LIMPIAR NODOS <i class="bi bi-play-fill"></i></button>
+        
+        <!-- Enlace habilitado en el botón CTA -->
+        <button class="hero-cta" routerLink="/mapa">
+          LIMPIAR NODOS <i class="bi bi-play-fill"></i>
+        </button>
       </div>
 
       <div class="holo-panel">
@@ -93,7 +96,6 @@
       </div>
     </div>
 
-    <!-- TARJETA DE LOGROS OBTENIDOS -->
     <div class="col-6 col-md-4">
       <div class="stat-card">
         <div class="stat-icon cyan"><i class="bi bi-trophy-fill"></i></div>
@@ -122,7 +124,8 @@
     <h3>Mapa de <span class="accent">Depuración</span></h3>
   </div>
 
-  <div class="map-panel">
+  <!-- Al hacer clic sobre el panel del mapa también redirige -->
+  <div class="map-panel" routerLink="/mapa" style="cursor: pointer;">
     <div class="map-path" style="position:relative;">
       <svg viewBox="0 0 1000 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
         <path d="M 80 170 C 220 60, 320 60, 380 140 S 560 220, 620 140 S 800 40, 900 90"
