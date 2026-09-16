@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router'; 
 import { AuthService } from '../../services/auth.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { DashboardData } from '../../interfaces/usuario.interface';
@@ -8,7 +8,7 @@ import { DashboardData } from '../../interfaces/usuario.interface';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink], 
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -38,6 +38,10 @@ export class DashboardComponent implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+
+  irAlMapa(): void {
+    this.router.navigate(['/mapa']);
   }
 
   cerrarSesion(): void {
