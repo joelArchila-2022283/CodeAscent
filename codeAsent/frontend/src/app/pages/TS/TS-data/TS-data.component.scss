@@ -1,0 +1,104 @@
+.ts-section {
+    animation: tsReveal .45s ease both;
+}
+
+header {
+    margin-bottom: 1.5rem;
+}
+
+.section-kicker {
+    color: #00e5ff;
+    font: 700 .72rem monospace;
+    letter-spacing: .14em;
+}
+
+h2 {
+    margin: .35rem 0;
+    color: #ffb700;
+    font: 2.1rem 'Bangers', cursive;
+    letter-spacing: .05em;
+}
+
+header p,
+.lesson-strip p {
+    color: #9a8a80;
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,
+            minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+article {
+    padding: 1.3rem;
+    background: #1b1411d9;
+    border: 2px solid #42342c;
+    border-radius: 10px;
+}
+
+article i {
+    color: #ff9100;
+    font-size: 1.8rem;
+}
+
+h3 {
+    margin: 1rem 0 .2rem;
+    color: #9a8a80;
+    font: 1rem 'Bangers', cursive;
+    letter-spacing: .08em;
+}
+
+strong {
+    display: block;
+    color: #e6ded6;
+    font: 1.8rem 'Bangers', cursive;
+}
+
+article span {
+    color: #9a8a80;
+    font-size: .8rem;
+}
+
+.lesson-strip {
+    margin: 1.25rem 0;
+    padding: 1.2rem;
+    border-left: 4px solid #00e5ff;
+    background: rgba(0, 229, 255, .07);
+}
+
+.lesson-strip span {
+    color: #00e5ff;
+    font: 700 .75rem monospace;
+}
+
+.lesson-strip p {
+    margin-bottom: 0;
+}
+
+.ts-back {
+    padding: .7rem 1rem;
+    color: #ffb700;
+    background: #211711;
+    border: 2px solid #6a4b2d;
+    border-radius: 8px;
+    font: 1rem 'Bangers', cursive;
+    cursor: pointer;
+}
+
+.ts-back:hover {
+    background: #2c1d14;
+}
+
+@keyframes tsReveal {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
