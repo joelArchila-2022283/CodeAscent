@@ -39,6 +39,15 @@ export const obtenerResumenDashboard = async (req: RequestAutenticado, res: Resp
       progreso = resProgreso.rows[0];
     }
 
+    const resProgresoSql = await pool.query(`
+      SELECT p.id_progreso, p.id_usuario, p.id_lenguaje, p.id_nivel_actual, p.xp_actual, p.porcentaje
+      FROM progreso p
+      INNER JOIN lenguaje l ON l.id_lenguaje = p.id_lenguaje
+      WHERE p.id_usuario = $1 AND LOWER(l.nombre) = 'sql'
+      LIMIT 1
+    `, [idUsuario]);
+    const progresoSql = resProgresoSql.rows[0] || null;
+
     // 3. Contar Logros Obtenidos Reales
     const resLogros = await pool.query(
       'SELECT COUNT(*)::int AS total FROM usuario_logro WHERE id_usuario = $1',
@@ -113,6 +122,7 @@ export const obtenerResumenDashboard = async (req: RequestAutenticado, res: Resp
     return res.json({
       usuario,
       progreso,
+      progresoSql,
       logrosObtenidos,
       nodosMapa
     });

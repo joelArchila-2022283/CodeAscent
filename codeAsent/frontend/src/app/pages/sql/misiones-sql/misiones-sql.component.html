@@ -1,0 +1,31 @@
+<div class="contenedor-misiones">
+  <h2>🎯 DIRECTIVAS DEL REACTOR SQL</h2>
+  <div class="grid-misiones">
+    @for (mis of listaMisiones(); track mis.idMision) {
+      <article 
+        class="tarjeta-mision"
+        [class.completada]="mis.estadoMision === 'completada'"
+        [class.en-progreso]="mis.estadoMision === 'en_progreso'">
+        <div class="cabecera-mision">
+          <span class="codigo">{{ mis.codigoIdentificador }}</span>
+          <span class="estado">{{ mis.estadoMision === 'completada' ? 'COMPLETADA ✔' : 'EN PROGRESO ⚙️' }}</span>
+        </div>
+
+        <h3>{{ mis.tituloMision }}</h3>
+        <p>{{ mis.descripcionMision }}</p>
+
+        <div class="pie-mision">
+          <span class="recompensa">⭐ +{{ mis.recompensaExperiencia }} XP</span>
+          @if (mis.estadoMision === 'en_progreso') {
+            <button 
+              type="button"
+              class="boton-cumplir" 
+              (click)="irAMision(mis.seccionDestino)">
+              CUMPLIR MISIÓN →
+            </button>
+          }
+        </div>
+      </article>
+    }
+  </div>
+</div>

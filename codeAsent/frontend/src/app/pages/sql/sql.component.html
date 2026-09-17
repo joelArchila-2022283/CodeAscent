@@ -1,0 +1,111 @@
+<main class="sql-dashboard" id="sql-dashboard-root">
+  <!-- Capa de Fondo con fondo-sql.jpg y atmósfera Disney 1930s -->
+  <div class="sql-bg-layer" aria-hidden="true">
+    <div class="sql-bg-image"></div>
+    <div class="torch-ambient-glow torch-left"></div>
+    <div class="torch-ambient-glow torch-right"></div>
+    <div class="sql-dust-motes"></div>
+  </div>
+
+  <!-- Header estilo bunker Disney 1930s -->
+  <header class="bunker-header" id="dashboard-header">
+    <div class="bunker-brand">
+      <div class="bunker-logo-stone">
+        <!-- Mascota estilo cartoon 1930s con ojos de tubo de goma -->
+        <div class="miner-mascot-unit bounce" [title]="mascotDialogue()">
+          <div class="transistor-coil"><div class="coil-spark"></div></div>
+          <div class="mascot-face">
+            <div class="eye left"><div class="pupil"></div></div>
+            <div class="eye right"><div class="pupil"></div></div>
+          </div>
+        </div>
+        <div class="bunker-title-block">
+          <h1 class="bunker-title">VALLE DE TRANSISTORES</h1>
+          <span class="bunker-subtitle">SECTOR 03: BASE DE DATOS SQL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HUD del jugador con XP y Estrellas -->
+    <div class="bunker-player-hud">
+      <div class="hud-stats-box">
+        <div class="hud-name-row">
+          <span class="hud-name">{{ cargandoJugador() ? 'CARGANDO...' : datosJugador().nombreJugador }}</span>
+          <span class="hud-rank">RANGO LVL {{ datosJugador().nivelProgreso }}</span>
+        </div>
+        <div class="hud-xp-rail" [attr.aria-label]="datosJugador().experienciaActual + ' XP de progreso'">
+          <div class="hud-xp-fill" [style.width.%]="(datosJugador().experienciaActual / datosJugador().experienciaSiguienteNivel) * 100"></div>
+        </div>
+        <div class="hud-meta-row">
+          <span>{{ errorJugador() || (datosJugador().experienciaActual + '/' + datosJugador().experienciaSiguienteNivel + ' XP') }}</span>
+          <span class="hud-watts">⭐ {{ datosJugador().estrellasTotales }} Estrellas</span>
+        </div>
+      </div>
+
+      <a class="map-return-button" routerLink="/mapa" aria-label="Regresar al mapa">
+        <i class="bi bi-arrow-left-circle-fill"></i>
+        <span>REGRESAR AL MAPA</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Navegación de piedra y cobre con efecto 3D vintage -->
+  <nav class="bunker-nav-rock" aria-label="Módulos SQL">
+    <ul class="bunker-nav__list">
+      <li>
+        <button type="button" class="rock-btn rock-btn--dashboard" [class.rock-btn--active]="seccionActiva() === 'panel'" (click)="cambiarSeccion('panel')" [attr.aria-current]="seccionActiva() === 'panel' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-speedometer2"></i></span>
+          <span class="rock-btn__text">DASHBOARD</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="rock-btn rock-btn--manual" [class.rock-btn--active]="seccionActiva() === 'manual'" (click)="cambiarSeccion('manual')" [attr.aria-current]="seccionActiva() === 'manual' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-journal-code"></i></span>
+          <span class="rock-btn__text">MANUAL TÉCNICO</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="rock-btn rock-btn--missions" [class.rock-btn--active]="seccionActiva() === 'misiones'" (click)="cambiarSeccion('misiones')" [attr.aria-current]="seccionActiva() === 'misiones' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-bullseye"></i></span>
+          <span class="rock-btn__text">MISIONES</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="rock-btn rock-btn--terminal" [class.rock-btn--active]="seccionActiva() === 'consola'" (click)="cambiarSeccion('consola')" [attr.aria-current]="seccionActiva() === 'consola' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-terminal-fill"></i></span>
+          <span class="rock-btn__text">TERMINAL SQL</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="rock-btn rock-btn--quiz" [class.rock-btn--active]="seccionActiva() === 'cuestionario'" (click)="cambiarSeccion('cuestionario')" [attr.aria-current]="seccionActiva() === 'cuestionario' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-patch-question-fill"></i></span>
+          <span class="rock-btn__text">TEST DIAGNÓSTICO</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Contenedor del módulo activo -->
+  <main class="bunker-content-stage">
+    @if (seccionActiva() === 'panel') {
+      <app-panel-sql (navegarA)="cambiarSeccion($event)"></app-panel-sql>
+    }
+    @if (seccionActiva() === 'manual') {
+      <app-manual-tecnico-sql></app-manual-tecnico-sql>
+    }
+    @if (seccionActiva() === 'misiones') {
+      <app-misiones-sql (navegarA)="cambiarSeccion($event)"></app-misiones-sql>
+    }
+    @if (seccionActiva() === 'consola') {
+      <app-consola-sql></app-consola-sql>
+    }
+    @if (seccionActiva() === 'cuestionario') {
+      <app-cuestionarios-sql></app-cuestionarios-sql>
+    }
+  </main>
+</main>
