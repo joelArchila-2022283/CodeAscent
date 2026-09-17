@@ -5,6 +5,7 @@ import { RegistroComponent } from './pages/registro/registro.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { MapaComponent } from './pages/mapa/mapa.component';
 import { HtmlDashboardComponent } from './pages/html/html-dashboard/html-dashboard.component';
+import { SqlComponent } from './pages/sql/sql.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
@@ -39,6 +40,18 @@ export const routes: Routes = [
   {
     path: 'curso/html',
     component: HtmlDashboardComponent,
+    canActivate: [autenticacionGuard]
+  },
+
+  {
+    path: 'sql',
+    component: SqlComponent,
+    canActivate: [autenticacionGuard]
+  },
+
+  {
+    path: 'curso/sql',
+    component: SqlComponent,
     canActivate: [autenticacionGuard]
   },
 

@@ -20,6 +20,7 @@ export interface NodeMapa {
 export interface DashboardData {
   usuario: IUsuario;
   progreso: IProgreso;
+  progresoSql?: IProgreso | null;
   logrosObtenidos: number;
   nodosMapa: NodeMapa[];
 }
