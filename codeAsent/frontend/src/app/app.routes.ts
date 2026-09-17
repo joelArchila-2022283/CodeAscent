@@ -12,7 +12,6 @@ import { ErrorPageComponent } from './error-page/error-page.component';
 import { autenticacionGuard } from './core/guards/autenticacion-guard';
 
 export const routes: Routes = [
-
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
   { path: 'login', component: LoginComponent },
@@ -58,5 +57,4 @@ export const routes: Routes = [
   { path: 'error/:type', component: ErrorPageComponent },
 
   { path: '**', component: NotFoundComponent }
-
 ];
