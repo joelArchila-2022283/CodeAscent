@@ -1,0 +1,148 @@
+.ts-section {
+    animation: tsReveal .45s ease both;
+}
+
+header {
+    margin-bottom: 1.5rem;
+}
+
+.section-kicker {
+    color: #00e5ff;
+    font: 700 .72rem monospace;
+    letter-spacing: .14em;
+}
+
+h2 {
+    margin: .35rem 0;
+    color: #ffb700;
+    font: 2.1rem 'Bangers', cursive;
+    letter-spacing: .05em;
+}
+
+header p {
+    color: #9a8a80;
+}
+
+.test-panel {
+    max-width: 700px;
+    padding: 1.5rem;
+    background: linear-gradient(145deg,
+            #261e19,
+            #110c0a);
+    border: 2px solid #5a3a21;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px #0008;
+}
+
+.test-progress {
+    display: flex;
+    justify-content: space-between;
+    color: #9a8a80;
+    font: 700 .72rem monospace;
+}
+
+.ts-orb {
+    display: grid;
+    place-items: center;
+    width: 70px;
+    height: 70px;
+    margin: 1.4rem auto;
+    color: #ffb700;
+    border: 2px solid #ff9100;
+    border-radius: 50%;
+    box-shadow: 0 0 25px #ff910066;
+    font-size: 2rem;
+    animation: orbPulse 2s infinite;
+}
+
+.test-panel h3 {
+    margin: 0 0 1.2rem;
+    color: #e6ded6;
+    font-size: 1.25rem;
+    line-height: 1.35;
+}
+
+.options {
+    display: grid;
+    gap: .65rem;
+}
+
+.options button {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .8rem;
+    color: #e6ded6;
+    text-align: left;
+    background: #17110f;
+    border: 2px solid #42342c;
+    border-radius: 7px;
+    font: .9rem monospace;
+    cursor: pointer;
+}
+
+.options button:hover,
+.options button.selected {
+    border-color: #ff9100;
+}
+
+.options button.correct {
+    border-color: #00e676;
+    color: #9fffc0;
+}
+
+.options button span {
+    color: #ffb700;
+    font-weight: 700;
+}
+
+.options button i {
+    margin-left: auto;
+}
+
+.answer-note {
+    padding: .75rem;
+    color: #ffb7a0;
+    background: #3b1d16;
+    border-radius: 6px;
+    font: .82rem monospace;
+}
+
+.answer-note.good {
+    color: #9fffc0;
+    background: #123127;
+}
+
+.ts-back {
+    margin-top: 1.5rem;
+    padding: .7rem 1rem;
+    color: #ffb700;
+    background: #211711;
+    border: 2px solid #6a4b2d;
+    border-radius: 8px;
+    font: 1rem 'Bangers', cursive;
+    cursor: pointer;
+}
+
+.ts-back:hover {
+    background: #2c1d14;
+}
+
+@keyframes orbPulse {
+    50% {
+        transform: scale(1.06);
+        box-shadow: 0 0 36px #ffb70099;
+    }
+}
+
+@keyframes tsReveal {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
