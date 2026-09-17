@@ -8,10 +8,15 @@ import { SqlComponent } from './pages/sql/sql.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
+// TODO: Tus compañeros deben descomentar estas importaciones cuando creen los componentes
+// import { CssComponent } from './pages/css/css.component';
+// import { TypescriptComponent } from './pages/typescript/typescript.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegistroComponent },
+  
   // Redirección de seguridad para cuando el login es exitoso
   { path: 'inicio', redirectTo: 'mapa', pathMatch: 'full' },
 
@@ -20,6 +25,11 @@ export const routes: Routes = [
   { path: 'curso/html', component: HtmlDashboardComponent },
   { path: 'sql', component: SqlComponent },
   { path: 'curso/sql', component: SqlComponent },
+  
+  // Rutas preparadas para tus compañeros de equipo:
+  // { path: 'curso/css', component: CssComponent },
+  // { path: 'curso/typescript', component: TypescriptComponent },
+
   { path: 'error/:type', component: ErrorPageComponent },
   { path: '**', component: NotFoundComponent }
 ];
