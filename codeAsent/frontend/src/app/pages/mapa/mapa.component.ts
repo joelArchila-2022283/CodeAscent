@@ -22,43 +22,43 @@ export class MapaComponent implements OnInit {
   territorios = signal<PinTerritorio[]>([
     {
       id: 1,
-      nombre: 'VALLE DE TARJETA MADRE',
+      nombre: 'CUEVA ANTIGUA',
       lenguaje: 'HTML',
       estado: 'en_curso',
-      posX: 24,
-      posY: 38,
+      posX: 52,
+      posY: 56,
       ruta: '/curso/html',
-      corte: 'polygon(0% 0%, 48% 0%, 38% 52%, 0% 52%)'
+      corte: 'polygon(42% 45%, 55% 42%, 68% 50%, 82% 45%, 100% 50%, 100% 100%, 48% 100%, 42% 88%, 46% 75%, 38% 60%)'
     },
     {
       id: 2,
-      nombre: 'VALLE DE TRANSISTORES Y CABLES',
-      lenguaje: 'CSS',
-      estado: 'bloqueado',
-      posX: 22,
-      posY: 75,
-      ruta: '/curso/css',
-      corte: 'polygon(0% 52%, 40% 52%, 46% 100%, 0% 100%)'
-    },
-    {
-      id: 3,
-      nombre: 'CUEVA ANTIGUA',
-      lenguaje: 'SQL',
-      estado: 'bloqueado',
-      posX: 52,
-      posY: 56,
-      ruta: '/curso/sql',
-      corte: 'polygon(48% 0%, 68% 0%, 72% 100%, 46% 100%, 40% 52%)'
-    },
-    {
-      id: 4,
       nombre: 'POBLADO ANTIGUO',
-      lenguaje: 'TYPESCRIPT',
+      lenguaje: 'CSS',
       estado: 'bloqueado',
       posX: 84,
       posY: 38,
+      ruta: '/curso/css',
+      corte: 'polygon(55% 0%, 100% 0%, 100% 50%, 82% 45%, 68% 50%, 55% 42%, 42% 45%, 45% 38%, 52% 28%, 48% 20%)'
+    },
+    {
+      id: 3,
+      nombre: 'VALLE DE TRANSISTORES Y CABLES',
+      lenguaje: 'SQL',
+      estado: 'bloqueado',
+      posX: 22,
+      posY: 75,
+      ruta: '/curso/sql',
+      corte: 'polygon(0% 45%, 15% 40%, 25% 48%, 35% 42%, 42% 45%, 38% 60%, 46% 75%, 42% 88%, 48% 100%, 0% 100%)'
+    },
+    {
+      id: 4,
+      nombre: 'VALLE DE TARJETA MADRE',
+      lenguaje: 'TYPESCRIPT',
+      estado: 'bloqueado',
+      posX: 24,
+      posY: 38,
       ruta: '/curso/typescript',
-      corte: 'polygon(68% 0%, 100% 0%, 100% 100%, 72% 100%)'
+      corte: 'polygon(0% 0%, 55% 0%, 48% 20%, 52% 28%, 45% 38%, 42% 45%, 35% 42%, 25% 48%, 15% 40%, 0% 45%)'
     }
   ]);
 
@@ -76,7 +76,6 @@ export class MapaComponent implements OnInit {
       next: (data: any) => {
         this.datosDashboard.set(data);
         
-        // Mapeo dinámico según la respuesta del backend
         if (data?.progresoCursos) {
           this.territorios.update(lista =>
             lista.map(t => {
