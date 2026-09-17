@@ -30,14 +30,14 @@
     <div class="bunker-player-hud">
       <div class="hud-stats-box">
         <div class="hud-name-row">
-          <span class="hud-name">{{ datosJugador().nombreJugador }}</span>
+          <span class="hud-name">{{ cargandoJugador() ? 'CARGANDO...' : datosJugador().nombreJugador }}</span>
           <span class="hud-rank">RANGO LVL {{ datosJugador().nivelProgreso }}</span>
         </div>
-        <div class="hud-xp-rail">
+        <div class="hud-xp-rail" [attr.aria-label]="datosJugador().experienciaActual + ' XP de progreso'">
           <div class="hud-xp-fill" [style.width.%]="(datosJugador().experienciaActual / datosJugador().experienciaSiguienteNivel) * 100"></div>
         </div>
         <div class="hud-meta-row">
-          <span>{{ datosJugador().experienciaActual }}/{{ datosJugador().experienciaSiguienteNivel }} XP</span>
+          <span>{{ errorJugador() || (datosJugador().experienciaActual + '/' + datosJugador().experienciaSiguienteNivel + ' XP') }}</span>
           <span class="hud-watts">⭐ {{ datosJugador().estrellasTotales }} Estrellas</span>
         </div>
       </div>
@@ -53,33 +53,38 @@
   <nav class="bunker-nav-rock" aria-label="Módulos SQL">
     <ul class="bunker-nav__list">
       <li>
-        <button type="button" class="rock-btn" [class.rock-btn--active]="seccionActiva() === 'panel'" (click)="cambiarSeccion('panel')">
-          <span class="rock-btn__icon"><i class="bi bi-hdd-network-fill"></i></span>
+        <button type="button" class="rock-btn rock-btn--dashboard" [class.rock-btn--active]="seccionActiva() === 'panel'" (click)="cambiarSeccion('panel')" [attr.aria-current]="seccionActiva() === 'panel' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-speedometer2"></i></span>
           <span class="rock-btn__text">DASHBOARD</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn" [class.rock-btn--active]="seccionActiva() === 'manual'" (click)="cambiarSeccion('manual')">
-          <span class="rock-btn__icon"><i class="bi bi-journal-code"></i></span>
+        <button type="button" class="rock-btn rock-btn--manual" [class.rock-btn--active]="seccionActiva() === 'manual'" (click)="cambiarSeccion('manual')" [attr.aria-current]="seccionActiva() === 'manual' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-journal-code"></i></span>
           <span class="rock-btn__text">MANUAL TÉCNICO</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn" [class.rock-btn--active]="seccionActiva() === 'misiones'" (click)="cambiarSeccion('misiones')">
-          <span class="rock-btn__icon"><i class="bi bi-lightning-charge-fill"></i></span>
+        <button type="button" class="rock-btn rock-btn--missions" [class.rock-btn--active]="seccionActiva() === 'misiones'" (click)="cambiarSeccion('misiones')" [attr.aria-current]="seccionActiva() === 'misiones' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-bullseye"></i></span>
           <span class="rock-btn__text">MISIONES</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn" [class.rock-btn--active]="seccionActiva() === 'consola'" (click)="cambiarSeccion('consola')">
-          <span class="rock-btn__icon"><i class="bi bi-terminal-fill"></i></span>
+        <button type="button" class="rock-btn rock-btn--terminal" [class.rock-btn--active]="seccionActiva() === 'consola'" (click)="cambiarSeccion('consola')" [attr.aria-current]="seccionActiva() === 'consola' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-terminal-fill"></i></span>
           <span class="rock-btn__text">TERMINAL SQL</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn" [class.rock-btn--active]="seccionActiva() === 'cuestionario'" (click)="cambiarSeccion('cuestionario')">
-          <span class="rock-btn__icon"><i class="bi bi-patch-question-fill"></i></span>
+        <button type="button" class="rock-btn rock-btn--quiz" [class.rock-btn--active]="seccionActiva() === 'cuestionario'" (click)="cambiarSeccion('cuestionario')" [attr.aria-current]="seccionActiva() === 'cuestionario' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-patch-question-fill"></i></span>
           <span class="rock-btn__text">TEST DIAGNÓSTICO</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
     </ul>
