@@ -59,7 +59,7 @@ $tinta-oscura: #102019;
 }
 
 .hoja-pergamino {
-  background: rgba(219, 234, 216, .95);
+  background: linear-gradient(145deg, #1d3a2e, #14271f);
   border: 2px solid $cobre-transistor;
   border-radius: 14px;
   padding: 1.8rem;
@@ -82,7 +82,7 @@ $tinta-oscura: #102019;
       font-family: 'Bangers', cursive;
       font-size: 2rem;
       margin: 0.4rem 0 0.2rem;
-      color: #18251d;
+      color: $pergamino-vintage;
     }
 
     .subtitulo {
@@ -112,5 +112,12 @@ $tinta-oscura: #102019;
       padding: 0.8rem;
       font-family: 'Fira Code', monospace;
     }
+  }
+
+  .contenido-hoja {
+    color: #c8e5ce;
+
+    h4 { color: $cobre-transistor; }
+    li { margin-bottom: .45rem; }
   }
 }
