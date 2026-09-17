@@ -13,48 +13,63 @@
         </p>
     </header>
 
-    <div class="data-grid">
-
-        <article>
-            <i class="bi bi-filetype-tsx"></i>
-            <h3>ESTRUCTURA</h3>
-            <strong>12</strong>
-            <span>conceptos dominados</span>
-        </article>
-
-        <article>
-            <i class="bi bi-diagram-3"></i>
-            <h3>RUTA ACTUAL</h3>
-            <strong>TS / 01</strong>
-            <span>fundamentos de TypeScript</span>
-        </article>
-
-        <article>
-            <i class="bi bi-clock-history"></i>
-            <h3>REGISTRO</h3>
-            <strong>48 min</strong>
-            <span>tiempo en la expedición</span>
-        </article>
-
+    <div *ngIf="cargando()" class="text-center py-4">
+        <div class="spinner-border text-info" role="status"></div>
+        <p class="mt-2">Cargando registros del sector...</p>
     </div>
 
-    <div class="lesson-strip">
+    <div *ngIf="!cargando() && errorCarga() as mensajeError" class="lesson-strip">
         <span>
-            <i class="bi bi-lightbulb"></i>
-            CONSEJO DEL MINERO
+            <i class="bi bi-exclamation-triangle"></i>
+            ERROR DE CONEXIÓN
         </span>
-
-        <p>
-            TypeScript permite definir tipos para que tus variables,
-            funciones y estructuras sean más seguras y fáciles de mantener.
-        </p>
+        <p>{{ mensajeError }}</p>
     </div>
+
+    <ng-container *ngIf="!cargando() && !errorCarga() && resumen() as data">
+
+        <div class="data-grid">
+
+            <article>
+                <i class="bi bi-filetype-tsx"></i>
+                <h3>ESTRUCTURA</h3>
+                <strong>{{ data.conceptosRegistrados }}</strong>
+                <span>conceptos registrados</span>
+            </article>
+
+            <article>
+                <i class="bi bi-diagram-3"></i>
+                <h3>RUTA ACTUAL</h3>
+                <strong>{{ data.nivel ? ('TS / ' + (data.nivel.numero_nivel | number:'2.0-0')) : 'TS / --' }}</strong>
+                <span>{{ data.nivel?.nombre || 'Sin nivel asignado' }}</span>
+            </article>
+
+            <article>
+                <i class="bi bi-clock-history"></i>
+                <h3>REGISTRO</h3>
+                <strong>{{ data.tieneProgreso ? 'Activo' : 'Sin iniciar' }}</strong>
+                <span>{{ formatearFecha(data.progreso?.fecha_actualizacion) }}</span>
+            </article>
+
+        </div>
+
+        <div class="lesson-strip">
+            <span>
+                <i class="bi bi-lightbulb"></i>
+                CONSEJO DEL MINERO
+            </span>
+
+            <p>
+                {{ (data.consejo | slice:0:220) || 'TypeScript permite definir tipos para que tus variables, funciones y
+                estructuras sean más seguras y fáciles de mantener.' }}
+            </p>
+        </div>
+
+    </ng-container>
 
     <button class="ts-back" type="button" (click)="back.emit()">
-
         <i class="bi bi-arrow-left"></i>
         VOLVER AL PANEL
-
     </button>
 
 </section>
