@@ -7,20 +7,20 @@ header {
 }
 
 .section-kicker {
-  color: #00e5ff;
+  color: #00d9ff;
   font: 700 .72rem monospace;
   letter-spacing: .14em;
 }
 
 h2 {
   margin: .35rem 0;
-  color: #ffb700;
+  color: #42b5ff;
   font: 2.1rem 'Bangers', cursive;
   letter-spacing: .05em;
 }
 
 header p {
-  color: #9a8a80;
+  color: #8998ad;
 }
 
 .terminal-grid {
@@ -33,11 +33,11 @@ header p {
 .terminal-window,
 .preview-window {
   min-height: 330px;
-  background: #0a1110;
-  border: 2px solid #25463f;
+  background: #07101a;
+  border: 2px solid #294b66;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 0 25px rgba(0, 229, 255, .1);
+  box-shadow: 0 0 25px rgba(0, 217, 255, .1);
 }
 
 .terminal-bar {
@@ -45,20 +45,20 @@ header p {
   justify-content: space-between;
   align-items: center;
   padding: .65rem .85rem;
-  color: #4ef2c0;
-  background: #10201d;
-  border-bottom: 1px solid #25463f;
+  color: #42b5ff;
+  background: #102235;
+  border-bottom: 1px solid #294b66;
   font: .75rem monospace;
 }
 
 .terminal-bar i {
   margin-right: .25rem;
-  color: #ff9100;
+  color: #168cff;
   font-size: .55rem;
 }
 
 .terminal-bar small {
-  color: #9a8a80;
+  color: #8998ad;
 }
 
 .terminal-window textarea {
@@ -66,22 +66,17 @@ header p {
   width: 100%;
   height: 245px;
   box-sizing: border-box;
-
   padding: 1rem;
-
-  color: #8fffd6;
-  background: #050b0a;
-
+  color: #8fdfff;
+  background: #040b13;
   border: 0;
   outline: 0;
-
   resize: none;
-
   font: .9rem/1.6 monospace;
 }
 
 .terminal-window textarea:focus {
-  box-shadow: inset 0 0 15px rgba(78, 242, 192, .08);
+  box-shadow: inset 0 0 15px rgba(66, 181, 255, .08);
 }
 
 .terminal-actions {
@@ -96,29 +91,26 @@ header p {
   padding: .65rem .9rem;
   border: 0;
   border-radius: 6px;
-
   font: 700 .72rem monospace;
-
   cursor: pointer;
-
   transition:
     transform .15s ease,
     filter .15s ease;
 }
 
 .ignite {
-  color: #0a1110;
-  background: #4ef2c0;
+  color: #07101a;
+  background: #42b5ff;
 }
 
 .secondary {
-  color: #0a1110;
-  background: #ffb700;
+  color: #07101a;
+  background: #168cff;
 }
 
 .danger {
   color: #fff;
-  background: #7b2929;
+  background: #294b7a;
 }
 
 .ignite:hover,
@@ -130,49 +122,37 @@ header p {
 
 .preview-window {
   position: relative;
-
   padding: 2.5rem 1.1rem 1.1rem;
-
-  color: #e6ded6;
-  background: #07100e;
+  color: #e1e9f5;
+  background: #06101a;
 }
 
 .preview-label {
   position: absolute;
-
   top: 0;
   left: 0;
-
   width: 100%;
-
   box-sizing: border-box;
-
   padding: .65rem .85rem;
-
-  color: #ffb700;
-  background: #251b13;
-
+  color: #42b5ff;
+  background: #122438;
   font: 700 .72rem monospace;
 }
 
 .preview-content {
   height: 245px;
-
   overflow: auto;
 }
 
 .compiler-output {
   margin: 0;
-
   white-space: pre-wrap;
-
-  color: #8fffd6;
-
+  color: #8fdfff;
   font: .8rem/1.6 monospace;
 }
 
 .compiler-success {
-  color: #4ef2c0;
+  color: #42b5ff;
 }
 
 .compiler-error {
@@ -181,46 +161,37 @@ header p {
 
 .terminal-waiting {
   height: 100%;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
   justify-content: center;
-
   text-align: center;
-
-  color: #4ef2c0;
-
+  color: #42b5ff;
   font-family: monospace;
 }
 
 .terminal-waiting i {
   font-size: 2.5rem;
-
   margin-bottom: 1rem;
 }
 
 .terminal-waiting p {
-  color: #ffb700;
+  color: #00d9ff;
 }
 
 .terminal-waiting small {
-  color: #9a8a80;
+  color: #8998ad;
 }
 
 .render-status {
   position: absolute;
-
   bottom: 1rem;
   right: 1rem;
-
   font: .7rem monospace;
 }
 
 .render-status.success {
-  color: #4ef2c0;
+  color: #42b5ff;
 }
 
 .render-status.error {
@@ -229,20 +200,15 @@ header p {
 
 .ts-back {
   padding: .7rem 1rem;
-
-  color: #ffb700;
-  background: #211711;
-
-  border: 2px solid #6a4b2d;
+  color: #42b5ff;
+  background: #101a29;
+  border: 2px solid #36516f;
   border-radius: 8px;
-
   font: 1rem 'Bangers', cursive;
-
   cursor: pointer;
 }
 
 @keyframes tsReveal {
-
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -252,11 +218,9 @@ header p {
     opacity: 1;
     transform: none;
   }
-
 }
 
 @media (max-width: 700px) {
-
   .terminal-grid {
     grid-template-columns: 1fr;
   }
@@ -264,5 +228,4 @@ header p {
   .terminal-actions {
     flex-wrap: wrap;
   }
-
 }

@@ -7,29 +7,29 @@ header {
 }
 
 .section-kicker {
-    color: #00e5ff;
+    color: #00d9ff;
     font: 700 .72rem monospace;
     letter-spacing: .14em;
 }
 
 h2 {
     margin: .35rem 0;
-    color: #ffb700;
+    color: #42b5ff;
     font: 2.1rem 'Bangers', cursive;
     letter-spacing: .05em;
 }
 
 header p {
-    color: #9a8a80;
+    color: #8998ad;
 }
 
 .test-panel {
     max-width: 700px;
     padding: 1.5rem;
     background: linear-gradient(145deg,
-            #261e19,
-            #110c0a);
-    border: 2px solid #5a3a21;
+            #172033,
+            #080d14);
+    border: 2px solid #36516f;
     border-radius: 12px;
     box-shadow: 0 10px 25px #0008;
 }
@@ -37,7 +37,7 @@ header p {
 .test-progress {
     display: flex;
     justify-content: space-between;
-    color: #9a8a80;
+    color: #8998ad;
     font: 700 .72rem monospace;
 }
 
@@ -47,17 +47,17 @@ header p {
     width: 70px;
     height: 70px;
     margin: 1.4rem auto;
-    color: #ffb700;
-    border: 2px solid #ff9100;
+    color: #42b5ff;
+    border: 2px solid #168cff;
     border-radius: 50%;
-    box-shadow: 0 0 25px #ff910066;
+    box-shadow: 0 0 25px #168cff66;
     font-size: 2rem;
     animation: orbPulse 2s infinite;
 }
 
 .test-panel h3 {
     margin: 0 0 1.2rem;
-    color: #e6ded6;
+    color: #e1e9f5;
     font-size: 1.25rem;
     line-height: 1.35;
 }
@@ -72,10 +72,10 @@ header p {
     align-items: center;
     gap: .75rem;
     padding: .8rem;
-    color: #e6ded6;
+    color: #e1e9f5;
     text-align: left;
-    background: #17110f;
-    border: 2px solid #42342c;
+    background: #0d1622;
+    border: 2px solid #293b55;
     border-radius: 7px;
     font: .9rem monospace;
     cursor: pointer;
@@ -83,16 +83,16 @@ header p {
 
 .options button:hover,
 .options button.selected {
-    border-color: #ff9100;
+    border-color: #168cff;
 }
 
 .options button.correct {
-    border-color: #00e676;
-    color: #9fffc0;
+    border-color: #00d9ff;
+    color: #9fe8ff;
 }
 
 .options button span {
-    color: #ffb700;
+    color: #42b5ff;
     font-weight: 700;
 }
 
@@ -102,36 +102,36 @@ header p {
 
 .answer-note {
     padding: .75rem;
-    color: #ffb7a0;
-    background: #3b1d16;
+    color: #8fdfff;
+    background: #102c42;
     border-radius: 6px;
     font: .82rem monospace;
 }
 
 .answer-note.good {
-    color: #9fffc0;
-    background: #123127;
+    color: #9fe8ff;
+    background: #123447;
 }
 
 .ts-back {
     margin-top: 1.5rem;
     padding: .7rem 1rem;
-    color: #ffb700;
-    background: #211711;
-    border: 2px solid #6a4b2d;
+    color: #42b5ff;
+    background: #101a29;
+    border: 2px solid #36516f;
     border-radius: 8px;
     font: 1rem 'Bangers', cursive;
     cursor: pointer;
 }
 
 .ts-back:hover {
-    background: #2c1d14;
+    background: #172b42;
 }
 
 @keyframes orbPulse {
     50% {
         transform: scale(1.06);
-        box-shadow: 0 0 36px #ffb70099;
+        box-shadow: 0 0 36px #42b5ff99;
     }
 }
 
