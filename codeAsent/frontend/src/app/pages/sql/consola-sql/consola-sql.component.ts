@@ -38,6 +38,8 @@ export class ConsolaSqlComponent {
   estrellasRestantes = signal<number>(3);
   resultadoEjecucion = signal<string | null>(null);
   ejecucionExitosa = signal<boolean>(false);
+  columnasResultado = ['id_transistor', 'nombre', 'tension', 'estado'];
+  filasResultado = signal<Array<Record<string, string | number>>>([]);
 
   validarPrediccion(indiceOpcion: number): void {
     this.prediccionSeleccionada.set(indiceOpcion);
@@ -73,9 +75,15 @@ export class ConsolaSqlComponent {
     if (ingresoLimpio.includes('where') && ingresoLimpio.includes('tension > 50')) {
       this.ejecucionExitosa.set(true);
       this.resultadoEjecucion.set(this.desafioActivo().retroalimentacionExito);
+      this.filasResultado.set([
+        { id_transistor: 2, nombre: 'Bobina Norte', tension: 72, estado: 'ACTIVO' },
+        { id_transistor: 4, nombre: 'Bobina Central', tension: 110, estado: 'ACTIVO' },
+        { id_transistor: 5, nombre: 'Bobina Sur', tension: 86, estado: 'ACTIVO' }
+      ]);
     } else {
       this.ejecucionExitosa.set(false);
       this.resultadoEjecucion.set(this.desafioActivo().explicacionErrorSintaxis);
+      this.filasResultado.set([]);
     }
   }
 }
