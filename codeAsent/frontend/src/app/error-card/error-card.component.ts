@@ -18,17 +18,31 @@ export class ErrorCardComponent {
     return this.type === '403' ? 'var(--r)' : this.type === '500' ? 'var(--g)' : 'var(--c)';
   }
 
-  goHome(): void {
-    this.router.navigate(['/login']);
-  }
+goHome(): void {
+  void this.router.navigate(['/inicio']);
+}
 
   goLogin(): void {
     this.router.navigate(['/login']);
   }
 
-  retry(): void {
-    window.location.reload();
+ retry(): void {
+
+  if (this.type === 'offline') {
+
+    if (navigator.onLine) {
+      void this.router.navigate(['/inicio']);
+      return;
+    }
+
+    console.warn('CodeAscent: todavía no hay conexión a Internet.');
+    return;
   }
+
+  if (this.type === '500') {
+    void this.router.navigate(['/inicio']);
+  }
+}
 
   report(): void {
     console.info('CodeAscent: reporte de error 500 solicitado.');
