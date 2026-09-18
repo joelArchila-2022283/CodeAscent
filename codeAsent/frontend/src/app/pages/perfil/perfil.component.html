@@ -1,0 +1,77 @@
+<main class="perfil-page">
+  <div class="perfil-shell">
+    <header class="perfil-topbar">
+      <a class="perfil-logo" routerLink="/dashboard">CODE ASCENT</a>
+      <a class="perfil-back" routerLink="/dashboard"><i class="bi bi-arrow-left"></i> VOLVER AL DASHBOARD</a>
+    </header>
+
+    @if (cargando()) {
+      <section class="estado-perfil" role="status">
+        <i class="bi bi-arrow-repeat"></i>
+        <span>CARGANDO PERFIL DEL JUGADOR...</span>
+      </section>
+    } @else if (error()) {
+      <section class="estado-perfil estado-perfil--error" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span>{{ error() }}</span>
+      </section>
+    } @else if (datos(); as data) {
+      <section class="perfil-hero perfil-card">
+        <div class="perfil-avatar">{{ iniciales(data.usuario.nombre) }}</div>
+        <div class="perfil-identidad">
+          <span class="perfil-kicker">PERFIL DEL JUGADOR</span>
+          <h1>{{ data.usuario.nombre | uppercase }}</h1>
+          <p class="perfil-handle">{{ data.usuario.correo }} · Nivel {{ data.progreso.id_nivel_actual || 1 }}</p>
+          <div class="xp-header"><span>PROGRESO GENERAL</span><strong>{{ data.progreso.xp_actual || 0 | number }} XP</strong></div>
+          <div class="progress-track"><span [style.width.%]="data.progreso.porcentaje || 0"></span></div>
+        </div>
+        <div class="perfil-rango">
+          <strong>{{ (data.progreso.porcentaje || 0) >= 80 ? 'EXPLORADOR AVANZADO' : 'EXPLORADOR DE CÓDIGO' }}</strong>
+          <span>RANGO ACTUAL</span>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="perfil-card stat-card"><i class="bi bi-layers-fill"></i><strong>{{ data.perfil?.estadisticas?.nivelesCompletados || 0 }}</strong><span>NIVELES COMPLETADOS</span></article>
+        <article class="perfil-card stat-card stat-card--cyan"><i class="bi bi-lightning-charge-fill"></i><strong>{{ data.perfil?.estadisticas?.retosSuperados || 0 }}</strong><span>RETOS SUPERADOS</span></article>
+        <article class="perfil-card stat-card stat-card--gold"><i class="bi bi-trophy-fill"></i><strong>{{ data.logrosObtenidos || 0 }}</strong><span>LOGROS OBTENIDOS</span></article>
+        <article class="perfil-card stat-card stat-card--violet"><i class="bi bi-stars"></i><strong>{{ data.perfil?.estadisticas?.xpTotal || data.progreso.xp_actual || 0 | number }}</strong><span>XP TOTAL</span></article>
+      </section>
+
+      <section class="perfil-section">
+        <div class="section-heading"><div><span class="perfil-kicker">RUTA DE APRENDIZAJE</span><h2>PROGRESO POR TECNOLOGÍA</h2></div><span>DATOS DE LA BASE DE DATOS</span></div>
+        <div class="languages-grid">
+          @for (lenguaje of data.perfil?.lenguajes || []; track lenguaje.id_lenguaje) {
+            <article class="perfil-card language-card" [class]="'language-card ' + claseLenguaje(lenguaje.nombre)">
+              <div class="language-top"><div class="language-name"><span class="language-icon"><i class="bi" [class]="iconoLenguaje(lenguaje.nombre)"></i></span>{{ nombreCorto(lenguaje.nombre) }}</div><strong>{{ porcentajeLenguaje(lenguaje) }}%</strong></div>
+              <p>{{ lenguaje.descripcion || 'Continúa explorando este sector de CodeAscent.' }}</p>
+              <div class="progress-track"><span [style.width.%]="porcentajeLenguaje(lenguaje)"></span></div>
+              <div class="language-meta"><span>Nivel <b>{{ lenguaje.nivel_actual || 1 }}</b></span><span><b>{{ lenguaje.total_niveles }}</b> niveles</span></div>
+            </article>
+          } @empty {
+            <div class="empty-state">Todavía no hay lenguajes activos en la base de datos.</div>
+          }
+        </div>
+      </section>
+
+      <section class="perfil-section">
+        <div class="section-heading"><div><span class="perfil-kicker">LECTURA DE ACTIVIDAD</span><h2>ESTADÍSTICAS</h2></div><span>ÚLTIMOS 7 DÍAS</span></div>
+        <div class="analytics-grid">
+          <article class="perfil-card analytics-card"><h3>XP OBTENIDA ESTA SEMANA</h3><p>Actividad registrada en lecciones, retos e intentos.</p><div class="week-chart">
+            @for (dia of [0, 1, 2, 3, 4, 5, 6]; track dia) { <div class="day-bar-wrap"><div class="day-bar" [style.height.%]="(xpDelDia(dia) / maxActividad()) * 100"></div><span>{{ etiquetaDia(dia) }}</span></div> }
+          </div></article>
+          <article class="perfil-card analytics-card"><h3>RENDIMIENTO</h3><p>Indicadores calculados desde tus intentos.</p><div class="metric-list"><div><span>Precisión en cuestionarios</span><b>{{ data.perfil?.estadisticas?.precision || 0 }}%</b></div><div><span>Retos superados</span><b>{{ data.perfil?.estadisticas?.retosSuperados || 0 }}</b></div><div><span>Nivel actual</span><b>{{ data.progreso.id_nivel_actual || 1 }}</b></div><div><span>Mejor sector</span><b>{{ data.perfil?.lenguajes?.[0]?.nombre || 'N/D' }}</b></div></div></article>
+        </div>
+      </section>
+
+      <section class="perfil-section">
+        <div class="section-heading"><div><span class="perfil-kicker">COLECCIÓN DEL JUGADOR</span><h2>LOGROS</h2></div><span>{{ data.logrosObtenidos || 0 }} CONSEGUIDOS</span></div>
+        <div class="achievements-grid">
+          @for (logro of data.perfil?.logros || []; track logro.id_logro) { <article class="perfil-card achievement"><div class="achievement-icon"><i class="bi bi-award-fill"></i></div><strong>{{ logro.nombre | uppercase }}</strong><small>{{ logro.descripcion || 'Logro conseguido durante tu recorrido.' }}</small></article> } @empty { <div class="empty-state">Aún no hay logros registrados. Tu próxima insignia está esperando.</div> }
+        </div>
+      </section>
+
+      <footer class="perfil-footer"><a routerLink="/mapa" class="perfil-button perfil-button--primary"><i class="bi bi-map"></i> CONTINUAR RECORRIDO</a><a routerLink="/dashboard" class="perfil-button"><i class="bi bi-grid-3x3-gap"></i> DASHBOARD</a></footer>
+    }
+  </div>
+</main>

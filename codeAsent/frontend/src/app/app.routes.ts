@@ -6,6 +6,7 @@ import { RegistroComponent } from './pages/registro/registro.component';
 import { RecuperarPasswordComponent } from './pages/recuperar-password/recuperar-password';
 import { RestaurarPasswordComponent } from './pages/restaurar-password/restaurar-password';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { PerfilComponent } from './pages/perfil/perfil.component';
 import { MapaComponent } from './pages/mapa/mapa.component';
 
 // Componentes de Cursos y Módulos
@@ -66,6 +67,11 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'perfil',
+    component: PerfilComponent,
     canActivate: [authGuard]
   },
   {
