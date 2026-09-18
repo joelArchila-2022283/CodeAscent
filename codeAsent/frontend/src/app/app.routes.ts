@@ -7,6 +7,8 @@ import { HtmlDashboardComponent } from './pages/html/html-dashboard/html-dashboa
 import { SqlComponent } from './pages/sql/sql.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
+import { RecuperarPasswordComponent } from './pages/recuperar-password/recuperar-password';
+import { RestaurarPasswordComponent } from './pages/restaurar-password/restaurar-password';
 
 // 1. Importamos los guardianes que protegerán las rutas
 import { authGuard, guestGuard } from './core/guards/auth-guard'; 
@@ -31,6 +33,8 @@ export const routes: Routes = [
   { path: 'curso/html', component: HtmlDashboardComponent, canActivate: [authGuard] },
   { path: 'sql', component: SqlComponent, canActivate: [authGuard] },
   { path: 'curso/sql', component: SqlComponent, canActivate: [authGuard] },
+  { path: 'recuperar-password', component: RecuperarPasswordComponent, canActivate: [guestGuard] },
+  { path: 'restaurar-password', component: RestaurarPasswordComponent, canActivate: [guestGuard] },
   
   // Rutas preparadas para tus compañeros de equipo (También deben ir protegidas):
   // { path: 'curso/css', component: CssComponent, canActivate: [authGuard] },
