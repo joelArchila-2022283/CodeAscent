@@ -12,6 +12,7 @@ import rutasNivelUsuario from './nivelUsuario.routes';
 import rutasLogro from './logros.routes';
 import rutasUsuarioLogro from './usuarioLogro.routes';
 import rutasDashboard from './dashboard.routes';
+import rutasSql from './sql.routes';
 
 const enrutadorPrincipal = Router();
 
@@ -29,5 +30,6 @@ enrutadorPrincipal.use('/niveles-usuario', rutasNivelUsuario);
 enrutadorPrincipal.use('/logros', rutasLogro);
 enrutadorPrincipal.use('/usuarios-logros', rutasUsuarioLogro);
 enrutadorPrincipal.use('/dashboard', rutasDashboard);
+enrutadorPrincipal.use('/sql', rutasSql);
 
 export default enrutadorPrincipal;
