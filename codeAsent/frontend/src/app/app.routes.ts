@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+
 import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
@@ -8,28 +9,52 @@ import { SqlComponent } from './pages/sql/sql.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
-// TODO: Tus compañeros deben descomentar estas importaciones cuando creen los componentes
-// import { CssComponent } from './pages/css/css.component';
-// import { TypescriptComponent } from './pages/typescript/typescript.component';
+import { autenticacionGuard } from './core/guards/autenticacion-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'registro', component: RegistroComponent },
-  
-  // Redirección de seguridad para cuando el login es exitoso
-  { path: 'inicio', redirectTo: 'mapa', pathMatch: 'full' },
 
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'mapa', component: MapaComponent },
-  { path: 'curso/html', component: HtmlDashboardComponent },
-  { path: 'sql', component: SqlComponent },
-  { path: 'curso/sql', component: SqlComponent },
-  
-  // Rutas preparadas para tus compañeros de equipo:
-  // { path: 'curso/css', component: CssComponent },
-  // { path: 'curso/typescript', component: TypescriptComponent },
+  { path: 'login', component: LoginComponent },
+
+  { path: 'registro', component: RegistroComponent },
+
+  {
+    path: 'inicio',
+    redirectTo: 'mapa',
+    pathMatch: 'full'
+  },
+
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [autenticacionGuard]
+  },
+
+  {
+    path: 'mapa',
+    component: MapaComponent,
+    canActivate: [autenticacionGuard]
+  },
+
+  {
+    path: 'curso/html',
+    component: HtmlDashboardComponent,
+    canActivate: [autenticacionGuard]
+  },
+
+  {
+    path: 'sql',
+    component: SqlComponent,
+    canActivate: [autenticacionGuard]
+  },
+
+  {
+    path: 'curso/sql',
+    component: SqlComponent,
+    canActivate: [autenticacionGuard]
+  },
 
   { path: 'error/:type', component: ErrorPageComponent },
+
   { path: '**', component: NotFoundComponent }
 ];
