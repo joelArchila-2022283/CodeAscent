@@ -55,6 +55,60 @@ export const obtenerResumenDashboard = async (req: RequestAutenticado, res: Resp
     );
     const logrosObtenidos = resLogros.rows[0]?.total || 0;
 
+    const resPerfil = await pool.query(`
+      SELECT
+        l.id_lenguaje,
+        l.nombre,
+        l.descripcion,
+        COALESCE(p.porcentaje, 0)::float AS porcentaje,
+        COALESCE(p.xp_actual, 0)::int AS xp_actual,
+        COALESCE(p.id_nivel_actual, 0)::int AS nivel_actual,
+        COUNT(DISTINCT n.id_nivel)::int AS total_niveles
+      FROM lenguaje l
+      LEFT JOIN progreso p
+        ON p.id_lenguaje = l.id_lenguaje AND p.id_usuario = $1
+      LEFT JOIN nivel n ON n.id_lenguaje = l.id_lenguaje AND n.estado = TRUE
+      WHERE l.estado = TRUE
+      GROUP BY l.id_lenguaje, l.nombre, l.descripcion, p.porcentaje, p.xp_actual, p.id_nivel_actual
+      ORDER BY CASE LOWER(l.nombre)
+        WHEN 'html' THEN 1
+        WHEN 'css' THEN 2
+        WHEN 'sql' THEN 3
+        WHEN 'typescript' THEN 4
+        ELSE 5
+      END
+    `, [idUsuario]);
+
+    const resEstadisticas = await pool.query(`
+      SELECT
+        (SELECT COUNT(*)::int FROM nivel_usuario WHERE id_usuario = $1 AND completado = TRUE) AS niveles_completados,
+        (SELECT COUNT(DISTINCT id_reto)::int FROM intento WHERE id_usuario = $1 AND correcto = TRUE) AS retos_superados,
+        (SELECT COALESCE(SUM(xp_actual), 0)::int FROM progreso WHERE id_usuario = $1) AS xp_total,
+        (SELECT COUNT(*)::int FROM intento WHERE id_usuario = $1) AS intentos_totales,
+        (SELECT COUNT(*)::int FROM intento WHERE id_usuario = $1 AND correcto = TRUE) AS intentos_correctos
+    `, [idUsuario]);
+
+    const resActividad = await pool.query(`
+      SELECT TO_CHAR(fecha_intento::date, 'YYYY-MM-DD') AS fecha,
+             COALESCE(SUM(xp_obtenida), 0)::int AS xp
+      FROM intento
+      WHERE id_usuario = $1 AND fecha_intento >= CURRENT_DATE - INTERVAL '6 days'
+      GROUP BY fecha_intento::date
+      ORDER BY fecha_intento::date
+    `, [idUsuario]);
+
+    const resLogrosPerfil = await pool.query(`
+      SELECT l.id_logro, l.nombre, l.descripcion, ul.fecha_obtenido
+      FROM usuario_logro ul
+      INNER JOIN logro l ON l.id_logro = ul.id_logro
+      WHERE ul.id_usuario = $1
+      ORDER BY ul.fecha_obtenido DESC
+    `, [idUsuario]);
+
+    const estadisticas = resEstadisticas.rows[0] || {};
+    const intentosTotales = Number(estadisticas.intentos_totales || 0);
+    const intentosCorrectos = Number(estadisticas.intentos_correctos || 0);
+
     // 4. Obtener los lenguajes FORZANDO el orden del juego: HTML -> CSS -> SQL -> TypeScript
     const resLenguajes = await pool.query(`
       SELECT id_lenguaje, nombre 
@@ -124,6 +178,17 @@ export const obtenerResumenDashboard = async (req: RequestAutenticado, res: Resp
       progreso,
       progresoSql,
       logrosObtenidos,
+      perfil: {
+        lenguajes: resPerfil.rows,
+        estadisticas: {
+          nivelesCompletados: Number(estadisticas.niveles_completados || 0),
+          retosSuperados: Number(estadisticas.retos_superados || 0),
+          xpTotal: Number(estadisticas.xp_total || 0),
+          precision: intentosTotales ? Math.round((intentosCorrectos / intentosTotales) * 100) : 0
+        },
+        actividadSemanal: resActividad.rows,
+        logros: resLogrosPerfil.rows
+      },
       nodosMapa
     });
 
