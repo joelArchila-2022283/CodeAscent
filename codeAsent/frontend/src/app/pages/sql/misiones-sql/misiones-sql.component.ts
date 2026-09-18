@@ -1,6 +1,6 @@
-import { Component, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, OnChanges, Output, EventEmitter, signal, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SeccionSql, MisionSql } from '../../../interfaces/sql.interface';
+import { NivelSql, SeccionSql, MisionSql } from '../../../interfaces/sql.interface';
 
 @Component({
   selector: 'app-misiones-sql',
@@ -9,7 +9,9 @@ import { SeccionSql, MisionSql } from '../../../interfaces/sql.interface';
   templateUrl: './misiones-sql.component.html',
   styleUrls: ['./misiones-sql.component.scss']
 })
-export class MisionesSqlComponent {
+export class MisionesSqlComponent implements OnChanges {
+  @Input() niveles: NivelSql[] = [];
+  @Input() nivelActivo: NivelSql | null = null;
   @Output() navegarA = new EventEmitter<SeccionSql>();
 
   listaMisiones = signal<MisionSql[]>([
@@ -34,6 +36,20 @@ export class MisionesSqlComponent {
       requisitoDesbloqueo: 'Ejecutar consulta válida'
     }
   ]);
+
+  ngOnChanges(_changes: SimpleChanges): void {
+    if (this.niveles.length === 0) return;
+    this.listaMisiones.set(this.niveles.map(nivel => ({
+      idMision: `nivel-${nivel.id_nivel}`,
+      codigoIdentificador: `NIVEL ${nivel.numero_nivel}`,
+      tituloMision: nivel.nombre,
+      descripcionMision: nivel.descripcion || 'Resuelve el problema, consulta el manual y demuestra lo aprendido.',
+      recompensaExperiencia: nivel.xp_requerida || 0,
+      estadoMision: nivel.id_nivel === this.nivelActivo?.id_nivel ? 'en_progreso' : nivel.numero_nivel === 1 ? 'en_progreso' : 'bloqueada',
+      seccionDestino: 'manual',
+      requisitoDesbloqueo: nivel.numero_nivel === 1 ? 'Disponible' : 'Completa el nivel anterior'
+    })));
+  }
 
   irAMision(seccion: SeccionSql): void {
     this.navegarA.emit(seccion);
