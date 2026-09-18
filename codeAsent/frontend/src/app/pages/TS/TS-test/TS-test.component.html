@@ -13,29 +13,40 @@
         </p>
     </header>
 
-    <div class="test-panel">
+    <div *ngIf="cargando()" class="text-center py-4">
+        <div class="spinner-border text-info" role="status"></div>
+        <p class="mt-2">Cargando prueba...</p>
+    </div>
+
+    <p *ngIf="!cargando() && errorCarga()">{{ errorCarga() }}</p>
+
+    <p *ngIf="!cargando() && !errorCarga() && options().length === 0">
+        No hay pruebas registradas todavía para este nivel.
+    </p>
+
+    <div class="test-panel" *ngIf="!cargando() && !errorCarga() && options().length > 0">
 
         <div class="test-progress">
-            <span>PRUEBA 01 / 05</span>
-            <span>20 XP</span>
+            <span>PRUEBA 1 / {{ totalPreguntas() }}</span>
+            <span>{{ xpRecompensa() }} XP</span>
         </div>
 
         <div class="ts-orb">
             <i class="bi bi-lightning-charge-fill"></i>
         </div>
 
-        <h3>{{ question }}</h3>
+        <h3>{{ question() }}</h3>
 
         <div class="options">
 
-            <button *ngFor="let option of options; let i = index" type="button" [class.selected]="selected() === i"
-                [class.correct]="answered() && i === 0" (click)="choose(i)">
+            <button *ngFor="let option of options(); let i = index" type="button" [class.selected]="selected() === i"
+                [class.correct]="answered() && i === correctIndex()" (click)="choose(i)">
 
                 <span>{{ ['A', 'B', 'C', 'D'][i] }}</span>
 
                 {{ option }}
 
-                <i *ngIf="answered() && i === 0" class="bi bi-check-circle-fill">
+                <i *ngIf="answered() && i === correctIndex()" class="bi bi-check-circle-fill">
                 </i>
 
             </button>
@@ -44,14 +55,14 @@
 
         @if (answered()) {
 
-        <p class="answer-note" [class.good]="selected() === 0">
+        <p class="answer-note" [class.good]="selected() === correctIndex()">
 
-            <i class="bi" [class.bi-check-circle-fill]="selected() === 0"
-                [class.bi-exclamation-triangle-fill]="selected() !== 0">
+            <i class="bi" [class.bi-check-circle-fill]="selected() === correctIndex()"
+                [class.bi-exclamation-triangle-fill]="selected() !== correctIndex()">
             </i>
 
             {{
-            selected() === 0
+            selected() === correctIndex()
             ? 'Núcleo estable. La respuesta TypeScript es correcta.'
             : 'La presión sube. Revisa los conceptos fundamentales de TypeScript.'
             }}

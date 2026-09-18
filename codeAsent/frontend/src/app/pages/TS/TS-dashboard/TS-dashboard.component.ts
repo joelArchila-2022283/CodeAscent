@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { TSDataComponent } from '../TS-data/TS-data.component';
@@ -8,12 +8,21 @@ import { TsTerminalComponent } from '../TS-terminal/TS-terminal.component';
 import { TSTestComponent } from '../TS-test/TS-test.component';
 import { TSDashboardSectionComponent } from './TS-dashboard-section.component';
 
+import { DashboardService } from '../../../services/dashboard.service';
+import { TsDataService } from '../../../services/ts-data.service';
+
 export type TSSection =
   | 'dashboard'
   | 'data'
   | 'processes'
   | 'terminal'
   | 'test';
+
+type MascotState =
+  | 'idle'
+  | 'happy'
+  | 'thinking'
+  | 'shocked';
 
 @Component({
   selector: 'app-ts-dashboard',
@@ -30,25 +39,70 @@ export type TSSection =
   templateUrl: './TS-dashboard.component.html',
   styleUrl: './TS-dashboard.component.scss'
 })
-export class TSDashboardComponent {
+export class TSDashboardComponent implements OnInit {
+
+  private readonly dashboardService = inject(DashboardService);
+  private readonly tsDataService = inject(TsDataService);
 
   activeSection = signal<TSSection>('dashboard');
 
   player = {
     name: 'Cadete Bit',
     level: 1,
-    currentXp: 320,
-    nextLevelXp: 500,
+    currentXp: 0,
+    nextLevelXp: 100,
     energyWatts: 86
   };
 
-  cartoonMascotState = signal<
-    'idle' | 'happy' | 'thinking' | 'shocked'
-  >('idle');
+  cartoonMascotState = signal<MascotState>('idle');
 
   mascotDialogue = signal<string>(
     'El sector TS está listo para trabajar.'
   );
+
+  ngOnInit(): void {
+    this.cargarJugador();
+  }
+
+  private cargarJugador(): void {
+
+    this.dashboardService.obtenerDatosDashboard().subscribe({
+      next: (data) => {
+        if (data?.usuario?.nombre) {
+          this.player.name = data.usuario.nombre;
+        }
+      },
+      error: (err) => {
+        console.error(
+          'Error al cargar el usuario del HUD:',
+          err
+        );
+      }
+    });
+
+    this.tsDataService.obtenerContexto().subscribe({
+      next: (contexto) => {
+
+        if (contexto?.nivelActual?.numero_nivel) {
+          this.player.level = contexto.nivelActual.numero_nivel;
+        }
+
+        this.player.currentXp =
+          contexto?.progreso?.xp_actual ?? 0;
+
+        if (contexto?.nivelActual?.xp_requerida) {
+          this.player.nextLevelXp =
+            contexto.nivelActual.xp_requerida;
+        }
+      },
+      error: (err) => {
+        console.error(
+          'Error al cargar el progreso del HUD:',
+          err
+        );
+      }
+    });
+  }
 
   navigateTo(section: TSSection): void {
 

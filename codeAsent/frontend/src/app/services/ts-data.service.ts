@@ -33,16 +33,29 @@ interface RespuestaLecciones {
 }
 
 /**
- * Vista compuesta que necesita TSDataComponent.
- * Se arma a partir de datos reales existentes en:
- * lenguaje, nivel, progreso y leccion. No inventa columnas.
+ * Contexto base del sector TypeScript: lenguaje, niveles, progreso
+ * del usuario autenticado (si existe) y el nivel que le corresponde.
+ * Es el punto de entrada común que reutilizan el resto de métodos
+ * y componentes, para no repetir esta cadena de llamadas en cada pantalla.
  */
+export interface ContextoTS {
+    idLenguaje: number;
+    niveles: INivel[];
+    nivelActual: INivel | null;
+    progreso: IProgreso | null;
+}
+
 export interface ResumenTSData {
     conceptosRegistrados: number;
     nivel: INivel | null;
     progreso: IProgreso | null;
     tieneProgreso: boolean;
     consejo: string | null;
+}
+
+export interface LeccionesNivelActual {
+    nivel: INivel | null;
+    lecciones: ILeccion[];
 }
 
 @Injectable({
@@ -53,7 +66,7 @@ export class TsDataService {
     private authService = inject(AuthService);
     private apiUrl = environment.apiUrl;
 
-    obtenerResumen(): Observable<ResumenTSData> {
+    obtenerContexto(): Observable<ContextoTS> {
         return this.http.get<RespuestaLenguajes>(`${this.apiUrl}/lenguajes`).pipe(
             switchMap(respuestaLenguajes => {
                 const lenguajeTS = (respuestaLenguajes.datos || []).find(
@@ -80,14 +93,13 @@ export class TsDataService {
                         )
                         .pipe(
                             map(respuesta => respuesta.data),
-                            // 404 (usuario sin progreso todavía) o 401 -> se trata
-                            // como "sin progreso registrado", no como error fatal.
+                            // 404 (sin progreso todavía) o 401 -> se trata como "sin progreso".
                             catchError(() => of(null))
                         )
                     : of(null);
 
                 return forkJoin({ niveles: niveles$, progreso: progreso$ }).pipe(
-                    switchMap(({ niveles, progreso }) => {
+                    map(({ niveles, progreso }) => {
                         const listaNiveles = niveles.data || [];
 
                         const nivelActual =
@@ -95,43 +107,86 @@ export class TsDataService {
                                 ? listaNiveles.find(n => n.id_nivel === progreso.id_nivel_actual)
                                 : null) ?? listaNiveles[0] ?? null;
 
-                        if (!nivelActual?.id_nivel) {
-                            return of<ResumenTSData>({
-                                conceptosRegistrados: 0,
-                                nivel: null,
-                                progreso,
-                                tieneProgreso: !!progreso,
-                                consejo: null
-                            });
-                        }
-
-                        return this.http
-                            .get<RespuestaLecciones>(
-                                `${this.apiUrl}/lecciones/nivel/${nivelActual.id_nivel}`
-                            )
-                            .pipe(
-                                map(respuestaLecciones => {
-                                    const lecciones = respuestaLecciones.data || [];
-                                    return {
-                                        conceptosRegistrados: lecciones.length,
-                                        nivel: nivelActual,
-                                        progreso,
-                                        tieneProgreso: !!progreso,
-                                        consejo: lecciones[0]?.contenido ?? null
-                                    } as ResumenTSData;
-                                }),
-                                catchError(() =>
-                                    of<ResumenTSData>({
-                                        conceptosRegistrados: 0,
-                                        nivel: nivelActual,
-                                        progreso,
-                                        tieneProgreso: !!progreso,
-                                        consejo: null
-                                    })
-                                )
-                            );
+                        return {
+                            idLenguaje,
+                            niveles: listaNiveles,
+                            nivelActual,
+                            progreso
+                        } as ContextoTS;
                     })
                 );
+            })
+        );
+    }
+
+    /** Vista compuesta que necesita TSDataComponent (panel ARCHIVOS). */
+    obtenerResumen(): Observable<ResumenTSData> {
+        return this.obtenerContexto().pipe(
+            switchMap(contexto => {
+                if (!contexto.nivelActual?.id_nivel) {
+                    return of<ResumenTSData>({
+                        conceptosRegistrados: 0,
+                        nivel: null,
+                        progreso: contexto.progreso,
+                        tieneProgreso: !!contexto.progreso,
+                        consejo: null
+                    });
+                }
+
+                return this.http
+                    .get<RespuestaLecciones>(
+                        `${this.apiUrl}/lecciones/nivel/${contexto.nivelActual.id_nivel}`
+                    )
+                    .pipe(
+                        map(respuestaLecciones => {
+                            const lecciones = respuestaLecciones.data || [];
+                            return {
+                                conceptosRegistrados: lecciones.length,
+                                nivel: contexto.nivelActual,
+                                progreso: contexto.progreso,
+                                tieneProgreso: !!contexto.progreso,
+                                consejo: lecciones[0]?.contenido ?? null
+                            } as ResumenTSData;
+                        }),
+                        catchError(() =>
+                            of<ResumenTSData>({
+                                conceptosRegistrados: 0,
+                                nivel: contexto.nivelActual,
+                                progreso: contexto.progreso,
+                                tieneProgreso: !!contexto.progreso,
+                                consejo: null
+                            })
+                        )
+                    );
+            })
+        );
+    }
+
+    /**
+     * Nivel actual de TypeScript y sus lecciones.
+     * Usado por TS-processes (retos por lección), TS-test (preguntas)
+     * y TS-terminal (código de ejemplo).
+     */
+    obtenerLeccionesNivelActual(): Observable<LeccionesNivelActual> {
+        return this.obtenerContexto().pipe(
+            switchMap(contexto => {
+                if (!contexto.nivelActual?.id_nivel) {
+                    return of<LeccionesNivelActual>({ nivel: null, lecciones: [] });
+                }
+
+                return this.http
+                    .get<RespuestaLecciones>(
+                        `${this.apiUrl}/lecciones/nivel/${contexto.nivelActual.id_nivel}`
+                    )
+                    .pipe(
+                        map(respuesta => ({
+                            nivel: contexto.nivelActual,
+                            lecciones: respuesta.data || []
+                        })),
+                        catchError(() =>
+                            of<LeccionesNivelActual>({ nivel: contexto.nivelActual, lecciones: [] })
+                        )
+                    );
             })
         );
     }

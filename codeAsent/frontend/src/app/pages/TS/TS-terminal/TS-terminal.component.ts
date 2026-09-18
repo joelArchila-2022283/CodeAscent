@@ -1,20 +1,12 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import ts from 'typescript';
 
-@Component({
-  selector: 'app-ts-terminal',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './TS-terminal.component.html',
-  styleUrl: './TS-terminal.component.scss'
-})
-export class TsTerminalComponent {
+import { TsDataService } from '../../../services/ts-data.service';
+import { EjemploService } from '../../../services/ts-ejemplo.service';
 
-  @Output() back = new EventEmitter<void>();
-
-  code = signal(
-`interface Usuario {
+const CODIGO_POR_DEFECTO =
+  `interface Usuario {
   nombre: string;
   nivel: number;
 }
@@ -26,12 +18,61 @@ const jugador: Usuario = {
 
 console.log('Hola ' + jugador.nombre);
 console.log('Nivel: ' + jugador.nivel);
-console.log('Nivel siguiente: ' + (jugador.nivel + 1));`
-  );
+console.log('Nivel siguiente: ' + (jugador.nivel + 1));`;
+
+@Component({
+  selector: 'app-ts-terminal',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './TS-terminal.component.html',
+  styleUrl: './TS-terminal.component.scss'
+})
+export class TsTerminalComponent implements OnInit {
+
+  @Output() back = new EventEmitter<void>();
+
+  private tsDataService = inject(TsDataService);
+  private ejemploService = inject(EjemploService);
+
+  private codigoInicial = CODIGO_POR_DEFECTO;
+
+  code = signal(CODIGO_POR_DEFECTO);
 
   output = signal('');
   compiled = signal(false);
   error = signal(false);
+
+  ngOnInit(): void {
+    this.cargarEjemplo();
+  }
+
+  private cargarEjemplo(): void {
+    this.tsDataService.obtenerLeccionesNivelActual().subscribe({
+      next: ({ lecciones }) => {
+        const idLeccion = lecciones[0]?.id_leccion;
+
+        if (!idLeccion) {
+          return;
+        }
+
+        this.ejemploService.obtenerPorLeccion(idLeccion).subscribe({
+          next: (ejemplos) => {
+            const codigo = ejemplos[0]?.codigo;
+            if (codigo) {
+              this.codigoInicial = codigo;
+              this.code.set(codigo);
+            }
+          },
+          error: (err) => {
+            console.error('Error al cargar el ejemplo TypeScript:', err);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error al cargar el nivel actual:', err);
+      }
+    });
+  }
 
   compile(): void {
 
@@ -39,7 +80,7 @@ console.log('Nivel siguiente: ' + (jugador.nivel + 1));`
 
     if (!codigo) {
       this.output.set(
-`[TS-TERMINAL]
+        `[TS-TERMINAL]
 
 ERROR: El terminal está vacío.
 
@@ -54,18 +95,16 @@ antes de ejecutar.`
 
     try {
 
-
       const resultado = ts.transpileModule(codigo, {
-  compilerOptions: {
-    target: ts.ScriptTarget.ES2020,
-    module: ts.ModuleKind.ESNext,
-    strict: false,
-    removeComments: false,
-    ignoreDeprecations: '6.0'
-  },
-  reportDiagnostics: true
-});
-
+        compilerOptions: {
+          target: ts.ScriptTarget.ES2020,
+          module: ts.ModuleKind.ESNext,
+          strict: false,
+          removeComments: false,
+          ignoreDeprecations: '6.0'
+        },
+        reportDiagnostics: true
+      });
 
       if (resultado.diagnostics && resultado.diagnostics.length > 0) {
 
@@ -118,11 +157,10 @@ antes de ejecutar.`
         console.log = consoleOriginal;
       }
 
-
       if (resultados.length === 0) {
 
         this.output.set(
-`[TS-TERMINAL]
+          `[TS-TERMINAL]
 > COMPILANDO TYPESCRIPT...
 
 COMPILACIÓN CORRECTA.
@@ -140,7 +178,7 @@ console.log("Hola");`
       } else {
 
         this.output.set(
-`[TS-TERMINAL]
+          `[TS-TERMINAL]
 > COMPILANDO TYPESCRIPT...
 
 COMPILACIÓN CORRECTA.
@@ -165,7 +203,7 @@ ${resultados.join('\n')}
     } catch (e) {
 
       this.output.set(
-`[TS-TERMINAL]
+        `[TS-TERMINAL]
 > COMPILANDO TYPESCRIPT...
 
 ERROR
@@ -207,22 +245,7 @@ nuevamente.`
 
   reset(): void {
 
-    this.code.set(
-`interface Usuario {
-  nombre: string;
-  nivel: number;
-}
-
-const jugador: Usuario = {
-  nombre: 'Cadete Bit',
-  nivel: 5
-};
-
-console.log('Hola ' + jugador.nombre);
-console.log('Nivel: ' + jugador.nivel);
-console.log('Nivel siguiente: ' + (jugador.nivel + 1));`
-    );
-
+    this.code.set(this.codigoInicial);
     this.output.set('');
     this.compiled.set(false);
     this.error.set(false);
