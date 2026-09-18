@@ -6,6 +6,7 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { MapaComponent } from './pages/mapa/mapa.component';
 import { HtmlDashboardComponent } from './pages/html/html-dashboard/html-dashboard.component';
 import { SqlComponent } from './pages/sql/sql.component';
+import { TSDashboardComponent } from './pages/TS/TS-dashboard/TS-dashboard.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
@@ -17,6 +18,8 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
 
   { path: 'registro', component: RegistroComponent },
+
+  { path: 'dashboard', component: TSDashboardComponent },
 
   {
     path: 'inicio',

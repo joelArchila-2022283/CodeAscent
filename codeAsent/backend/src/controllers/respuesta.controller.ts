@@ -28,6 +28,16 @@ export class RespuestaController {
         }
     }
 
+    async obtenerPorReto(req: Request, res: Response): Promise<void> {
+        try {
+            const id_reto = Number(req.params.id_reto);
+            const resultados = await servicio.obtenerPorReto(id_reto);
+            res.status(200.00).json(resultados);
+        } catch (error) {
+            res.status(500.00).json({ error: 'Error al obtener las respuestas del reto', detalle: error });
+        }
+    }
+
     async crear(req: Request, res: Response): Promise<void> {
         try {
             const nuevo = await servicio.crear(req.body);

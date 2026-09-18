@@ -20,7 +20,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router
-  ) {}
+  ) { }
 
   iniciarSesion(
     credenciales: PeticionLogin
@@ -55,6 +55,20 @@ export class AuthService {
   }
 
   obtenerRol(): string | null {
+    const payload = this.obtenerPayloadToken();
+    return payload?.rol ?? null;
+  }
+
+  /**
+   * Extrae el id_usuario desde el payload del JWT actual.
+   * Reutiliza el mismo mecanismo de decodificación que obtenerRol().
+   */
+  obtenerIdUsuario(): number | null {
+    const payload = this.obtenerPayloadToken();
+    return payload?.id_usuario ?? null;
+  }
+
+  private obtenerPayloadToken(): any | null {
     const token = this.obtenerToken();
     if (!token) {
       return null;
@@ -64,10 +78,9 @@ export class AuthService {
       if (partes.length !== 3) {
         return null;
       }
-      const payload = JSON.parse(
+      return JSON.parse(
         atob(partes[1].replace(/-/g, '+').replace(/_/g, '/'))
       );
-      return payload.rol ?? null;
     } catch (error) {
       console.error('Error al decodificar el token:', error);
       return null;

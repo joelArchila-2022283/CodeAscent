@@ -1,0 +1,123 @@
+.ts-section {
+    animation: tsReveal .45s ease both;
+}
+
+header {
+    margin-bottom: 1.5rem;
+}
+
+.section-kicker {
+    color: #00d9ff;
+    font: 700 .72rem monospace;
+    letter-spacing: .14em;
+}
+
+h2 {
+    margin: .35rem 0;
+    color: #42b5ff;
+    font: 2.1rem 'Bangers', cursive;
+    letter-spacing: .05em;
+}
+
+header p {
+    color: #8998ad;
+}
+
+.mission-list {
+    display: grid;
+    gap: .8rem;
+    margin-bottom: 1.5rem;
+}
+
+.mission {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+    text-align: left;
+    color: #e1e9f5;
+    background: #111b28e8;
+    border: 2px solid #293b55;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.mission:hover {
+    border-color: #168cff;
+    transform: translateX(5px);
+}
+
+.mission.done {
+    border-color: #00d9ff;
+}
+
+.mission-icon {
+    display: grid;
+    place-items: center;
+    width: 45px;
+    height: 45px;
+    flex: none;
+    border-radius: 8px;
+    background: #172b42;
+    color: #168cff;
+    font-size: 1.3rem;
+}
+
+.mission-copy {
+    display: grid;
+    gap: .2rem;
+    flex: 1;
+}
+
+.mission-copy small {
+    color: #8998ad;
+    font: .7rem monospace;
+}
+
+.mission-copy strong {
+    font: 1.3rem 'Bangers', cursive;
+    letter-spacing: .04em;
+}
+
+.mission-copy span {
+    color: #8998ad;
+    font-size: .84rem;
+}
+
+.mission-reward {
+    color: #42b5ff;
+    font: 700 .72rem monospace;
+    white-space: nowrap;
+}
+
+.done .mission-reward {
+    color: #00d9ff;
+}
+
+.ts-back {
+    padding: .7rem 1rem;
+    color: #42b5ff;
+    background: #101a29;
+    border: 2px solid #36516f;
+    border-radius: 8px;
+    font: 1rem 'Bangers', cursive;
+    cursor: pointer;
+}
+
+.ts-back:hover {
+    background: #172b42;
+}
+
+@keyframes tsReveal {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}

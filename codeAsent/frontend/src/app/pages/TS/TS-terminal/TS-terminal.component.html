@@ -1,0 +1,181 @@
+<section class="ts-section terminal-section">
+
+  <header>
+    <span class="section-kicker">
+      <i class="bi bi-terminal-fill"></i>
+      CRT-VGA / PUERTO 02
+    </span>
+
+    <h2>TERMINAL DE TYPESCRIPT</h2>
+
+    <p>
+      Escribe código TypeScript, compílalo y observa
+      el resultado directamente en la terminal.
+    </p>
+  </header>
+
+
+  <div class="terminal-grid">
+
+    <!-- ============================= -->
+    <!-- EDITOR -->
+    <!-- ============================= -->
+
+    <div class="terminal-window">
+
+      <div class="terminal-bar">
+
+        <span>
+          <i class="bi bi-circle-fill"></i>
+          <i class="bi bi-circle-fill"></i>
+          <i class="bi bi-circle-fill"></i>
+        </span>
+
+        <small>typescript-shell / main.ts</small>
+
+        <i class="bi bi-cpu-fill"></i>
+
+      </div>
+
+
+      <textarea
+        [ngModel]="code()"
+        (ngModelChange)="code.set($event)"
+        spellcheck="false"
+        aria-label="Editor TypeScript">
+      </textarea>
+
+
+      <div class="terminal-actions">
+
+        <button
+          class="ignite"
+          type="button"
+          (click)="compile()">
+
+          <i class="bi bi-play-fill"></i>
+
+          EJECUTAR TS
+
+        </button>
+
+
+        <button
+          class="secondary"
+          type="button"
+          (click)="reset()">
+
+          <i class="bi bi-arrow-clockwise"></i>
+
+          RESTAURAR
+
+        </button>
+
+
+        <button
+          class="danger"
+          type="button"
+          (click)="clear()">
+
+          <i class="bi bi-trash-fill"></i>
+
+          LIMPIAR
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- RESULTADO -->
+    <!-- ============================= -->
+
+    <div class="preview-window">
+
+      <span class="preview-label">
+
+        <i class="bi bi-terminal"></i>
+
+        SALIDA DEL PROGRAMA
+
+      </span>
+
+
+      <div class="preview-content">
+
+        @if (!output()) {
+
+          <div class="terminal-waiting">
+
+            <i class="bi bi-cpu"></i>
+
+            <p>
+              ESPERANDO CÓDIGO TYPESCRIPT...
+            </p>
+
+            <small>
+              Escribe código y presiona
+              "EJECUTAR TS".
+            </small>
+
+          </div>
+
+        }
+
+        @else {
+
+          <pre
+            class="compiler-output"
+            [class.compiler-error]="error()"
+            [class.compiler-success]="compiled()"
+          >{{ output() }}</pre>
+
+        }
+
+      </div>
+
+
+      @if (compiled()) {
+
+        <span class="render-status success">
+
+          <i class="bi bi-check-circle-fill"></i>
+
+          EJECUCIÓN OK
+
+        </span>
+
+      }
+
+
+      @if (error()) {
+
+        <span class="render-status error">
+
+          <i class="bi bi-x-circle-fill"></i>
+
+          ERROR TS
+
+        </span>
+
+      }
+
+    </div>
+
+  </div>
+
+
+  <button
+    class="ts-back"
+    type="button"
+    (click)="back.emit()">
+
+    <i class="bi bi-arrow-left"></i>
+
+    VOLVER AL PANEL
+
+  </button>
+
+</section>
