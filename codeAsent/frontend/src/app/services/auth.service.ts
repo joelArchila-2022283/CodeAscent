@@ -89,6 +89,20 @@ export class AuthService {
     );
   }
 
+  solicitarRecuperacion(correo: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_URL}/usuarios/recuperar`,
+      { correo }
+    );
+  }
+
+  restaurarPasswordSegura(token: string, nuevaPassword: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_URL}/usuarios/actualizar-password`,
+      { token, nuevaPassword }
+    );
+  }
+
   cerrarSesion(): void {
     this.eliminarToken();
     this.router.navigate(['/login']);
