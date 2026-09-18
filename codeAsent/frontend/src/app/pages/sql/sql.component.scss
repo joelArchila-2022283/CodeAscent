@@ -450,3 +450,28 @@ header, nav, .bunker-content-stage {
 .bunker-content-stage {
   animation: rockRumble .5s ease-out 1;
 }
+
+.nivel-selector {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  max-width: 1200px;
+  margin: 0 auto 1.25rem;
+  padding: .8rem 1rem;
+  border: 1px solid rgba(217, 164, 65, .55);
+  border-radius: 12px;
+  background: rgba(13, 31, 24, .9);
+  box-shadow: 0 0 20px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.05);
+
+  &__icon { color: $amber-glow; font-size: 1.35rem; }
+  &__copy { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+  &__eyebrow { color: $cyan-screen; font-size: .66rem; font-weight: 700; letter-spacing: .15em; }
+  strong { overflow: hidden; color: $text-html; text-overflow: ellipsis; white-space: nowrap; }
+  small { overflow: hidden; color: $text-dim; text-overflow: ellipsis; white-space: nowrap; }
+
+  select { min-width: 8rem; padding: .55rem .7rem; border: 1px solid $amber-fire; border-radius: 7px; background: #14271f; color: $amber-glow; font-family: 'Bangers', cursive; letter-spacing: .04em; cursor: pointer; }
+
+  @media (max-width: 600px) { align-items: flex-start; flex-wrap: wrap; select { width: 100%; } }
+}
