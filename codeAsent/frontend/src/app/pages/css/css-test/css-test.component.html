@@ -1,0 +1,8 @@
+<section class="content"><button class="back" (click)="back.emit()">← DASHBOARD</button><div class="eyebrow">TEST // COMPROBACIÓN DE APRENDIZAJE</div><h2>DIAGNÓSTICO CSS</h2><p class="lead">Las preguntas salen de los conceptos que estudiaste en DATA y practicaste en TERMINAL.</p>
+@if(!finished()){
+<article class="quiz"><div class="quiz-top"><span>{{ current().topic }}</span><small>PREGUNTA {{ index()+1 }} / {{ questions.length }}</small></div><h3>{{ current().text }}</h3>
+@for(option of current().options;track option){<button class="answer" [class.ok]="selected()===option && option===current().correct" [class.bad]="selected()===option && option!==current().correct" (click)="answer(option)">{{ option }}</button>}
+@if(!selected()){<button class="hint-btn" (click)="showHint.set(!showHint())">💡 {{ showHint()?'OCULTAR PISTA':'VER PISTA' }}</button>@if(showHint()){<p class="hint">{{ current().hint }}</p>}}
+@if(selected()){<div class="feedback" [class.correct]="selected()===current().correct"><b>{{ selected()===current().correct?'✓ CORRECTO':'✕ REVISA ESTE CONCEPTO' }}</b><p>{{ current().explanation }}</p></div><button class="next" (click)="next()">{{ index()===questions.length-1?'VER RESULTADO':'SIGUIENTE →' }}</button>}
+</article>}@else{<article class="result"><span>DIAGNÓSTICO COMPLETADO</span><h3>{{ score() }} / {{ questions.length }}</h3><p>{{ score()>=4?'Buen dominio de los fundamentos.':'Conviene volver a DATA y practicar otra vez los temas que costaron.' }}</p><button class="next" (click)="restart()">REPETIR TEST</button></article>}
+</section>
