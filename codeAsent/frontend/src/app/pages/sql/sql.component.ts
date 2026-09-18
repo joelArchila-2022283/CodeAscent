@@ -1,13 +1,14 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { SeccionSql, JugadorSql } from '../../interfaces/sql.interface';
+import { NivelSql, SeccionSql, JugadorSql } from '../../interfaces/sql.interface';
 import { PanelSqlComponent } from './panel-sql/panel-sql.component';
 import { ManualTecnicoSqlComponent } from './manual-tecnico-sql/manual-tecnico-sql.component';
 import { MisionesSqlComponent } from './misiones-sql/misiones-sql.component';
 import { ConsolaSqlComponent } from './consola-sql/consola-sql.component';
 import { CuestionariosSqlComponent } from './cuestionarios-sql/cuestionarios-sql.component';
 import { DashboardService } from '../../services/dashboard.service';
+import { SqlService } from '../../services/sql.service';
 
 @Component({
   selector: 'app-sql',
@@ -26,10 +27,15 @@ import { DashboardService } from '../../services/dashboard.service';
 })
 export class SqlComponent implements OnInit {
   private dashboardService = inject(DashboardService);
+  private sqlService = inject(SqlService);
 
   seccionActiva = signal<SeccionSql>('panel');
   cargandoJugador = signal(true);
   errorJugador = signal<string | null>(null);
+  niveles = signal<NivelSql[]>([]);
+  nivelActivo = signal<NivelSql | null>(null);
+  cargandoNiveles = signal(true);
+  errorNiveles = signal<string | null>(null);
 
   datosJugador = signal<JugadorSql>({
     nombreJugador: 'Cadete Bit',
@@ -45,6 +51,7 @@ export class SqlComponent implements OnInit {
   mascotDialogue = signal<string>('¡Sintoniza las bobinas de datos, Cadete!');
 
   ngOnInit(): void {
+    this.cargarNiveles();
     this.dashboardService.obtenerDatosDashboard().subscribe({
       next: (datos) => {
         const progreso = datos.progresoSql ?? datos.progreso;
@@ -71,6 +78,26 @@ export class SqlComponent implements OnInit {
         this.cargandoJugador.set(false);
       }
     });
+  }
+
+  cargarNiveles(): void {
+    this.sqlService.obtenerNiveles().subscribe({
+      next: (niveles) => {
+        this.niveles.set(niveles);
+        this.nivelActivo.set(niveles[0] ?? null);
+        this.cargandoNiveles.set(false);
+      },
+      error: () => {
+        this.errorNiveles.set('No se pudieron cargar los niveles SQL.');
+        this.cargandoNiveles.set(false);
+      }
+    });
+  }
+
+  seleccionarNivel(evento: Event): void {
+    const numeroNivel = Number((evento.target as HTMLSelectElement).value);
+    const nivel = this.niveles().find(item => item.numero_nivel === numeroNivel);
+    if (nivel) this.nivelActivo.set(nivel);
   }
 
   cambiarSeccion(nuevaSeccion: SeccionSql): void {
