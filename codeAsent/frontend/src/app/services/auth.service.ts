@@ -38,16 +38,24 @@ export class AuthService {
     );
   }
 
-  guardarToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
+  // Actualizado para aceptar un booleano 'recordar'
+  guardarToken(token: string, recordar: boolean = true): void {
+    if (recordar) {
+      localStorage.setItem(this.TOKEN_KEY, token);
+    } else {
+      sessionStorage.setItem(this.TOKEN_KEY, token);
+    }
   }
 
+  // Busca en localStorage primero, luego en sessionStorage
   obtenerToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return localStorage.getItem(this.TOKEN_KEY) || sessionStorage.getItem(this.TOKEN_KEY);
   }
 
+  // Limpia ambos almacenes
   eliminarToken(): void {
     localStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
   }
 
   estaAutenticado(): boolean {
@@ -91,6 +99,20 @@ export class AuthService {
     return this.http.post<RespuestaAuth>(
       `${this.API_URL}/usuarios/google`,
       { idToken }
+    );
+  }
+
+  solicitarRecuperacion(correo: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_URL}/usuarios/recuperar`,
+      { correo }
+    );
+  }
+
+  restaurarPasswordSegura(token: string, nuevaPassword: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_URL}/usuarios/actualizar-password`,
+      { token, nuevaPassword }
     );
   }
 

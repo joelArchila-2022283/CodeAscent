@@ -83,11 +83,15 @@ export class LoginComponent implements AfterViewInit {
     const idToken = response.credential;
     this.cargando = true;
     this.mensajeError = null;
+    
+    // Obtenemos el valor del checkbox (por defecto a false para Google si no interactúan con el form)
+    const recordar = this.loginForm.value.recordarme === true;
 
     this.authService.loginConGoogle(idToken).subscribe({
       next: (respuesta) => {
         this.cargando = false;
-        this.authService.guardarToken(respuesta.datos.token);
+        // Pasamos el booleano al guardar el token
+        this.authService.guardarToken(respuesta.datos.token, recordar);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
@@ -113,6 +117,8 @@ export class LoginComponent implements AfterViewInit {
 
     this.cargando = true;
     this.mensajeError = null;
+    
+    const recordar = this.loginForm.value.recordarme;
 
     const credenciales: PeticionLogin = {
       correo: this.loginForm.value.correo,
@@ -122,7 +128,8 @@ export class LoginComponent implements AfterViewInit {
     this.authService.iniciarSesion(credenciales).subscribe({
       next: (respuesta) => {
         this.cargando = false;
-        this.authService.guardarToken(respuesta.datos.token);
+        // Pasamos el booleano 'recordar' al servicio
+        this.authService.guardarToken(respuesta.datos.token, recordar);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {

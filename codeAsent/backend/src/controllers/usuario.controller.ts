@@ -2,8 +2,18 @@ import { Request, Response } from 'express';
 import { UsuarioService } from '../services/usuario.service';
 import { OAuth2Client } from 'google-auth-library';
 import { generarToken } from '../utils/jwt.util';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 export class UsuarioController {
 
@@ -232,7 +242,7 @@ export class UsuarioController {
                 usuario = await UsuarioService.crear({
                     nombre: payload.name || 'Jugador Google',
                     correo: payload.email,
-                    password: '', // No requiere password local
+                    password: '',
                     rol: 'jugador'
                 });
             }
@@ -256,6 +266,84 @@ export class UsuarioController {
             res.status(500).json({
                 exito: false,
                 mensaje: 'Error al verificar credencial de Google',
+                error: error instanceof Error ? error.message : 'Error desconocido'
+            });
+        }
+    }
+
+    // Recuperacion de contraseña
+    static async solicitarRecuperacion(req: Request, res: Response): Promise<void> {
+        try {
+            const { correo } = req.body;
+
+            // 1. Usar el servicio que ya tienes para buscar al usuario
+            const usuario = await UsuarioService.obtenerPorCorreo(correo);
+
+            if (!usuario) {
+                res.status(404).json({ mensaje: 'No existe una cuenta con este correo en CodeAscent.' });
+                return;
+            }
+
+            // 2. Generar un token temporal que caduca en 15 minutos
+            const tokenRecuperacion = jwt.sign(
+                { id_usuario: usuario.id_usuario, correo: usuario.correo },
+                process.env.JWT_SECRET as string,
+                { expiresIn: '15m' }
+            );
+
+            // 3. Crear el enlace seguro hacia tu frontend
+            const enlace = `${process.env.FRONTEND_URL}/restaurar-password?token=${tokenRecuperacion}`;
+
+            // 4. Diseñar y enviar el correo con la temática de la cueva
+            await transporter.sendMail({
+                from: `"CodeAscent - Soporte Subterráneo" <${process.env.EMAIL_USER}>`,
+                to: correo,
+                subject: 'Recuperación de Núcleo - CodeAscent',
+                html: `
+                    <div style="background-color: #0c0908; color: #e6ded6; padding: 30px; font-family: sans-serif; border: 2px solid #42342c; border-radius: 10px; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #ff9100; text-align: center; font-size: 24px;">Restablecimiento de Credenciales</h2>
+                        <p>Saludos, operador <strong>${usuario.nombre}</strong>.</p>
+                        <p>Los sensores de la mina indican que solicitaste un restablecimiento de contraseña para tu cuenta.</p>
+                        <p>Haz clic en el siguiente enlace para calibrar una nueva clave. Por seguridad, este enlace se autodestruirá en <strong>15 minutos</strong>:</p>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${enlace}" style="background-color: #ff9100; color: #000; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; font-size: 16px;">Restaurar Contraseña</a>
+                        </div>
+                        <p style="color: #9a8a80; font-size: 12px; text-align: center;">Si no solicitaste esto, ignora este mensaje y tu núcleo permanecerá seguro.</p>
+                    </div>
+                `
+            });
+
+            res.json({ mensaje: 'Directiva de recuperación enviada exitosamente.' });
+        } catch (error) {
+            console.error('Error al enviar correo:', error);
+            res.status(500).json({ 
+                mensaje: 'Error interno de los servidores de la mina.',
+                error: error instanceof Error ? error.message : 'Error desconocido'
+            });
+        }
+    }
+
+    static async actualizarPassword(req: Request, res: Response): Promise<void> {
+        try {
+            const { token, nuevaPassword } = req.body;
+
+            let decodificado: any;
+            try {
+                decodificado = jwt.verify(token, process.env.JWT_SECRET as string);
+            } catch (err) {
+                res.status(401).json({ mensaje: 'El enlace de recuperación ha caducado o es inválido.' });
+                return;
+            }
+
+            const id_usuario = decodificado.id_usuario;
+
+            await UsuarioService.actualizar(id_usuario, { password: nuevaPassword });
+
+            res.status(200).json({ mensaje: 'Contraseña actualizada correctamente.' });
+
+        } catch (error) {
+            res.status(500).json({
+                mensaje: 'Error interno al actualizar la contraseña',
                 error: error instanceof Error ? error.message : 'Error desconocido'
             });
         }

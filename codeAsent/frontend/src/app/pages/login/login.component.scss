@@ -258,6 +258,17 @@
       text-shadow: 0 0 6px rgba(0, 255, 102, 0.6);
     }
   }
+  .forgot-password-link {
+    color: var(--cyan-main);
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--green-bright);
+      text-shadow: 0 0 6px rgba(0, 255, 102, 0.6);
+    }
+  }
 }
 
 .btn-principal {
