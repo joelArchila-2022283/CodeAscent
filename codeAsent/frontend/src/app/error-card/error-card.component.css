@@ -88,3 +88,9 @@
 @keyframes wifiFail{50%{opacity:.4}}
 
 .panel{display:block}.error-page{width:100%}
+
+.btn {
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto;
+}

@@ -9,28 +9,36 @@ $texto-atenuado: #7fb3a3;
 :host {
   display: flex;
   justify-content: center;
-  padding: 24px 12px;
+  align-items: center;
+  height: 100dvh;
+  width: 100vw;
+  padding: clamp(8px, 1.5vw, 16px);
   background: #050708;
   color: $neon;
   font-family: 'Baloo 2', sans-serif;
-  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .dispositivo {
   width: 100%;
-  max-width: 940px;
+  max-width: 1100px;
+  height: 100%;
+  max-height: 900px;
   background: $oscuro-1;
-  border-radius: 14px;
-  padding: 8px 26px;
+  border-radius: clamp(8px, 2vw, 14px);
+  padding: clamp(6px, 1.5vw, 8px) clamp(10px, 3vw, 26px);
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 255, 153, 0.12);
+  display: flex;
+  flex-direction: column;
 }
 
 .engranajes {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 26px;
+  width: clamp(16px, 3vw, 26px);
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -40,8 +48,8 @@ $texto-atenuado: #7fb3a3;
   &.derecha { right: 0; }
 
   div {
-    width: 12px;
-    height: 16px;
+    width: clamp(8px, 1.5vw, 12px);
+    height: clamp(12px, 2vw, 16px);
     background: #000;
     border-radius: 3px;
     margin: 0 auto;
@@ -51,12 +59,19 @@ $texto-atenuado: #7fb3a3;
 
 .pantalla {
   position: relative;
+  flex: 1;
+  min-height: 0;
   background: radial-gradient(ellipse at center, #0f1a1d 0%, $oscuro-1 100%);
-  min-height: 660px;
   border-radius: 6px;
-  padding: 20px 22px 26px;
-  overflow: hidden;
-  border: 3px solid $neon;
+  padding: clamp(10px, 2vw, 20px) clamp(10px, 2.5vw, 22px);
+  overflow: hidden; /* Nada sale de la pantalla */
+  border: clamp(2px, 0.5vw, 3px) solid $neon;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: clamp(6px, 1.5vh, 14px);
 }
 
 .lineas-escaneo {
@@ -76,24 +91,23 @@ $texto-atenuado: #7fb3a3;
 }
 
 .boton-panel {
-  position: absolute;
-  top: 20px;
-  left: 22px;
+  align-self: flex-start;
   z-index: 10;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-family: 'Bangers', cursive;
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
   letter-spacing: 1px;
   color: $neon;
   background: $oscuro-2;
   border: 2px solid $neon;
-  padding: 6px 14px;
+  padding: 4px 12px;
   border-radius: 8px;
   text-decoration: none;
   box-shadow: 0 0 10px rgba(0, 255, 153, 0.3);
   transition: all 0.2s ease;
+  margin: 0;
 
   &:hover {
     background: $neon;
@@ -103,57 +117,78 @@ $texto-atenuado: #7fb3a3;
   }
 }
 
+.encabezado-mapa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 2px;
+  z-index: 2;
+}
+
 .titulo-seccion {
   font-family: 'Bangers', cursive;
-  font-size: 22px;
+  font-size: clamp(18px, 4.5vw, 26px);
   color: $neon;
   text-align: center;
-  margin-bottom: 4px;
-  position: relative;
-  z-index: 2;
   text-shadow: 0 0 12px rgba(0, 255, 153, 0.75), 2px 2px 0 $rojo-carmesi;
+  margin: 0;
 }
 
 .subtitulo-seccion {
   text-align: center;
-  font-size: 14px;
+  font-size: clamp(11px, 2.2vw, 14px);
   color: $texto-atenuado;
-  margin-bottom: 12px;
-  position: relative;
-  z-index: 2;
   font-weight: 700;
+  margin: 0;
 }
 
 .progreso-mapa {
   text-align: center;
   font-family: 'Bangers', cursive;
-  font-size: 13px;
+  font-size: clamp(10px, 2.2vw, 13px);
   color: $naranja-ambar;
-  margin-bottom: 14px;
   letter-spacing: 1px;
-  position: relative;
-  z-index: 2;
   text-shadow: 0 0 8px rgba(255, 102, 0, 0.6);
+  margin: 0;
 }
 
 .contenedor-mapa {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
   position: relative;
-  border: 3px solid $neon;
-  border-radius: 14px;
+  border: clamp(2px, 0.5vw, 3px) solid $neon;
+  border-radius: clamp(8px, 2vw, 14px);
   overflow: hidden;
   box-shadow: 0 0 22px rgba(0, 255, 153, 0.35), 4px 5px 0 rgba(0, 0, 0, 0.6);
   background: $oscuro-1;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+}
+
+.mapa-proporcion {
+  position: relative;
+  aspect-ratio: 16 / 9; 
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
 
   img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
+    object-fit: cover;
   }
 }
 
-.niebla-mapa {
+.niebla-mapa, .capa-pines {
   position: absolute;
   inset: 0;
+}
+
+.niebla-mapa {
   z-index: 2;
   pointer-events: none;
 }
@@ -177,11 +212,7 @@ $texto-atenuado: #7fb3a3;
   }
 }
 
-.capa-pines {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-}
+.capa-pines { z-index: 5; }
 
 .pin-mapa {
   position: absolute;
@@ -192,46 +223,37 @@ $texto-atenuado: #7fb3a3;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 
-  &.visible {
-    animation: aparicionPin 0.5s ease forwards;
-  }
+  &.visible { animation: aparicionPin 0.5s ease forwards; }
 
   &.bloqueado {
     opacity: 1;
-
     .pulso-pin {
       border-color: $rojo-carmesi;
       animation: pulsoBloqueado 2.6s ease-out infinite;
     }
-
     .etiqueta-pin {
       border-color: #2a3236;
       color: $texto-atenuado;
       box-shadow: none;
     }
-
-    .lenguaje-pin {
-      color: $rojo-carmesi;
-    }
+    .lenguaje-pin { color: $rojo-carmesi; }
   }
 
-  &:hover .punto-pin:not(.bloqueado) {
-    transform: scale(1.12);
-  }
+  &:hover .punto-pin:not(.bloqueado) { transform: scale(1.12); }
 }
 
 .punto-pin {
-  width: 38px;
-  height: 38px;
+  width: clamp(22px, 5vh, 38px);
+  height: clamp(22px, 5vh, 38px);
   border-radius: 50%;
-  border: 3px solid $oscuro-1;
+  border: clamp(2px, 0.5vw, 3px) solid $oscuro-1;
   background: $neon;
   color: $oscuro-1;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Bangers', cursive;
-  font-size: 17px;
+  font-size: clamp(11px, 2.5vh, 17px);
   box-shadow: 0 0 14px rgba(0, 255, 153, 0.85), 2px 3px 0 rgba(0, 0, 0, 0.6);
   animation: rebotePin 1.8s ease-in-out infinite;
   transition: transform 0.15s ease;
@@ -249,8 +271,8 @@ $texto-atenuado: #7fb3a3;
   position: absolute;
   top: 0;
   left: 50%;
-  width: 38px;
-  height: 38px;
+  width: clamp(22px, 5vh, 38px);
+  height: clamp(22px, 5vh, 38px);
   transform: translate(-50%, 0);
   border-radius: 50%;
   border: 2px solid $neon;
@@ -258,6 +280,83 @@ $texto-atenuado: #7fb3a3;
   pointer-events: none;
 }
 
+.etiqueta-pin {
+  margin-top: 4px;
+  font-family: 'Bangers', cursive;
+  font-size: clamp(8px, 2vh, 11px);
+  letter-spacing: 0.5px;
+  background: $oscuro-2;
+  border: 2px solid $neon;
+  color: $neon;
+  padding: 2px clamp(4px, 1vw, 9px);
+  border-radius: 8px;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
+  max-width: clamp(70px, 15vw, 100%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.lenguaje-pin {
+  font-size: clamp(7px, 1.5vh, 9px);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  color: $naranja-ambar;
+  letter-spacing: 1px;
+  margin-top: 1px;
+}
+
+.leyenda-mapa {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(6px, 1.5vw, 14px);
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  margin: 0;
+
+  .item-leyenda {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: clamp(9px, 2vh, 12px);
+    color: $texto-atenuado;
+  }
+}
+
+.punto-leyenda {
+  width: clamp(8px, 2vh, 14px);
+  height: clamp(8px, 2vh, 14px);
+  border-radius: 50%;
+  border: 2px solid $oscuro-1;
+
+  &.actual {
+    background: $neon;
+    box-shadow: 0 0 6px rgba(0, 255, 153, 0.8);
+  }
+
+  &.bloqueado {
+    background: #2a3236;
+  }
+}
+
+.nota-inferior {
+  font-size: clamp(9px, 2vh, 13px);
+  color: $texto-atenuado;
+  text-align: center;
+  border-top: 2px dashed $neon-cian;
+  padding-top: clamp(6px, 1.5vh, 12px);
+  position: relative;
+  z-index: 2;
+  opacity: 0.8;
+  margin: 0;
+  width: 100%;
+}
+
+/* Animaciones */
 @keyframes rebotePin {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5px); }
@@ -278,79 +377,11 @@ $texto-atenuado: #7fb3a3;
   100% { transform: translate(-50%, 0) scale(1.8); opacity: 0; }
 }
 
-.etiqueta-pin {
-  margin-top: 6px;
-  font-family: 'Bangers', cursive;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  background: $oscuro-2;
-  border: 2px solid $neon;
-  color: $neon;
-  padding: 3px 9px;
-  border-radius: 8px;
-  white-space: nowrap;
-  box-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
-}
-
-.lenguaje-pin {
-  font-size: 9px;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  color: $naranja-ambar;
-  letter-spacing: 1px;
-  margin-top: 1px;
-}
-
-.leyenda-mapa {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: center;
-  margin-top: 14px;
-  position: relative;
-  z-index: 2;
-
-  .item-leyenda {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    color: $texto-atenuado;
-  }
-}
-
-.punto-leyenda {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid $oscuro-1;
-
-  &.actual {
-    background: $neon;
-    box-shadow: 0 0 6px rgba(0, 255, 153, 0.8);
-  }
-
-  &.bloqueado {
-    background: #2a3236;
-  }
-}
-
-.nota-inferior {
-  margin-top: 20px;
-  font-size: 13px;
-  color: $texto-atenuado;
-  text-align: center;
-  border-top: 2px dashed $neon-cian;
-  padding-top: 12px;
-  position: relative;
-  z-index: 2;
-  opacity: 0.8;
+@keyframes parpadeoNiebla {
+  0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 10px rgba(255, 26, 26, 0.35)) saturate(1); }
+  50% { opacity: 1; filter: drop-shadow(0 0 15px rgba(255, 26, 26, 0.55)) saturate(1.2); }
 }
 
 @media (max-width: 640px) {
-  .dispositivo { padding: 8px 20px; }
-  .boton-panel { position: relative; top: 0; left: 0; margin-bottom: 10px; display: inline-flex; }
-  .etiqueta-pin { font-size: 10px; padding: 2px 7px; }
+  .engranajes { display: none; }
 }

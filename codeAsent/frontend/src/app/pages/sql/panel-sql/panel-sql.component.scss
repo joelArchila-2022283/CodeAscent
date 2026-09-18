@@ -1,0 +1,147 @@
+@use 'sass:color';
+
+$madera-roble: #487b5a;
+$cobre-transistor: #d9a441;
+$pergamino-vintage: #d9ead8;
+$tinta-oscura: #102019;
+
+@keyframes iconoFlotante {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-5px) rotate(-4deg); }
+}
+
+@keyframes orbita {
+  from { transform: rotate(0deg) translateX(22px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(22px) rotate(-360deg); }
+}
+
+.panel-hub-valle {
+  .encabezado-hub {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      font-family: 'Bangers', cursive;
+      font-size: 2.2rem;
+      color: $pergamino-vintage;
+      text-shadow: 2px 2px 0px $tinta-oscura;
+      margin: 0;
+    }
+
+    p {
+      color: color.adjust($pergamino-vintage, $lightness: 10%);
+      font-size: 1.1rem;
+    }
+  }
+
+  .rejilla-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .tarjeta-nodo {
+    background: linear-gradient(145deg, rgba(24, 47, 38, .94), rgba(11, 25, 21, .94));
+    border: 2px solid #416b51;
+    border-radius: 10px;
+    padding: 1.5rem;
+    cursor: pointer;
+    box-shadow: 6px 6px 0px $tinta-oscura;
+    transition: all 0.2s ease-in-out;
+    animation: entradaTarjeta .45s ease both;
+    position: relative;
+    overflow: hidden;
+
+    &:nth-child(2) { animation-delay: .06s; }
+    &:nth-child(3) { animation-delay: .12s; }
+    &:nth-child(4) { animation-delay: .18s; }
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 8px 8px 0px $tinta-oscura;
+      background: linear-gradient(145deg, #28503e, #193528);
+
+      .icono-nodo {
+        transform: translateY(-3px) scale(1.08);
+        box-shadow: 0 0 24px currentColor;
+      }
+
+      .enlace-nodo i { transform: translate(3px, -3px); }
+    }
+
+    .icono-nodo {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 4.3rem;
+      height: 4.3rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid currentColor;
+      border-radius: 18px;
+      background: rgba(4, 15, 11, .55);
+      font-size: 2rem;
+      color: $cobre-transistor;
+      box-shadow: 0 0 12px rgba(217, 164, 65, .18);
+      transition: transform .3s ease, box-shadow .3s ease;
+      animation: iconoFlotante 3.2s ease-in-out infinite;
+
+      .icono-orbita {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 8px currentColor;
+        animation: orbita 3.4s linear infinite;
+      }
+    }
+
+    h3 {
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      color: $cobre-transistor;
+      margin: 0 0 0.5rem;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: #c7dbca;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+    }
+
+    .enlace-nodo {
+      font-weight: bold;
+      color: $madera-roble;
+      font-size: 0.9rem;
+
+      i {
+        display: inline-block;
+        margin-left: .25rem;
+        transition: transform .2s ease;
+      }
+    }
+
+    &--manual .icono-nodo { color: #f2d078; }
+    &--misiones .icono-nodo { color: #ff9276; }
+    &--consola .icono-nodo { color: #68dcf0; }
+    &--quiz .icono-nodo { color: #d19cff; }
+  }
+}
+
+@keyframes entradaTarjeta {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-nodo,
+  .icono-nodo,
+  .icono-orbita {
+    animation: none !important;
+    transition: none !important;
+  }
+}

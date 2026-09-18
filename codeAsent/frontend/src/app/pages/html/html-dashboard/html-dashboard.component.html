@@ -1,0 +1,100 @@
+<main class="html-dashboard" id="html-dashboard-root">
+  <div class="html-bg-layer" aria-hidden="true">
+    <div class="html-bg-image"></div>
+    <div class="torch-ambient-glow torch-left"></div>
+    <div class="torch-ambient-glow torch-right"></div>
+    <div class="html-dust-motes"></div>
+  </div>
+
+  <header class="bunker-header" id="dashboard-header">
+    <div class="bunker-brand">
+      <div class="bunker-logo-stone">
+        <div class="miner-mascot-unit" [class.bounce]="cartoonMascotState() === 'idle'" [title]="mascotDialogue()">
+          <div class="miner-helmet"><div class="helmet-light"></div></div>
+          <div class="mascot-face"><div class="eye left"><div class="pupil"></div></div><div class="eye right"><div class="pupil"></div></div></div>
+        </div>
+        <div class="bunker-title-block">
+          <h1 class="bunker-title">HTML LAB</h1>
+          <span class="bunker-subtitle">SECTOR 01: HTML</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bunker-player-hud">
+      <div class="hud-stats-box">
+        <div class="hud-name-row">
+          <span class="hud-name">{{ player.name }}</span>
+          <span class="hud-rank">RANGO LVL {{ player.level }}</span>
+        </div>
+        <div class="hud-xp-rail">
+          <div class="hud-xp-fill" [style.width.%]="(player.currentXp / player.nextLevelXp) * 100"></div>
+        </div>
+        <div class="hud-meta-row">
+          <span>{{ player.currentXp }}/{{ player.nextLevelXp }} XP</span>
+          <span class="hud-watts">⚡ {{ player.energyWatts }}W</span>
+        </div>
+      </div>
+
+      <a class="map-return-button" routerLink="/mapa" aria-label="Regresar al mapa">
+        <i class="bi bi-arrow-left-circle-fill"></i>
+        <span>REGRESAR AL MAPA</span>
+      </a>
+    </div>
+  </header>
+
+  <nav class="bunker-nav-rock" aria-label="Módulos HTML">
+    <ul class="bunker-nav__list">
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'dashboard'" (click)="navigateTo('dashboard')">
+          <span class="rock-btn__icon"><i class="bi bi-hdd-rack-fill"></i></span>
+          <span class="rock-btn__text">DASHBOARD</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'data'" (click)="navigateTo('data')">
+          <span class="rock-btn__icon"><i class="bi bi-file-earmark-binary"></i></span>
+          <span class="rock-btn__text">DATA</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'processes'" (click)="navigateTo('processes')">
+          <span class="rock-btn__icon"><i class="bi bi-gear-wide-connected"></i></span>
+          <span class="rock-btn__text">PROCESSES</span>
+          <span class="rock-badge">4</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'terminal'" (click)="navigateTo('terminal')">
+          <span class="rock-btn__icon"><i class="bi bi-terminal-fill"></i></span>
+          <span class="rock-btn__text">TERMINAL</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')">
+          <span class="rock-btn__icon"><i class="bi bi-floppy-fill"></i></span>
+          <span class="rock-btn__text">TEST</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="bunker-content-stage">
+    @switch (activeSection()) {
+      @case ('dashboard') {
+        <app-html-dashboard-section (sectionSelected)="navigateTo($event)" />
+      }
+      @case ('data') {
+        <app-html-data (back)="navigateTo('dashboard')" />
+      }
+      @case ('processes') {
+        <app-html-processes (back)="navigateTo('dashboard')" />
+      }
+      @case ('terminal') {
+        <app-html-terminal (back)="navigateTo('dashboard')" />
+      }
+      @case ('test') {
+        <app-html-test (back)="navigateTo('dashboard')" />
+      }
+    }
+  </div>
+</main>
