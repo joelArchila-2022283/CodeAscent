@@ -8,27 +8,33 @@ import { SqlComponent } from './pages/sql/sql.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
+// 1. Importamos los guardianes que protegerán las rutas
+import { authGuard, guestGuard } from './core/guards/auth-guard'; 
+
 // TODO: Tus compañeros deben descomentar estas importaciones cuando creen los componentes
 // import { CssComponent } from './pages/css/css.component';
 // import { TypescriptComponent } from './pages/typescript/typescript.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'registro', component: RegistroComponent },
+  
+  // Rutas PÚBLICAS 
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'registro', component: RegistroComponent, canActivate: [guestGuard] },
   
   // Redirección de seguridad para cuando el login es exitoso
   { path: 'inicio', redirectTo: 'mapa', pathMatch: 'full' },
 
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'mapa', component: MapaComponent },
-  { path: 'curso/html', component: HtmlDashboardComponent },
-  { path: 'sql', component: SqlComponent },
-  { path: 'curso/sql', component: SqlComponent },
+  // Rutas PRIVADAS
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'mapa', component: MapaComponent, canActivate: [authGuard] },
+  { path: 'curso/html', component: HtmlDashboardComponent, canActivate: [authGuard] },
+  { path: 'sql', component: SqlComponent, canActivate: [authGuard] },
+  { path: 'curso/sql', component: SqlComponent, canActivate: [authGuard] },
   
-  // Rutas preparadas para tus compañeros de equipo:
-  // { path: 'curso/css', component: CssComponent },
-  // { path: 'curso/typescript', component: TypescriptComponent },
+  // Rutas preparadas para tus compañeros de equipo (También deben ir protegidas):
+  // { path: 'curso/css', component: CssComponent, canActivate: [authGuard] },
+  // { path: 'curso/typescript', component: TypescriptComponent, canActivate: [authGuard] },
 
   { path: 'error/:type', component: ErrorPageComponent },
   { path: '**', component: NotFoundComponent }
