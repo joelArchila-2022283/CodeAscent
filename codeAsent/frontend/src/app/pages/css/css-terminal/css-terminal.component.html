@@ -1,0 +1,12 @@
+<section class="content">
+  <button class="back" (click)="back.emit()">← DASHBOARD</button>
+  <div class="eyebrow">TERMINAL // CSS LIVE LAB</div>
+  <h2>APLICA LO APRENDIDO</h2>
+  <p class="lead">Aquí no recibes la solución: tienes un objetivo, una pista opcional y una previsualización para comprobar tu trabajo.</p>
+  <div class="task-tabs">@for (task of tasks; track task.title; let i=$index){<button [class.active]="taskIndex()===i" (click)="chooseTask(i)">{{ i + 1 }}</button>}</div>
+  <article class="objective"><small>EJERCICIO ACTIVO</small><h3>{{ currentTask().title }}</h3><p>{{ currentTask().instruction }}</p><button class="hint-btn" (click)="showHint.set(!showHint())">💡 {{ showHint() ? 'OCULTAR PISTA' : 'VER PISTA' }}</button>@if(showHint()){<div class="hint">{{ currentTask().hint }}</div>}</article>
+  <div class="terminal-grid">
+    <div class="terminal-box"><label>EDITOR CSS</label><textarea [(ngModel)]="code" spellcheck="false"></textarea><div class="actions"><button class="primary" (click)="run()">▶ EJECUTAR CSS</button><button (click)="reset()">REINICIAR</button></div><pre class="console">{{ consoleText() }}</pre></div>
+    <div class="preview"><b>PREVISUALIZACIÓN</b><p class="preview-note">El resultado cambia al ejecutar tu CSS.</p><div class="demo css-live-demo"><h3>Tarjeta CodeAscent</h3><p>Estoy esperando tus estilos.</p><button>BOTÓN</button></div></div>
+  </div>
+</section>
