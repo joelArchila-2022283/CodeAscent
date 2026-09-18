@@ -3,8 +3,8 @@ import { Routes } from '@angular/router';
 // Componentes de Autenticación y Principales
 import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
-import { RecuperarPasswordComponent } from './pages/recuperar-password/recuperar-password.component';
-import { RestaurarPasswordComponent } from './pages/restaurar-password/restaurar-password.component';
+import { RecuperarPasswordComponent } from './pages/recuperar-password/recuperar-password';
+import { RestaurarPasswordComponent } from './pages/restaurar-password/restaurar-password';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { MapaComponent } from './pages/mapa/mapa.component';
 
@@ -19,7 +19,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
 // Guardianes de Autenticación
-import { authGuard, guestGuard } from './core/guards/auth.guard'; 
+import { authGuard, guestGuard } from './core/guards/auth-guard'; 
 
 export const routes: Routes = [
   {
