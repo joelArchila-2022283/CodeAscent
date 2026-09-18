@@ -4,28 +4,43 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { MapaComponent } from './pages/mapa/mapa.component';
+
 import { HtmlDashboardComponent } from './pages/html/html-dashboard/html-dashboard.component';
+import { CssDashboardComponent } from './pages/css/css-dashboard/css-dashboard.component';
 import { SqlComponent } from './pages/sql/sql.component';
 import { TSDashboardComponent } from './pages/TS/TS-dashboard/TS-dashboard.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
-
 import { autenticacionGuard } from './core/guards/autenticacion-guard';
 
+
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
 
-  { path: 'login', component: LoginComponent },
 
-  { path: 'registro', component: RegistroComponent },
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
 
-  { path: 'dashboard', component: TSDashboardComponent },
+ 
+  {
+    path: 'login',
+    component: LoginComponent
+  },
+
+  {
+    path: 'registro',
+    component: RegistroComponent
+  },
+
 
   {
     path: 'inicio',
     redirectTo: 'mapa',
     pathMatch: 'full'
   },
+
 
   {
     path: 'dashboard',
@@ -46,6 +61,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'curso/css',
+    component: CssDashboardComponent,
+    canActivate: [autenticacionGuard]
+  },
+
+
+  {
     path: 'sql',
     component: SqlComponent,
     canActivate: [autenticacionGuard]
@@ -57,7 +79,23 @@ export const routes: Routes = [
     canActivate: [autenticacionGuard]
   },
 
-  { path: 'error/:type', component: ErrorPageComponent },
 
-  { path: '**', component: NotFoundComponent }
+  {
+    path: 'curso/typescript',
+    component: TSDashboardComponent,
+    canActivate: [autenticacionGuard]
+  },
+
+
+  {
+    path: 'error/:type',
+    component: ErrorPageComponent
+  },
+
+
+  {
+    path: '**',
+    component: NotFoundComponent
+  }
+
 ];
