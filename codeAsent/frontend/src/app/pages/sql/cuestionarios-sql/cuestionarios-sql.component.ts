@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NivelSql } from '../../../interfaces/sql.interface';
 
 interface PreguntaSql {
   id: number;
@@ -16,7 +17,8 @@ interface PreguntaSql {
   templateUrl: './cuestionarios-sql.component.html',
   styleUrls: ['./cuestionarios-sql.component.scss']
 })
-export class CuestionariosSqlComponent {
+export class CuestionariosSqlComponent implements OnChanges {
+  @Input() nivelActivo: NivelSql | null = null;
   indicePreguntaActual = signal<number>(0);
   opcionSeleccionada = signal<number | null>(null);
   respuestaVerificada = signal<boolean>(false);
@@ -39,6 +41,33 @@ export class CuestionariosSqlComponent {
       explicacionFormativa: '¡Exacto! El operador AND exige que todas las condiciones evaluadas sean verdaderas.'
     }
   ];
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['nivelActivo'] || !this.nivelActivo) return;
+    const retos = this.nivelActivo.retos.filter(reto => reto.tipo_reto === 'opcion_multiple' && reto.respuestas.length > 0);
+    if (retos.length === 0) {
+      this.preguntas = [{
+        id: this.nivelActivo.id_nivel,
+        pregunta: `¿Qué concepto debes aplicar en el nivel «${this.nivelActivo.nombre}»?`,
+        opciones: ['Analizar el problema', 'Ignorar la descripción', 'Repetir sin pensar', 'Usar cualquier comando'],
+        indiceCorrecto: 0,
+        explicacionFormativa: 'Primero comprende el problema y después traduce esa idea a una consulta SQL.'
+      }];
+    } else {
+      this.preguntas = retos.map(reto => ({
+        id: reto.id_reto,
+        pregunta: reto.descripcion,
+        opciones: reto.respuestas.map(respuesta => respuesta.contenido),
+        indiceCorrecto: Math.max(0, reto.respuestas.findIndex(respuesta => respuesta.es_correcta)),
+        explicacionFormativa: `Revisa el concepto «${this.nivelActivo!.nombre}» y explica por qué esa respuesta resuelve el problema.`
+      }));
+    }
+    this.indicePreguntaActual.set(0);
+    this.opcionSeleccionada.set(null);
+    this.respuestaVerificada.set(false);
+    this.puntuacion.set(0);
+    this.quizFinalizado.set(false);
+  }
 
   seleccionarRespuesta(indice: number): void {
     if (!this.respuestaVerificada()) {

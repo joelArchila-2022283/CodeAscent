@@ -90,22 +90,36 @@
     </ul>
   </nav>
 
+  <section class="nivel-selector" aria-label="Nivel SQL activo">
+    <div class="nivel-selector__icon" aria-hidden="true"><i class="bi bi-diagram-3-fill"></i></div>
+    <div class="nivel-selector__copy">
+      <span class="nivel-selector__eyebrow">RUTA DE APRENDIZAJE</span>
+      <strong>{{ nivelActivo() ? 'Nivel ' + nivelActivo()!.numero_nivel + ': ' + nivelActivo()!.nombre : 'Cargando niveles...' }}</strong>
+      <small>{{ nivelActivo()?.descripcion || errorNiveles() || 'Problema, pensamiento, intento y retroalimentación.' }}</small>
+    </div>
+    <select [value]="nivelActivo()?.numero_nivel ?? ''" (change)="seleccionarNivel($event)" [disabled]="cargandoNiveles() || niveles().length === 0">
+      @for (nivel of niveles(); track nivel.id_nivel) {
+        <option [value]="nivel.numero_nivel">NIVEL {{ nivel.numero_nivel }}</option>
+      }
+    </select>
+  </section>
+
   <!-- Contenedor del módulo activo -->
   <main class="bunker-content-stage">
     @if (seccionActiva() === 'panel') {
       <app-panel-sql (navegarA)="cambiarSeccion($event)"></app-panel-sql>
     }
     @if (seccionActiva() === 'manual') {
-      <app-manual-tecnico-sql></app-manual-tecnico-sql>
+      <app-manual-tecnico-sql [nivelActivo]="nivelActivo()"></app-manual-tecnico-sql>
     }
     @if (seccionActiva() === 'misiones') {
-      <app-misiones-sql (navegarA)="cambiarSeccion($event)"></app-misiones-sql>
+      <app-misiones-sql [niveles]="niveles()" [nivelActivo]="nivelActivo()" (navegarA)="cambiarSeccion($event)"></app-misiones-sql>
     }
     @if (seccionActiva() === 'consola') {
-      <app-consola-sql></app-consola-sql>
+      <app-consola-sql [nivelActivo]="nivelActivo()"></app-consola-sql>
     }
     @if (seccionActiva() === 'cuestionario') {
-      <app-cuestionarios-sql></app-cuestionarios-sql>
+      <app-cuestionarios-sql [nivelActivo]="nivelActivo()"></app-cuestionarios-sql>
     }
   </main>
 </main>

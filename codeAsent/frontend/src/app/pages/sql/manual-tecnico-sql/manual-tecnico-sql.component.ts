@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NivelSql } from '../../../interfaces/sql.interface';
 
 interface LeccionSql {
   id: string;
@@ -18,7 +19,8 @@ interface LeccionSql {
   templateUrl: './manual-tecnico-sql.component.html',
   styleUrls: ['./manual-tecnico-sql.component.scss']
 })
-export class ManualTecnicoSqlComponent {
+export class ManualTecnicoSqlComponent implements OnChanges {
+  @Input() nivelActivo: NivelSql | null = null;
   indiceLeccionSeleccionada = signal<number>(0);
 
   lecciones: LeccionSql[] = [
@@ -51,5 +53,24 @@ export class ManualTecnicoSqlComponent {
 
   seleccionarLeccion(indice: number): void {
     this.indiceLeccionSeleccionada.set(indice);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['nivelActivo'] || !this.nivelActivo) return;
+
+    const leccionesDb = this.nivelActivo.lecciones.map(leccion => ({
+      id: `nivel-${this.nivelActivo!.id_nivel}-leccion-${leccion.id_leccion}`,
+      codigoIdentificador: `SQL-N${this.nivelActivo!.numero_nivel}-L${leccion.orden}`,
+      titulo: leccion.titulo,
+      subtitulo: this.nivelActivo!.nombre,
+      explicacionConceptual: leccion.contenido,
+      ejemploConsulta: leccion.ejemplos[0]?.codigo || 'SELECT * FROM tabla_objetivo;',
+      puntosClave: leccion.ejemplos.map(ejemplo => ejemplo.explicacion || ejemplo.titulo || 'Analiza el ejemplo antes de ejecutarlo.')
+    }));
+
+    if (leccionesDb.length > 0) {
+      this.lecciones = leccionesDb;
+      this.indiceLeccionSeleccionada.set(0);
+    }
   }
 }
