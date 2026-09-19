@@ -1,22 +1,204 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+  inject,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CssDataService } from '../../../services/css-data.service';
+import { NivelCss, RetoCss } from '../../../interfaces/css.interface';
 
-interface PracticeTask { title: string; instruction: string; hint: string; starter: string; }
-@Component({ selector:'app-css-terminal', standalone:true, imports:[FormsModule], templateUrl:'./css-terminal.component.html', styleUrl:'./css-terminal.component.scss' })
-export class CssTerminalComponent {
+@Component({
+  selector: 'app-css-terminal',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './css-terminal.component.html',
+  styleUrl: './css-terminal.component.scss'
+})
+export class CssTerminalComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() selectedLevel = 1;
   @Output() back = new EventEmitter<void>();
+  @Output() progressUpdated = new EventEmitter<void>();
+
+  private cssData = inject(CssDataService);
+
+  levels: NivelCss[] = [];
   taskIndex = signal(0);
-  showHint = signal(false);
-  consoleText = signal('> Terminal CSS lista.\n> Lee el objetivo y modifica el código.');
-  tasks: PracticeTask[] = [
-    { title:'01 · SELECTOR DE CLASE', instruction:'Aplica la regla a la tarjeta de práctica usando el selector de clase correcto.', hint:'En DATA aprendiste que las clases empiezan con un símbolo específico.', starter:`/* Apunta a la clase demo */\n.demo {\n  color: white;\n}` },
-    { title:'02 · COLOR Y FONDO', instruction:'Haz que la tarjeta tenga texto claro sobre un fondo morado.', hint:'Una propiedad controla las letras y otra la superficie.', starter:`.demo {\n  /* agrega color y background-color */\n}` },
-    { title:'03 · BOX MODEL', instruction:'Agrega 24px de espacio interior y un borde sólido de 3px a la tarjeta.', hint:'El espacio entre contenido y borde no es margin.', starter:`.demo {\n  /* agrega padding y border */\n}` },
-    { title:'04 · TIPOGRAFÍA', instruction:'Haz que el título h3 mida 28px, tenga peso 700 y quede centrado.', hint:'Necesitarás tres propiedades de Tipografía vistas en DATA.', starter:`.demo h3 {\n  /* font-size, font-weight y alineación */\n}` }
-  ];
-  code = this.tasks[0].starter;
-  currentTask(){ return this.tasks[this.taskIndex()]; }
-  chooseTask(i:number){ this.taskIndex.set(i); this.code=this.tasks[i].starter; this.showHint.set(false); this.consoleText.set('> Ejercicio cargado.\n> Modifica el código y ejecútalo.'); }
-  run(): void { const id='codeascent-css-live-style'; document.getElementById(id)?.remove(); const style=document.createElement('style'); style.id=id; style.textContent=this.code.replace(/\.demo/g,'.css-live-demo'); document.head.appendChild(style); this.consoleText.set('> CSS procesado.\n> Observa la previsualización y compárala con el objetivo.'); }
-  reset(): void { document.getElementById('codeascent-css-live-style')?.remove(); this.code=this.currentTask().starter; this.consoleText.set('> Ejercicio reiniciado.'); }
+  stars = signal(3);
+  success = signal<boolean | null>(null);
+  loading = signal(true);
+  validating = signal(false);
+  error = signal<string | null>(null);
+  consoleText = signal('> Cargando misiones CSS desde PostgreSQL...');
+  code = '';
+
+  ngOnInit(): void {
+    this.cargarNiveles();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['selectedLevel'] && !changes['selectedLevel'].firstChange && this.levels.length > 0) {
+      this.load(this.selectedLevel);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.removePreviewStyles();
+  }
+
+  private cargarNiveles(): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.cssData.obtenerNivelesPedagogicos().subscribe({
+      next: (niveles: NivelCss[]) => {
+        this.levels = niveles ?? [];
+        this.loading.set(false);
+
+        if (this.levels.length === 0) {
+          this.error.set('El backend no devolvió niveles CSS.');
+          this.consoleText.set('> No se encontraron niveles CSS en PostgreSQL.');
+          return;
+        }
+
+        this.load(this.selectedLevel);
+        this.consoleText.set(
+          `> ${this.levels.length} niveles CSS cargados desde PostgreSQL.\n` +
+          `> Misión ${this.selectedLevel} preparada.`
+        );
+      },
+      error: (error) => {
+        console.error('Error cargando niveles CSS:', error);
+        this.loading.set(false);
+        this.error.set('No se pudieron cargar las misiones CSS desde el backend.');
+        this.consoleText.set('> ERROR: No se pudieron cargar las misiones CSS.');
+      }
+    });
+  }
+
+  currentLevel(): NivelCss | null {
+    return this.levels[this.taskIndex()] ?? null;
+  }
+
+  currentTask(): RetoCss | null {
+    return this.currentLevel()?.retos?.find((reto: RetoCss) => reto.tipo_reto === 'codigo') ?? null;
+  }
+
+  load(numeroNivel: number): void {
+    if (!this.levels.length) return;
+
+    const index = this.levels.findIndex((nivel: NivelCss) => nivel.numero_nivel === numeroNivel);
+    this.taskIndex.set(index >= 0 ? index : 0);
+    this.code = '';
+    this.success.set(null);
+    this.stars.set(3);
+    this.removePreviewStyles();
+
+    const nivel = this.currentLevel();
+    const reto = this.currentTask();
+    if (!nivel || !reto) {
+      this.consoleText.set('> Este nivel no tiene una misión de código configurada.');
+      return;
+    }
+
+    this.consoleText.set(
+      `> Nivel ${nivel.numero_nivel}: ${nivel.nombre}\n` +
+      `> Misión: ${reto.titulo}\n` +
+      '> Datos cargados desde PostgreSQL.'
+    );
+  }
+
+  chooseTask(index: number): void {
+    const nivel = this.levels[index];
+    if (nivel) this.load(nivel.numero_nivel);
+  }
+
+  run(): void {
+    const task = this.currentTask();
+
+    if (!task) {
+      this.consoleText.set('> No existe una misión de código para ejecutar.');
+      return;
+    }
+
+    if (!this.code.trim()) {
+      this.success.set(false);
+      this.consoleText.set('> Escribe una regla CSS antes de ejecutar.');
+      return;
+    }
+
+    // El preview se mantiene instantáneo, pero la validación real se hace en backend.
+    this.applyPreview();
+    this.validating.set(true);
+    this.consoleText.set('> Validando misión en el servidor...');
+
+    this.cssData.registrarIntentoCss(task.id_reto, this.code).subscribe({
+      next: resultado => {
+        this.validating.set(false);
+        this.success.set(resultado.correcto);
+
+        if (!resultado.correcto) {
+          this.consoleText.set(
+            '> El CSS se aplicó al preview, pero la misión todavía no coincide con la solución esperada.\n' +
+            '> El intento fue registrado en PostgreSQL.'
+          );
+          return;
+        }
+
+        if (resultado.ya_completado) {
+          this.consoleText.set(
+            '> MISIÓN CORRECTA.\n' +
+            '> Esta misión ya había sido completada, por eso no se otorgó XP adicional.'
+          );
+        } else {
+          this.consoleText.set(
+            '> MISIÓN COMPLETADA.\n' +
+            `> +${resultado.xp_obtenida} XP guardados en PostgreSQL.\n` +
+            '> Siguiente nivel desbloqueado.'
+          );
+        }
+
+        this.progressUpdated.emit();
+      },
+      error: error => {
+        console.error('Error registrando intento CSS:', error);
+        this.validating.set(false);
+        this.success.set(null);
+        this.consoleText.set('> ERROR: No se pudo guardar el intento en PostgreSQL.');
+      }
+    });
+  }
+
+  reset(): void {
+    this.code = '';
+    this.success.set(null);
+    this.removePreviewStyles();
+    this.consoleText.set('> Editor reiniciado.');
+  }
+
+  private applyPreview(): void {
+    this.removePreviewStyles();
+    const style = document.createElement('style');
+    style.id = 'codeascent-css-live-style';
+    style.textContent = this.scopePreviewCss(this.code);
+    document.head.appendChild(style);
+  }
+
+  private scopePreviewCss(css: string): string {
+    return css.replace(
+      /(^|})\s*([^@}{][^{]*)\{/g,
+      (_match, closing, selectors) =>
+        `${closing}\n${selectors.split(',').map((selector: string) => `.css-live-demo ${selector.trim()}`).join(', ')} {`
+    );
+  }
+
+  private removePreviewStyles(): void {
+    document.getElementById('codeascent-css-live-style')?.remove();
+  }
 }
