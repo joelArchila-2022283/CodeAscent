@@ -143,14 +143,14 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       'SELECT id_lenguaje, porcentaje FROM progreso WHERE id_usuario = $1',
       [idUsuario]
     );
-    
+
     const mapProgresos = new Map<number, number>();
     resProgresosUser.rows.forEach((p: any) => mapProgresos.set(p.id_lenguaje, p.porcentaje));
 
     // Construir los nodos en la secuencia exacta requerida
     const nodosMapa = resLenguajes.rows.map((lenguaje: any, index: number) => {
       const porcentajeLenguaje = mapProgresos.get(lenguaje.id_lenguaje) || 0;
-      
+
       let estado: 'unlocked' | 'current' | 'locked' = 'locked';
       let subtexto = 'Bloqueado';
 
@@ -173,6 +173,108 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       };
     });
 
+    const resMisiones = await pool.query(`
+  SELECT
+    n.id_nivel,
+    n.numero_nivel,
+    n.nombre,
+    n.descripcion,
+    n.xp_requerida,
+
+    le.id_leccion,
+    le.titulo AS leccion_titulo,
+    le.contenido AS leccion_contenido,
+
+    r.id_reto,
+    r.titulo AS reto_titulo,
+    r.descripcion AS reto_descripcion,
+    r.tipo_reto,
+    r.xp_recompensa,
+    r.dificultad,
+
+    resp.id_respuesta,
+    resp.contenido AS respuesta_contenido,
+    resp.es_correcta
+
+  FROM nivel n
+
+  INNER JOIN lenguaje l
+    ON l.id_lenguaje = n.id_lenguaje
+
+  LEFT JOIN leccion le
+    ON le.id_nivel = n.id_nivel
+    AND le.estado = TRUE
+
+  LEFT JOIN reto r
+    ON r.id_leccion = le.id_leccion
+    AND r.estado = TRUE
+
+  LEFT JOIN respuesta resp
+    ON resp.id_reto = r.id_reto
+
+  WHERE LOWER(l.nombre) = 'typescript'
+    AND n.estado = TRUE
+
+  ORDER BY
+    n.numero_nivel ASC,
+    le.orden ASC NULLS LAST,
+    r.id_reto ASC,
+    resp.id_respuesta ASC
+`);
+
+    const misionesMap = new Map<number, any>();
+
+    for (const fila of resMisiones.rows) {
+
+      if (!misionesMap.has(fila.id_nivel)) {
+
+        misionesMap.set(fila.id_nivel, {
+          id_nivel: fila.id_nivel,
+          numero_nivel: fila.numero_nivel,
+          nombre: fila.nombre,
+          descripcion: fila.descripcion,
+          xp_requerida: fila.xp_requerida,
+
+          leccion: fila.id_leccion
+            ? {
+              id_leccion: fila.id_leccion,
+              titulo: fila.leccion_titulo,
+              contenido: fila.leccion_contenido
+            }
+            : null,
+
+          reto: fila.id_reto
+            ? {
+              id_reto: fila.id_reto,
+              titulo: fila.reto_titulo,
+              descripcion: fila.reto_descripcion,
+              tipo_reto: fila.tipo_reto,
+              xp_recompensa: fila.xp_recompensa,
+              dificultad: fila.dificultad,
+              respuestas: []
+            }
+            : null
+        });
+      }
+
+      const mision = misionesMap.get(fila.id_nivel);
+
+      if (
+        fila.id_respuesta &&
+        mision?.reto
+      ) {
+        mision.reto.respuestas.push({
+          id_respuesta: fila.id_respuesta,
+          contenido: fila.respuesta_contenido,
+          es_correcta: fila.es_correcta
+        });
+      }
+    }
+
+    const misiones = Array.from(
+      misionesMap.values()
+    );
+
     return res.json({
       usuario,
       progreso,
@@ -189,7 +291,9 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
         actividadSemanal: resActividad.rows,
         logros: resLogrosPerfil.rows
       },
-      nodosMapa
+      nodosMapa,
+
+      misiones
     });
 
   } catch (error: any) {

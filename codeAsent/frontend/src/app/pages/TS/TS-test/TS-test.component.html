@@ -1,5 +1,6 @@
 <section class="ts-section test-section">
 
+    ```
     <header>
         <span class="section-kicker">
             <i class="bi bi-cpu-fill"></i>
@@ -13,71 +14,192 @@
         </p>
     </header>
 
+
+    <!-- CARGANDO -->
     <div *ngIf="cargando()" class="text-center py-4">
+
         <div class="spinner-border text-info" role="status"></div>
-        <p class="mt-2">Cargando prueba...</p>
+
+        <p class="mt-2">
+            Cargando prueba...
+        </p>
+
     </div>
 
-    <p *ngIf="!cargando() && errorCarga()">{{ errorCarga() }}</p>
 
-    <p *ngIf="!cargando() && !errorCarga() && options().length === 0">
+    <!-- ERROR -->
+    <p *ngIf="!cargando() && errorCarga()">
+
+        {{ errorCarga() }}
+
+    </p>
+
+
+    <!-- SIN PREGUNTAS -->
+    <p *ngIf="
+        !cargando() &&
+        !errorCarga() &&
+        options().length === 0
+    ">
         No hay pruebas registradas todavía para este nivel.
     </p>
 
-    <div class="test-panel" *ngIf="!cargando() && !errorCarga() && options().length > 0">
 
+    <!-- PANEL DE PRUEBA -->
+    <div class="test-panel" *ngIf="
+        !cargando() &&
+        !errorCarga() &&
+        options().length > 0
+    ">
+
+        <!-- PROGRESO -->
         <div class="test-progress">
-            <span>PRUEBA 1 / {{ totalPreguntas() }}</span>
-            <span>{{ xpRecompensa() }} XP</span>
+
+            <span>
+                PRUEBA
+                {{ preguntaActual() + 1 }}
+                /
+                {{ totalPreguntas() }}
+            </span>
+
+            <span>
+                {{ xpRecompensa() }} XP
+            </span>
+
         </div>
 
+
+        <!-- ORBE -->
         <div class="ts-orb">
+
             <i class="bi bi-lightning-charge-fill"></i>
+
         </div>
 
-        <h3>{{ question() }}</h3>
 
+        <!-- PREGUNTA -->
+        <h3>
+            {{ question() }}
+        </h3>
+
+
+        <!-- OPCIONES -->
         <div class="options">
 
-            <button *ngFor="let option of options(); let i = index" type="button" [class.selected]="selected() === i"
-                [class.correct]="answered() && i === correctIndex()" (click)="choose(i)">
+            <button *ngFor="
+                let option of options();
+                let i = index
+            " type="button" [class.selected]="
+                selected() === i
+            " [class.correct]="
+                answered() &&
+                selected() === correctIndex() &&
+                i === correctIndex()
+            " [class.incorrect]="
+                selected() === i &&
+                selected() !== correctIndex()
+            " [disabled]="
+                answered() &&
+                selected() === correctIndex()
+            " (click)="choose(i)">
 
-                <span>{{ ['A', 'B', 'C', 'D'][i] }}</span>
+                <span>
+                    {{ ['A', 'B', 'C', 'D'][i] }}
+                </span>
 
                 {{ option }}
 
-                <i *ngIf="answered() && i === correctIndex()" class="bi bi-check-circle-fill">
+
+                <!-- CORRECTO -->
+                <i *ngIf="
+                    answered() &&
+                    selected() === correctIndex() &&
+                    i === correctIndex()
+                " class="bi bi-check-circle-fill">
+                </i>
+
+
+                <!-- INCORRECTO -->
+                <i *ngIf="
+                    selected() === i &&
+                    selected() !== correctIndex()
+                " class="bi bi-x-circle-fill">
                 </i>
 
             </button>
 
         </div>
 
-        @if (answered()) {
 
-        <p class="answer-note" [class.good]="selected() === correctIndex()">
+        <!-- FEEDBACK -->
+        @if (selected() !== null) {
 
-            <i class="bi" [class.bi-check-circle-fill]="selected() === correctIndex()"
-                [class.bi-exclamation-triangle-fill]="selected() !== correctIndex()">
+        <p class="answer-note" [class.good]="
+                selected() === correctIndex()
+            ">
+
+            <i class="bi" [class.bi-check-circle-fill]="
+                    selected() === correctIndex()
+                " [class.bi-exclamation-triangle-fill]="
+                    selected() !== correctIndex()
+                ">
             </i>
+
 
             {{
             selected() === correctIndex()
+
             ? 'Núcleo estable. La respuesta TypeScript es correcta.'
-            : 'La presión sube. Revisa los conceptos fundamentales de TypeScript.'
+
+            : 'La presión sube. Revisa los conceptos fundamentales de TypeScript e inténtalo nuevamente.'
             }}
 
         </p>
 
-        }
+
+        <!-- SIGUIENTE -->
+        @if (
+        selected() === correctIndex() &&
+        preguntaActual() + 1 < totalPreguntas() ) { <button class="ts-back" type="button" (click)="siguientePregunta()">
+
+            SIGUIENTE PRUEBA
+
+            <i class="bi bi-arrow-right"></i>
+
+            </button>
+
+            }
+
+
+            <!-- FINALIZADO -->
+            @if (
+            selected() === correctIndex() &&
+            preguntaActual() + 1 >= totalPreguntas()
+            ) {
+
+            <p class="answer-note good">
+
+                <i class="bi bi-check-circle-fill"></i>
+
+                HAS COMPLETADO TODAS LAS PRUEBAS TYPESCRIPT.
+
+            </p>
+
+            }
+
+            }
 
     </div>
 
+
+    <!-- VOLVER -->
     <button class="ts-back" type="button" (click)="back.emit()">
 
         <i class="bi bi-arrow-left"></i>
+
         VOLVER AL PANEL
 
     </button>
+    ```
 
 </section>

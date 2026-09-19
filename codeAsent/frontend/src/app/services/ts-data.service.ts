@@ -58,6 +58,13 @@ export interface LeccionesNivelActual {
     lecciones: ILeccion[];
 }
 
+export interface TodasLasLeccionesTS {
+    nivel: INivel;
+    lecciones: ILeccion[];
+}
+
+
+
 @Injectable({
     providedIn: 'root'
 })
@@ -190,4 +197,55 @@ export class TsDataService {
             })
         );
     }
+
+    obtenerTodasLasLecciones(): Observable<TodasLasLeccionesTS[]> {
+        return this.obtenerContexto().pipe(
+            switchMap(contexto => {
+
+                const niveles = contexto.niveles || [];
+
+                if (niveles.length === 0) {
+                    return of([]);
+                }
+
+                const peticiones = niveles
+                    .filter(nivel => nivel.id_nivel)
+                    .map(nivel =>
+                        this.http
+                            .get<RespuestaLecciones>(
+                                `${this.apiUrl}/lecciones/nivel/${nivel.id_nivel}`
+                            )
+                            .pipe(
+                                map(respuesta => ({
+                                    nivel,
+                                    lecciones: respuesta.data || []
+                                })),
+                                catchError(() =>
+                                    of({
+                                        nivel,
+                                        lecciones: []
+                                    })
+                                )
+                            )
+                    );
+
+                return forkJoin(peticiones);
+            })
+        );
+    }
+
+    obtenerLeccionesPorNivel(
+        idNivel: number
+    ): Observable<ILeccion[]> {
+
+        return this.http
+            .get<RespuestaLecciones>(
+                `${this.apiUrl}/lecciones/nivel/${idNivel}`
+            )
+            .pipe(
+                map(respuesta => respuesta.data || []),
+                catchError(() => of<ILeccion[]>([]))
+            );
+    }
 }
+

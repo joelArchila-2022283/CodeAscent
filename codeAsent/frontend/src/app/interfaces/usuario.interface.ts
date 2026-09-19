@@ -24,6 +24,7 @@ export interface DashboardData {
   logrosObtenidos: number;
   nodosMapa: NodeMapa[];
   perfil?: PerfilData;
+  misiones: IMisionTS[];
 }
 
 export interface PerfilLenguaje {
@@ -46,4 +47,38 @@ export interface PerfilData {
   };
   actividadSemanal: Array<{ fecha: string; xp: number }>;
   logros: Array<{ id_logro: number; nombre: string; descripcion?: string; fecha_obtenido: string }>;
+}
+
+export interface IRespuestaMisionTS {
+  id_respuesta: number;
+  contenido: string;
+  es_correcta: boolean;
+}
+
+export interface IRetoMisionTS {
+  id_reto: number;
+  titulo: string;
+  descripcion: string;
+  tipo_reto: 'opcion_multiple' | 'codigo' | 'verdadero_falso' | 'completar';
+  xp_recompensa: number;
+  dificultad: 'facil' | 'medio' | 'dificil';
+  respuestas: IRespuestaMisionTS[];
+}
+
+export interface ILeccionMisionTS {
+  id_leccion: number;
+  titulo: string;
+  contenido: string;
+}
+
+export interface IMisionTS {
+  id_nivel: number;
+  numero_nivel: number;
+  nombre: string;
+  descripcion: string;
+  xp_requerida: number;
+
+  leccion: ILeccionMisionTS | null;
+
+  reto: IRetoMisionTS | null;
 }
