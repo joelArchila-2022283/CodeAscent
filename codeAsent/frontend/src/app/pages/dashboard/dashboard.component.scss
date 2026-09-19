@@ -53,7 +53,6 @@
 
 .brand { display: flex; align-items: center; gap: 0.8rem; }
 
-/* LOGO MEJORADO ANIMADO (TINTA / CARTOON) */
 .brand-logo-animated {
   width: 44px; height: 44px; border-radius: 12px;
   background: #000;
@@ -92,12 +91,19 @@
   background: var(--bg-panel-2); border: 2px solid var(--line-dim); border-radius: 999px;
   padding: 0.3rem 0.9rem 0.3rem 0.3rem;
 }
-.profile-avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: #000; border: 2px solid var(--neon-green);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; color: var(--neon-green);
+
+/* CLASE NUEVA DEL AVATAR GEOMÉTRICO */
+.profile-avatar-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #0c0908;
+  border: 2px solid var(--neon-green);
+  object-fit: cover;
+  object-position: center;
+  box-shadow: 0 0 14px rgba(57,255,140,0.55);
 }
+
 .profile-name { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
 .profile-level { font-size: 0.7rem; color: var(--neon-cyan); }
 
