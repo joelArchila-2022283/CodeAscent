@@ -14,6 +14,7 @@ import rutasUsuarioLogro from './usuarioLogro.routes';
 import rutasDashboard from './dashboard.routes';
 import rutasSql from './sql.routes';
 
+import rutasCss from './css.routes';
 const enrutadorPrincipal = Router();
 
 enrutadorPrincipal.use('/usuarios', rutasUsuario);
@@ -31,5 +32,7 @@ enrutadorPrincipal.use('/logros', rutasLogro);
 enrutadorPrincipal.use('/usuarios-logros', rutasUsuarioLogro);
 enrutadorPrincipal.use('/dashboard', rutasDashboard);
 enrutadorPrincipal.use('/sql', rutasSql);
+
+enrutadorPrincipal.use('/css', rutasCss);
 
 export default enrutadorPrincipal;
