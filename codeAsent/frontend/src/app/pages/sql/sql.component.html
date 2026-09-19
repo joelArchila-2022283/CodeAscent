@@ -13,11 +13,7 @@
       <div class="bunker-logo-stone">
         <!-- Mascota estilo cartoon 1930s con ojos de tubo de goma -->
         <div class="miner-mascot-unit bounce" [title]="mascotDialogue()">
-          <div class="transistor-coil"><div class="coil-spark"></div></div>
-          <div class="mascot-face">
-            <div class="eye left"><div class="pupil"></div></div>
-            <div class="eye right"><div class="pupil"></div></div>
-          </div>
+          <img class="miner-avatar-img" [src]="obtenerUrlAvatar(datosJugador().nombreJugador || 'default')" alt="Avatar del jugador">
         </div>
         <div class="bunker-title-block">
           <h1 class="bunker-title">VALLE DE TRANSISTORES</h1>

@@ -17,10 +17,32 @@
       </section>
     } @else if (datos(); as data) {
       <section class="perfil-hero perfil-card">
-        <div class="perfil-avatar">{{ iniciales(data.usuario.nombre) }}</div>
+        <div class="perfil-avatar">
+          <img [src]="obtenerUrlAvatar(data.usuario.nombre)" alt="Avatar de {{ data.usuario.nombre }}">
+        </div>
         <div class="perfil-identidad">
           <span class="perfil-kicker">PERFIL DEL JUGADOR</span>
-          <h1>{{ data.usuario.nombre | uppercase }}</h1>
+          @if (editandoNombre()) {
+            <div class="nombre-editor">
+              <input [(ngModel)]="nombreEditado" maxlength="100" aria-label="Nombre de usuario">
+              <button type="button" class="perfil-icon-button" (click)="guardarNombre()" [disabled]="guardandoNombre()" title="Guardar usuario">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button type="button" class="perfil-icon-button perfil-icon-button--muted" (click)="cancelarEdicionNombre()" [disabled]="guardandoNombre()" title="Cancelar edición">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          } @else {
+            <div class="nombre-visible">
+              <h1>{{ data.usuario.nombre | uppercase }}</h1>
+              <button type="button" class="perfil-icon-button" (click)="iniciarEdicionNombre(data.usuario.nombre)" title="Editar usuario">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+            </div>
+          }
+          @if (mensajeNombre(); as mensaje) {
+            <small class="nombre-mensaje">{{ mensaje }}</small>
+          }
           <p class="perfil-handle">{{ data.usuario.correo }} · Nivel {{ data.progreso.id_nivel_actual || 1 }}</p>
           <div class="xp-header"><span>PROGRESO GENERAL</span><strong>{{ data.progreso.xp_actual || 0 | number }} XP</strong></div>
           <div class="progress-track"><span [style.width.%]="data.progreso.porcentaje || 0"></span></div>

@@ -19,4 +19,8 @@ export class DashboardService {
       `${this.apiUrl}/resumen`
     );
   }
+
+  actualizarNombreUsuario(idUsuario: number, nombre: string): Observable<void> {
+    return this.http.put<void>(`http://localhost:3000/api/usuarios/${idUsuario}`, { nombre });
+  }
 }

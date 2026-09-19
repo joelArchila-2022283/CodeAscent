@@ -76,23 +76,20 @@ header, nav, .bunker-content-stage { position: relative; z-index: 10; }
 .bunker-brand, .bunker-logo-stone { display: flex; align-items: center; }
 .bunker-logo-stone { gap: 1rem; }
 .miner-mascot-unit {
-  position: relative; width: 54px; height: 54px; background: #110e0d; border: 3px solid #5a473e; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 12px rgba(255,145,0,.4);
+  position: relative; width: 72px; height: 72px; background: #110e0d; border: 3px solid #5a473e; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 12px rgba(255,145,0,.4);
 }
 .miner-mascot-unit.bounce { animation: rockRumble 2.2s infinite ease-in-out; }
-.miner-helmet { position: absolute; top: -13px; width: 60px; height: 28px; background: #d48806; border-radius: 32px 32px 0 0; border: 3px solid #221712; box-shadow: 0 3px 6px rgba(0,0,0,.6); }
-.helmet-light { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; background: #fff; border-radius: 50%; border: 2px solid #221712; animation: screenPulse 1.8s infinite alternate; }
-.mascot-face { display: flex; gap: 5px; margin-top: 10px; }
-.eye { width: 11px; height: 15px; background: #e6ded6; border-radius: 50%; position: relative; overflow: hidden; }
-.pupil { position: absolute; bottom: 2px; right: 2px; width: 6px; height: 9px; background: #000; border-radius: 50%; }
+.miner-avatar-img { position: absolute; inset: 5px; z-index: 1; width: calc(100% - 10px); height: calc(100% - 10px); border-radius: 50%; object-fit: cover; opacity: .9; }
 
 .bunker-title { margin: 0; font-family: 'Bangers', cursive; font-size: 2.4rem; line-height: 1; color: $amber-fire; text-shadow: 0 0 10px rgba(255,145,0,.6), 2px 2px 0 #000; letter-spacing: .08em; }
 .bunker-subtitle { display: block; font-size: .75rem; font-weight: 700; letter-spacing: .15em; color: $cyan-screen; text-transform: uppercase; }
 
-.bunker-player-hud { min-width: 175px; display: flex; align-items: center; justify-content: flex-end; gap: 1rem; flex-wrap: wrap; }
-.hud-name-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .3rem; }
+.bunker-player-hud { min-width: 330px; display: flex; align-items: center; justify-content: flex-end; gap: 1rem; flex-wrap: wrap; }
+.hud-stats-box { min-width: 260px; }
+.hud-name-row { display: flex; justify-content: space-between; align-items: baseline; gap: 2.5rem; margin-bottom: .55rem; }
 .hud-name { font-weight: 700; font-size: 1rem; }
 .hud-rank { font-family: 'Bangers', cursive; font-size: 1rem; color: $amber-fire; }
-.hud-xp-rail { width: 100%; height: 8px; background: #0c0908; border: 1px solid $rock-border; border-radius: 999px; overflow: hidden; margin-bottom: .3rem; }
+.hud-xp-rail { width: 100%; height: 9px; background: #0c0908; border: 1px solid $rock-border; border-radius: 999px; overflow: hidden; margin-bottom: .45rem; }
 .hud-xp-fill { height: 100%; background: linear-gradient(90deg, #d48806, $amber-fire); box-shadow: 0 0 8px $amber-fire; border-radius: 999px; transition: width .4s ease; }
 .hud-meta-row { display: flex; justify-content: space-between; font-size: .75rem; color: $text-dim; }
 .hud-watts { color: $cyan-screen; font-weight: 700; }

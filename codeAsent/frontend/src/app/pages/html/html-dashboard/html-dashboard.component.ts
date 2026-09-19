@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DashboardService } from '../../../services/dashboard.service';
+import { obtenerUrlAvatar } from '../../../utils/avatar.util';
 import { HtmlDataComponent } from '../html-data/html-data.component';
 import { HtmlProcessesComponent } from '../html-processes/html-processes.component';
 import { HtmlTerminalComponent } from '../html-terminal/html-terminal.component';
@@ -16,10 +18,12 @@ export type HTMLSection = 'dashboard' | 'data' | 'processes' | 'terminal' | 'tes
   templateUrl: './html-dashboard.component.html',
   styleUrl: './html-dashboard.component.scss'
 })
-export class HtmlDashboardComponent {
+export class HtmlDashboardComponent implements OnInit {
+  private readonly dashboardService = inject(DashboardService);
+
   activeSection = signal<HTMLSection>('dashboard');
   player = {
-    name: 'Cadete Bit',
+    name: '',
     level: 1,
     currentXp: 320,
     nextLevelXp: 500,
@@ -28,6 +32,26 @@ export class HtmlDashboardComponent {
 
   cartoonMascotState = signal<'idle' | 'happy' | 'thinking' | 'shocked'>('idle');
   mascotDialogue = signal<string>('El sector HTML está listo para trabajar.');
+  jugadorCargando = signal(true);
+
+  ngOnInit(): void {
+    this.dashboardService.obtenerDatosDashboard().subscribe({
+      next: data => {
+        if (data?.usuario?.nombre) {
+          this.player.name = data.usuario.nombre;
+        }
+        this.jugadorCargando.set(false);
+      },
+      error: err => {
+        console.error('Error al cargar usuario HTML:', err);
+        this.jugadorCargando.set(false);
+      }
+    });
+  }
+
+  obtenerUrlAvatar(nombre: string | undefined): string {
+    return obtenerUrlAvatar(nombre);
+  }
 
   navigateTo(section: HTMLSection) {
     this.activeSection.set(section);

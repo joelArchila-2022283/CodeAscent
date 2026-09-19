@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { DashboardData } from '../../interfaces/usuario.interface';
+import { obtenerUrlAvatar } from '../../utils/avatar.util';
 
 @Component({
   selector: 'app-dashboard',
@@ -38,6 +39,11 @@ export class DashboardComponent implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+
+  // Generador dinámico del avatar geométrico
+  obtenerUrlAvatar(nombre: string | undefined): string {
+    return obtenerUrlAvatar(nombre);
   }
 
   irAlMapa(): void {

@@ -9,6 +9,7 @@ import { ConsolaSqlComponent } from './consola-sql/consola-sql.component';
 import { CuestionariosSqlComponent } from './cuestionarios-sql/cuestionarios-sql.component';
 import { DashboardService } from '../../services/dashboard.service';
 import { SqlService } from '../../services/sql.service';
+import { obtenerUrlAvatar } from '../../utils/avatar.util';
 
 @Component({
   selector: 'app-sql',
@@ -38,7 +39,7 @@ export class SqlComponent implements OnInit {
   errorNiveles = signal<string | null>(null);
 
   datosJugador = signal<JugadorSql>({
-    nombreJugador: 'Cadete Bit',
+    nombreJugador: '',
     tituloRango: 'Explorador del Valle de Transistores',
     nivelProgreso: 2,
     experienciaActual: 240,
@@ -49,6 +50,10 @@ export class SqlComponent implements OnInit {
   });
 
   mascotDialogue = signal<string>('¡Sintoniza las bobinas de datos, Cadete!');
+
+  obtenerUrlAvatar(nombre: string | undefined): string {
+    return obtenerUrlAvatar(nombre);
+  }
 
   ngOnInit(): void {
     this.cargarNiveles();
