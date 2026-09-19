@@ -8,6 +8,7 @@ import { CssTerminalComponent } from '../css-terminal/css-terminal.component';
 import { CssTestComponent } from '../css-test/css-test.component';
 import { DashboardService } from '../../../services/dashboard.service';
 import { CssDataService } from '../../../services/css-data.service';
+import { obtenerUrlAvatar } from '../../../utils/avatar.util';
 
 export type CSSSection = 'dashboard' | 'data' | 'processes' | 'terminal' | 'test';
 
@@ -23,12 +24,19 @@ export class CssDashboardComponent implements OnInit {
   private readonly cssDataService = inject(CssDataService);
 
   activeSection = signal<CSSSection>('dashboard');
-  player = { name: 'Cadete Bit', level: 1, currentXp: 0, nextLevelXp: 100, progress: 0 };
+  player = { name: '', level: 1, currentXp: 0, nextLevelXp: 100, progress: 0 };
+  jugadorCargando = signal(true);
 
   ngOnInit(): void {
     this.dashboardService.obtenerDatosDashboard().subscribe({
-      next: data => { if (data?.usuario?.nombre) this.player.name = data.usuario.nombre; },
-      error: err => console.error('Error al cargar usuario CSS:', err)
+      next: data => {
+        if (data?.usuario?.nombre) this.player.name = data.usuario.nombre;
+        this.jugadorCargando.set(false);
+      },
+      error: err => {
+        console.error('Error al cargar usuario CSS:', err);
+        this.jugadorCargando.set(false);
+      }
     });
 
     this.cssDataService.obtenerContexto().subscribe({
@@ -43,4 +51,6 @@ export class CssDashboardComponent implements OnInit {
   }
 
   navigateTo(section: CSSSection): void { this.activeSection.set(section); }
+
+  obtenerUrlAvatar(nombre: string | undefined): string { return obtenerUrlAvatar(nombre); }
 }
