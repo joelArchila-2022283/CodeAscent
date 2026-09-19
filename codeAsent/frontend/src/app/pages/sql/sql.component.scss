@@ -149,8 +149,8 @@ header, nav, .bunker-content-stage {
 /* --- MASCOTA CARTOON 1930s (TUBO DE GOMA) --- */
 .miner-mascot-unit {
   position: relative;
-  width: 54px;
-  height: 54px;
+  width: 72px;
+  height: 72px;
   background: #110e0d;
   border: 3px solid #5a473e;
   border-radius: 50%;
@@ -163,54 +163,17 @@ header, nav, .bunker-content-stage {
     animation: rockRumble 2.2s infinite ease-in-out;
   }
 
-  .transistor-coil {
+  .miner-avatar-img {
     position: absolute;
-    top: -13px;
-    width: 58px;
-    height: 26px;
-    background: $copper-transistor;
-    border-radius: 28px 28px 0 0;
-    border: 3px solid #221712;
-    box-shadow: 0 3px 6px rgba(0,0,0,.6);
-
-    .coil-spark {
-      position: absolute;
-      top: 2px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 14px;
-      height: 14px;
-      background: #fff;
-      border-radius: 50%;
-      border: 2px solid #221712;
-      animation: screenPulse 1.8s infinite alternate;
-    }
+    inset: 5px;
+    z-index: 1;
+    width: calc(100% - 10px);
+    height: calc(100% - 10px);
+    border-radius: 50%;
+    object-fit: cover;
+    opacity: .9;
   }
 
-  .mascot-face {
-    display: flex;
-    gap: 5px;
-    margin-top: 10px;
-
-    .eye {
-      width: 11px;
-      height: 15px;
-      background: #e6ded6;
-      border-radius: 50%;
-      position: relative;
-      overflow: hidden;
-
-      .pupil {
-        position: absolute;
-        bottom: 2px;
-        right: 2px;
-        width: 6px;
-        height: 9px;
-        background: #000;
-        border-radius: 50%;
-      }
-    }
-  }
 }
 
 .bunker-title-block {
@@ -239,7 +202,7 @@ header, nav, .bunker-content-stage {
 
 /* --- HUD DEL JUGADOR --- */
 .bunker-player-hud {
-  min-width: 175px;
+  min-width: 330px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -247,14 +210,15 @@ header, nav, .bunker-content-stage {
   flex-wrap: wrap;
 
   .hud-stats-box {
-    min-width: 160px;
+    min-width: 260px;
   }
 
   .hud-name-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: .3rem;
+    gap: 2.5rem;
+    margin-bottom: .55rem;
 
     .hud-name {
       font-weight: 700;
@@ -270,12 +234,12 @@ header, nav, .bunker-content-stage {
 
   .hud-xp-rail {
     width: 100%;
-    height: 8px;
+    height: 9px;
     background: #0c0908;
     border: 1px solid $rock-border;
     border-radius: 999px;
     overflow: hidden;
-    margin-bottom: .3rem;
+    margin-bottom: .45rem;
 
     .hud-xp-fill {
       height: 100%;
