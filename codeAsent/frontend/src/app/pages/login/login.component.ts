@@ -134,8 +134,10 @@ export class LoginComponent implements AfterViewInit {
       },
       error: (err) => {
         this.cargando = false;
-        if (err.status === 401) {
-          this.mensajeError = 'Credenciales inválidas. Verifica tu correo y contraseña.';
+        if (err.status === 404) {
+          this.mensajeError = 'No tienes una sesión iniciada. Esta cuenta aún no está registrada.';
+        } else if (err.status === 401) {
+          this.mensajeError = 'La contraseña es incorrecta.';
         } else {
           this.mensajeError = 'Fallo de conexión. Inténtalo de nuevo.';
         }

@@ -40,9 +40,13 @@ export class UsuarioController {
             );
 
             if (!resultado) {
-                res.status(401).json({
+                const usuarioExiste = await UsuarioService.obtenerPorCorreo(correo);
+
+                res.status(usuarioExiste ? 401 : 404).json({
                     exito: false,
-                    mensaje: 'Correo o contraseña incorrectos'
+                    mensaje: usuarioExiste
+                        ? 'La contraseña es incorrecta.'
+                        : 'Esta cuenta aún no está registrada.'
                 });
                 return;
             }
