@@ -15,61 +15,75 @@
 
     <div *ngIf="cargando()" class="text-center py-4">
         <div class="spinner-border text-info" role="status"></div>
-        <p class="mt-2">Cargando registros del sector...</p>
+        <p class="mt-2">Cargando lecciones...</p>
     </div>
 
-    <div *ngIf="!cargando() && errorCarga() as mensajeError" class="lesson-strip">
+    <div *ngIf="!cargando() && errorCarga()" class="lesson-strip">
         <span>
             <i class="bi bi-exclamation-triangle"></i>
             ERROR DE CONEXIÓN
         </span>
-        <p>{{ mensajeError }}</p>
+
+        <p>{{ errorCarga() }}</p>
     </div>
 
-    <ng-container *ngIf="!cargando() && !errorCarga() && resumen() as data">
+    <div class="lessons-list" *ngIf="!cargando() && !errorCarga() && lecciones().length > 0">
 
-        <div class="data-grid">
+        <article class="lesson-card" *ngFor="let grupo of lecciones()">
 
-            <article>
-                <i class="bi bi-filetype-tsx"></i>
-                <h3>ESTRUCTURA</h3>
-                <strong>{{ data.conceptosRegistrados }}</strong>
-                <span>conceptos registrados</span>
-            </article>
+            <div class="lesson-level">
 
-            <article>
-                <i class="bi bi-diagram-3"></i>
-                <h3>RUTA ACTUAL</h3>
-                <strong>{{ data.nivel ? ('TS / ' + (data.nivel.numero_nivel | number:'2.0-0')) : 'TS / --' }}</strong>
-                <span>{{ data.nivel?.nombre || 'Sin nivel asignado' }}</span>
-            </article>
+                <span class="lesson-code">
+                    TS / {{ grupo.nivel.numero_nivel | number:'2.0-0' }}
+                </span>
 
-            <article>
-                <i class="bi bi-clock-history"></i>
-                <h3>REGISTRO</h3>
-                <strong>{{ data.tieneProgreso ? 'Activo' : 'Sin iniciar' }}</strong>
-                <span>{{ formatearFecha(data.progreso?.fecha_actualizacion) }}</span>
-            </article>
+                <h3>
+                    {{ grupo.nivel.nombre }}
+                </h3>
 
-        </div>
+                <p>
+                    {{ grupo.nivel.descripcion }}
+                </p>
 
-        <div class="lesson-strip">
-            <span>
-                <i class="bi bi-lightbulb"></i>
-                CONSEJO DEL MINERO
-            </span>
+            </div>
 
-            <p>
-                {{ (data.consejo | slice:0:220) || 'TypeScript permite definir tipos para que tus variables, funciones y
-                estructuras sean más seguras y fáciles de mantener.' }}
-            </p>
-        </div>
+            <div class="lesson-item" *ngFor="let leccion of grupo.lecciones">
 
-    </ng-container>
+                <div class="lesson-icon">
+                    <i class="bi bi-book-half"></i>
+                </div>
+
+                <div class="lesson-content">
+
+                    <span>LECCIÓN</span>
+
+                    <h4>
+                        {{ leccion.titulo }}
+                    </h4>
+
+                    <p>
+                        {{ leccion.contenido }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    </div>
+
+    <p *ngIf="!cargando() && !errorCarga() && lecciones().length === 0">
+
+        No hay lecciones registradas todavía para TypeScript.
+
+    </p>
 
     <button class="ts-back" type="button" (click)="back.emit()">
+
         <i class="bi bi-arrow-left"></i>
         VOLVER AL PANEL
+
     </button>
 
 </section>

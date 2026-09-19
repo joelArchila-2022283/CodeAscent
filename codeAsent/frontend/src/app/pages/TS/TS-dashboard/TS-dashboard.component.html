@@ -7,17 +7,13 @@
     <div class="ts-dust-motes"></div>
   </div>
 
-
   <header class="bunker-header" id="ts-dashboard-header">
 
     <div class="bunker-brand">
 
       <div class="bunker-logo-stone">
 
-        <div
-          class="miner-mascot-unit"
-          [class.bounce]="cartoonMascotState() === 'idle'"
-          [title]="mascotDialogue()">
+        <div class="miner-mascot-unit" [class.bounce]="cartoonMascotState() === 'idle'" [title]="mascotDialogue()">
 
           <div class="miner-helmet">
             <div class="helmet-light"></div>
@@ -37,7 +33,6 @@
 
         </div>
 
-
         <div class="bunker-title-block">
 
           <h1 class="bunker-title">
@@ -53,7 +48,6 @@
       </div>
 
     </div>
-
 
     <div class="bunker-player-hud">
 
@@ -71,16 +65,13 @@
 
         </div>
 
-
         <div class="hud-xp-rail">
 
-          <div
-            class="hud-xp-fill"
-            [style.width.%]="(player.currentXp / player.nextLevelXp) * 100">
-          </div>
+          <div class="hud-xp-fill" [style.width.%]="
+              (player.currentXp / player.nextLevelXp) * 100
+            "></div>
 
         </div>
-
 
         <div class="hud-meta-row">
 
@@ -96,11 +87,7 @@
 
       </div>
 
-
-      <a
-        class="map-return-button"
-        routerLink="/mapa"
-        aria-label="Regresar al mapa">
+      <a class="map-return-button" routerLink="/mapa" aria-label="Regresar al mapa">
 
         <i class="bi bi-arrow-left-circle-fill"></i>
 
@@ -115,18 +102,15 @@
   </header>
 
 
-  <nav
-    class="bunker-nav-rock"
-    aria-label="Módulos TypeScript">
+  <nav class="bunker-nav-rock" aria-label="Módulos TypeScript">
 
     <ul class="bunker-nav__list">
 
       <li>
 
-        <button
-          class="rock-btn"
-          [class.rock-btn--active]="activeSection() === 'dashboard'"
-          (click)="navigateTo('dashboard')">
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'dashboard'
+          " (click)="navigateTo('dashboard')">
 
           <span class="rock-btn__icon">
             <i class="bi bi-hdd-rack-fill"></i>
@@ -143,10 +127,9 @@
 
       <li>
 
-        <button
-          class="rock-btn"
-          [class.rock-btn--active]="activeSection() === 'data'"
-          (click)="navigateTo('data')">
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'data'
+          " (click)="navigateTo('data')">
 
           <span class="rock-btn__icon">
             <i class="bi bi-file-earmark-binary"></i>
@@ -163,10 +146,9 @@
 
       <li>
 
-        <button
-          class="rock-btn"
-          [class.rock-btn--active]="activeSection() === 'processes'"
-          (click)="navigateTo('processes')">
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'processes'
+          " (click)="navigateTo('processes')">
 
           <span class="rock-btn__icon">
             <i class="bi bi-gear-wide-connected"></i>
@@ -177,7 +159,7 @@
           </span>
 
           <span class="rock-badge">
-            4
+            10
           </span>
 
         </button>
@@ -187,10 +169,9 @@
 
       <li>
 
-        <button
-          class="rock-btn"
-          [class.rock-btn--active]="activeSection() === 'terminal'"
-          (click)="navigateTo('terminal')">
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'terminal'
+          " (click)="navigateTo('terminal')">
 
           <span class="rock-btn__icon">
             <i class="bi bi-terminal-fill"></i>
@@ -207,10 +188,9 @@
 
       <li>
 
-        <button
-          class="rock-btn"
-          [class.rock-btn--active]="activeSection() === 'test'"
-          (click)="navigateTo('test')">
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'test'
+          " (click)="navigateTo('test')">
 
           <span class="rock-btn__icon">
             <i class="bi bi-floppy-fill"></i>
@@ -233,40 +213,39 @@
 
     @switch (activeSection()) {
 
-      @case ('dashboard') {
+    @case ('dashboard') {
 
-        <app-ts-dashboard-section
-          (sectionSelected)="navigateTo($event)" />
+    <app-ts-dashboard-section (sectionSelected)="navigateTo($event)" />
 
-      }
+    }
 
-      @case ('data') {
 
-        <app-ts-data
-          (back)="navigateTo('dashboard')" />
+    @case ('data') {
 
-      }
+    <app-ts-data (back)="navigateTo('dashboard')" />
 
-      @case ('processes') {
+    }
 
-        <app-ts-processes
-          (back)="navigateTo('dashboard')" />
 
-      }
+    @case ('processes') {
 
-      @case ('terminal') {
+    <app-ts-processes (back)="navigateTo('dashboard')" (missionSelected)="seleccionarReto($event)" />
 
-        <app-ts-terminal
-          (back)="navigateTo('dashboard')" />
+    }
 
-      }
 
-      @case ('test') {
+    @case ('terminal') {
 
-        <app-ts-test
-          (back)="navigateTo('dashboard')" />
+    <app-ts-terminal [retoSeleccionado]="retoSeleccionado()" (back)="volverDeTerminal()" />
 
-      }
+    }
+
+
+    @case ('test') {
+
+    <app-ts-test (back)="navigateTo('dashboard')" />
+
+    }
 
     }
 
