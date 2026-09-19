@@ -26,10 +26,11 @@
       <a routerLink="/perfil" class="nav-pill"><i class="bi bi-person-fill"></i> Perfil</a>
     </nav>
 
-    <!-- BLOQUE DE PERFIL -->
+    <!-- BLOQUE DE PERFIL CON AVATAR -->
     <div class="topbar-right">
       <div class="profile-chip">
-        <div class="profile-avatar"><i class="bi bi-person-fill"></i></div>
+        <!-- Avatar Dinámico de DiceBear -->
+        <img [src]="obtenerUrlAvatar(data.usuario.nombre)" alt="Avatar de Operador" class="profile-avatar-img">
         <div>
           <div class="profile-name">{{ data.usuario.nombre }}</div>
           <div class="profile-level">Nivel {{ data.progreso.id_nivel_actual || 1 }} · Infección Detectada</div>
@@ -69,7 +70,6 @@
         <h2>¡BIENVENIDO DE VUELTA, {{ data.usuario.nombre | uppercase }}!</h2>
         <p>Un virus de tinta está corrompiendo los nodos del sistema. ¡Compila tu código y purga la amenaza antes de que consuma el servidor!</p>
         
-        <!-- Enlace habilitado en el botón CTA -->
         <button class="hero-cta" routerLink="/mapa">
           LIMPIAR NODOS <i class="bi bi-play-fill"></i>
         </button>
@@ -124,7 +124,6 @@
     <h3>Mapa de <span class="accent">Depuración</span></h3>
   </div>
 
-  <!-- Al hacer clic sobre el panel del mapa también redirige -->
   <div class="map-panel" routerLink="/mapa" style="cursor: pointer;">
     <div class="map-path" style="position:relative;">
       <svg viewBox="0 0 1000 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
@@ -143,5 +142,4 @@
       </div>
     </div>
   </div>
-
 </div>

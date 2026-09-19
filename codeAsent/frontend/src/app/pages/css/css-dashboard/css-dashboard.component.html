@@ -10,6 +10,7 @@
     <div class="bunker-brand">
       <div class="bunker-logo-stone">
         <div class="css-mascot-unit" title="CSS Style Engine">
+          <img class="lab-avatar-img" [src]="obtenerUrlAvatar(player.name || 'default')" alt="Avatar del jugador">
           <div class="crt-antenna"></div>
           <div class="crt-face"><span></span><span></span></div>
           <div class="crt-mouth"></div>
@@ -24,7 +25,7 @@
     <div class="bunker-player-hud">
       <div class="hud-stats-box">
         <div class="hud-name-row">
-          <span class="hud-name">{{ player.name }}</span>
+          <span class="hud-name">{{ jugadorCargando() ? 'CARGANDO...' : player.name }}</span>
           <span class="hud-rank">RANGO LVL {{ player.level }}</span>
         </div>
         <div class="hud-xp-rail">

@@ -107,29 +107,6 @@ $text-dim: #8998ad;
   box-sizing: border-box;
 }
 
-.ts-bg-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.ts-bg-image {
-  position: absolute;
-  inset: 0;
-  background: url('/assets/images/ts-background.jpg') no-repeat center center / cover;
-  opacity: .45;
-  filter: contrast(1.15) brightness(.85);
-}
-
-.ts-bg-layer::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 20, 55, .35);
-}
-
 .torch-ambient-glow {
   position: absolute;
   width: 350px;
@@ -151,7 +128,6 @@ $text-dim: #8998ad;
 .torch-right {
   top: 8rem;
   right: -50px;
-  animation-delay: -1.5s;
 }
 
 .ts-dust-motes {
@@ -164,7 +140,6 @@ $text-dim: #8998ad;
   z-index: 2;
   opacity: .25;
 }
-
 header,
 nav,
 .bunker-content-stage {
@@ -201,8 +176,8 @@ nav,
 
 .miner-mascot-unit {
   position: relative;
-  width: 54px;
-  height: 54px;
+  width: 72px;
+  height: 72px;
   background: #0b101a;
   border: 3px solid #36516f;
   border-radius: 50%;
@@ -216,53 +191,15 @@ nav,
   animation: rockRumble 2.2s infinite ease-in-out;
 }
 
-.miner-helmet {
+.miner-avatar-img {
   position: absolute;
-  top: -13px;
-  width: 60px;
-  height: 28px;
-  background: #1478d4;
-  border-radius: 32px 32px 0 0;
-  border: 3px solid #111827;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, .6);
-}
-
-.helmet-light {
-  position: absolute;
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 14px;
-  background: #e8f7ff;
+  inset: 5px;
+  z-index: 1;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
   border-radius: 50%;
-  border: 2px solid #111827;
-  animation: screenPulse 1.8s infinite alternate;
-}
-
-.mascot-face {
-  display: flex;
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.eye {
-  width: 11px;
-  height: 15px;
-  background: #e1e9f5;
-  border-radius: 50%;
-  position: relative;
-  overflow: hidden;
-}
-
-.pupil {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 6px;
-  height: 9px;
-  background: #000;
-  border-radius: 50%;
+  object-fit: cover;
+  opacity: .9;
 }
 
 .bunker-title {
@@ -287,7 +224,7 @@ nav,
 }
 
 .bunker-player-hud {
-  min-width: 175px;
+  min-width: 330px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -299,7 +236,8 @@ nav,
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: .3rem;
+  gap: 2.5rem;
+  margin-bottom: .55rem;
 }
 
 .hud-name {
@@ -315,12 +253,12 @@ nav,
 
 .hud-xp-rail {
   width: 100%;
-  height: 8px;
+  height: 9px;
   background: #080b12;
   border: 1px solid $rock-border;
   border-radius: 999px;
   overflow: hidden;
-  margin-bottom: .3rem;
+  margin-bottom: .45rem;
 }
 
 .hud-xp-fill {
@@ -581,4 +519,19 @@ nav,
   .stone-modules-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.miner-avatar-img {
+  position: absolute;
+  inset: 5px;
+  z-index: 1;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
+  border-radius: 50%;
+  object-fit: cover;
+  opacity: .9;
+}
+
+.hud-stats-box {
+  min-width: 260px;
 }

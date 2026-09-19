@@ -18,6 +18,7 @@
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
     "@popperjs/core": "^2.11.8",
+    "blobatar": "^2.7.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "nodemailer": "^10.0.10",
