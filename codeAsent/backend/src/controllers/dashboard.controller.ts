@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { pool } from '../config/conexion';
 
-interface RequestAutenticado extends Request {
-  id_usuario?: number;
-}
-
-export const obtenerResumenDashboard = async (req: RequestAutenticado, res: Response) => {
+export const obtenerResumenDashboard = async (req: Request, res: Response) => {
   try {
-    const idUsuario = req.id_usuario || 1;
+    const idUsuario = req.usuario?.id_usuario;
+
+    if (!idUsuario) {
+      return res.status(401).json({ mensaje: 'Usuario no autenticado.' });
+    }
 
     // 1. Obtener Usuario
     const resUsuario = await pool.query(
