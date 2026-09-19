@@ -171,12 +171,25 @@ export class UsuarioController {
     ): Promise<void> {
 
         try {
-
             const id_usuario = Number(req.params.id);
+            const idAutenticado = req.usuario?.id_usuario;
+            const nombre = typeof req.body.nombre === 'string'
+                ? req.body.nombre.trim()
+                : '';
+
+            if (!idAutenticado || id_usuario !== idAutenticado) {
+                res.status(403).json({ mensaje: 'Solo puedes actualizar tu propio usuario.' });
+                return;
+            }
+
+            if (nombre.length < 3 || nombre.length > 100) {
+                res.status(400).json({ mensaje: 'El usuario debe tener entre 3 y 100 caracteres.' });
+                return;
+            }
 
             await UsuarioService.actualizar(
                 id_usuario,
-                req.body
+                { nombre }
             );
 
             res.status(200).json({

@@ -13,4 +13,8 @@ export class DashboardService {
   obtenerDatosDashboard(): Observable<DashboardData> {
     return this.http.get<DashboardData>(`${this.apiUrl}/resumen`);
   }
+
+  actualizarNombreUsuario(idUsuario: number, nombre: string): Observable<void> {
+    return this.http.put<void>(`http://localhost:3000/api/usuarios/${idUsuario}`, { nombre });
+  }
 }
