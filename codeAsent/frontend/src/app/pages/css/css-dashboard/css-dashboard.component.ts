@@ -23,6 +23,7 @@ export class CssDashboardComponent implements OnInit {
   private readonly cssDataService = inject(CssDataService);
 
   activeSection = signal<CSSSection>('dashboard');
+  selectedPedagogyLevel = signal(1);
   player = { name: 'Cadete Bit', level: 1, currentXp: 0, nextLevelXp: 100, progress: 0 };
 
   ngOnInit(): void {
@@ -31,6 +32,10 @@ export class CssDashboardComponent implements OnInit {
       error: err => console.error('Error al cargar usuario CSS:', err)
     });
 
+    this.recargarProgreso();
+  }
+
+  recargarProgreso(): void {
     this.cssDataService.obtenerContexto().subscribe({
       next: contexto => {
         this.player.level = contexto.nivelActual?.numero_nivel ?? 1;
@@ -43,4 +48,5 @@ export class CssDashboardComponent implements OnInit {
   }
 
   navigateTo(section: CSSSection): void { this.activeSection.set(section); }
+  openPractice(level: number): void { this.selectedPedagogyLevel.set(level); this.activeSection.set('terminal'); }
 }
