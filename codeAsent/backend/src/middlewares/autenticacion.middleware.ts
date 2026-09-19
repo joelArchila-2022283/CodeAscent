@@ -1,28 +1,83 @@
 import { Request, Response, NextFunction } from 'express';
 import { verificarToken } from '../utils/jwt.util';
 
-export const verificarAutenticacion = (req: Request, res: Response, next: NextFunction): void => {
-    const cabeceraAutorizacion = req.headers.authorization;
+export const verificarAutenticacion = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void => {
 
-    if (!cabeceraAutorizacion || !cabeceraAutorizacion.startsWith('Bearer ')) {
+    const cabeceraAutorizacion =
+        req.headers.authorization;
+
+    if (
+        !cabeceraAutorizacion ||
+        !cabeceraAutorizacion.startsWith('Bearer ')
+    ) {
+
         res.status(401).json({
             exito: false,
-            mensaje: 'Acceso no autorizado. Se requiere un token de autenticación.'
+            mensaje:
+                'Acceso no autorizado. Se requiere un token de autenticación.'
         });
+
         return;
     }
 
-    const token = cabeceraAutorizacion.split(' ')[1];
-    const datosUsuario = verificarToken(token);
+    const token =
+        cabeceraAutorizacion.split(' ')[1];
+
+    const datosUsuario =
+        verificarToken(token);
 
     if (!datosUsuario) {
+
         res.status(401).json({
             exito: false,
-            mensaje: 'Token inválido o expirado. Por favor, inicia sesión nuevamente.'
+            mensaje:
+                'Token inválido o expirado. Por favor, inicia sesión nuevamente.'
         });
+
         return;
     }
 
     req.usuario = datosUsuario;
+
+    next();
+};
+
+
+/**
+ * Middleware para permitir únicamente
+ * usuarios con rol de administrador.
+ */
+export const esAdmin = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void => {
+
+    if (!req.usuario) {
+
+        res.status(401).json({
+            exito: false,
+            mensaje:
+                'Usuario no autenticado.'
+        });
+
+        return;
+    }
+
+    if (req.usuario.rol !== 'admin') {
+
+        res.status(403).json({
+            exito: false,
+            mensaje:
+                'Acceso denegado. Se requieren permisos de administrador.'
+        });
+
+        return;
+    }
+
     next();
 };

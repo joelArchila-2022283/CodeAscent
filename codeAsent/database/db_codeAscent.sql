@@ -647,10 +647,120 @@ CREATE OR REPLACE PROCEDURE sp_crear_intento(
     p_correcto BOOLEAN,
     p_xp_obtenida INTEGER DEFAULT 0
 )
-LANGUAGE plpgsql AS $$
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_xp_reto INTEGER := 0;
+    v_xp_final INTEGER := 0;
+    v_id_lenguaje INTEGER;
+    v_ya_completado BOOLEAN := FALSE;
 BEGIN
-    INSERT INTO intento (id_usuario, id_reto, respuesta_usuario, correcto, xp_obtenida)
-    VALUES (p_id_usuario, p_id_reto, p_respuesta_usuario, p_correcto, p_xp_obtenida);
+
+    SELECT
+        COALESCE(r.xp_recompensa, 0),
+        n.id_lenguaje
+
+    INTO
+        v_xp_reto,
+        v_id_lenguaje
+
+    FROM reto r
+
+    INNER JOIN leccion l
+        ON l.id_leccion = r.id_leccion
+
+    INNER JOIN nivel n
+        ON n.id_nivel = l.id_nivel
+
+    WHERE r.id_reto = p_id_reto;
+
+
+    IF NOT FOUND THEN
+
+        RAISE EXCEPTION
+            'El reto % no existe.',
+            p_id_reto;
+
+    END IF;
+
+
+    SELECT EXISTS (
+
+        SELECT 1
+
+        FROM intento
+
+        WHERE id_usuario = p_id_usuario
+
+          AND id_reto = p_id_reto
+
+          AND correcto = TRUE
+
+    )
+
+    INTO v_ya_completado;
+
+
+    IF
+        p_correcto = TRUE
+        AND v_ya_completado = FALSE
+    THEN
+
+        v_xp_final :=
+            v_xp_reto;
+
+    ELSE
+
+        v_xp_final :=
+            0;
+
+    END IF;
+
+
+    INSERT INTO intento (
+
+        id_usuario,
+        id_reto,
+        respuesta_usuario,
+        correcto,
+        xp_obtenida
+
+    )
+
+    VALUES (
+
+        p_id_usuario,
+        p_id_reto,
+        p_respuesta_usuario,
+        p_correcto,
+        v_xp_final
+
+    );
+
+
+    IF v_xp_final > 0 THEN
+
+        UPDATE progreso
+
+        SET
+
+            xp_actual =
+                COALESCE(
+                    xp_actual,
+                    0
+                ) + v_xp_final,
+
+            fecha_actualizacion =
+                CURRENT_TIMESTAMP
+
+        WHERE id_usuario =
+            p_id_usuario
+
+          AND id_lenguaje =
+            v_id_lenguaje;
+
+    END IF;
+
 END;
 $$;
 
@@ -1007,3 +1117,1549 @@ CALL sp_crear_ejemplo(2, 'Filtrar con WHERE', 'SELECT nombre, correo FROM usuari
 CALL sp_crear_ejemplo(3, 'Plantilla Básica HTML', '<!DOCTYPE html>' || chr(10) || '<html>' || chr(10) || '<head><title>Mi Pagina</title></head>' || chr(10) || '<body><h1>Hola Mundo</h1></body>' || chr(10) || '</html>', 'Estructura minima obligatoria para un documento HTML5 estándar.');
 CALL sp_crear_ejemplo(4, 'Regla CSS para Títulos', 'h1 {' || chr(10) || '  color: #3498db;' || chr(10) || '  text-align: center;' || chr(10) || '}', 'Establece color azul y alineacion centrada para todas las etiquetas H1.');
 CALL sp_crear_ejemplo(5, 'Tipado de Variables TS', 'const nombreUsuario: string = "Carlos";' || chr(10) || 'const nivelActual: number = 5;' || chr(10) || 'const estaActivo: boolean = true;', 'Ejemplo de asignación explicita para string, number y boolean en TypeScript.');
+
+-- ============================================================
+-- CODEASCENT - CONTENIDO TYPESCRIPT
+-- 10 MISIONES / 10 LECCIONES / 10 CUESTIONARIOS
+-- ============================================================
+--
+-- Misión      -> nivel
+-- Lección     -> leccion
+-- Cuestionario -> reto
+-- Respuestas  -> respuesta
+--
+-- Todo se conecta mediante:
+-- lenguaje.nombre = 'TypeScript'
+-- nivel.numero_nivel = 1..10
+--
+-- Se utilizan los procedimientos almacenados existentes.
+-- ============================================================
+
+
+DO $$
+DECLARE
+    v_id_nivel INTEGER;
+    v_id_leccion INTEGER;
+    v_id_reto INTEGER;
+BEGIN
+
+    -- ========================================================
+    -- MISIÓN 1
+    -- Tipos Primitivos
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 1;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 1 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Los tipos primitivos de TypeScript';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Los tipos primitivos de TypeScript',
+            'En TypeScript puedes indicar explícitamente qué tipo de dato almacenará una variable. Los tipos primitivos más utilizados son string para texto, number para valores numéricos y boolean para valores verdadero o falso. El tipado permite detectar errores antes de ejecutar el programa. Piensa primero qué tipo de información necesitas almacenar y después expresa esa decisión mediante la sintaxis de TypeScript.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Los tipos primitivos de TypeScript'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Identifica el tipo de dato';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Identifica el tipo de dato',
+            'Un explorador necesita almacenar el nombre de un jugador. ¿Qué tipo primitivo de TypeScript debe utilizar?',
+            'opcion_multiple',
+            50,
+            'facil'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Identifica el tipo de dato'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'string'
+    ) THEN
+        CALL sp_crear_respuesta(v_id_reto, 'string', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'number', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'boolean', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'void', FALSE);
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 2
+    -- Inferencia de Tipos
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 2;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 2 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'La inferencia de tipos';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'La inferencia de tipos',
+            'TypeScript puede determinar automáticamente el tipo de una variable a partir del valor con el que fue inicializada. Esto se conoce como inferencia de tipos. Por ejemplo, cuando una variable recibe un texto, TypeScript puede inferir que se trata de un string sin necesidad de escribir el tipo explícitamente. La inferencia reduce código repetitivo sin eliminar la seguridad del tipado.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'La inferencia de tipos'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Predice el tipo inferido';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Predice el tipo inferido',
+            'Observa la declaración const edad = 18. ¿Qué tipo infiere TypeScript para la variable edad?',
+            'opcion_multiple',
+            100,
+            'facil'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Predice el tipo inferido'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'number'
+    ) THEN
+        CALL sp_crear_respuesta(v_id_reto, 'number', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'string', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'boolean', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'any', FALSE);
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 3
+    -- Arreglos y Tuplas
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 3;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 3 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Arreglos y tuplas';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Arreglos y tuplas',
+            'Los arreglos permiten almacenar múltiples valores del mismo tipo o de tipos compatibles. En TypeScript puedes declarar un arreglo como string[] o utilizando la sintaxis Array<string>. Las tuplas permiten representar una cantidad y orden específicos de elementos, por ejemplo [string, number]. La diferencia fundamental está en que un arreglo representa una colección flexible, mientras que una tupla define una estructura determinada.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Arreglos y tuplas'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Distingue arreglo y tupla';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Distingue arreglo y tupla',
+            '¿Cuál declaración representa una tupla que contiene primero un nombre y después una edad?',
+            'opcion_multiple',
+            150,
+            'facil'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Distingue arreglo y tupla'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = '[string, number]'
+    ) THEN
+        CALL sp_crear_respuesta(v_id_reto, '[string, number]', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'string[]', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'number[]', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Array<boolean>', FALSE);
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 4
+    -- Interfaces Básicas
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 4;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 4 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Interfaces y contratos de objetos';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Interfaces y contratos de objetos',
+            'Una interfaz describe la estructura que debe cumplir un objeto. Permite establecer qué propiedades existen y qué tipos tienen. En lugar de descubrir los errores después de ejecutar el programa, TypeScript puede verificar que un objeto respete el contrato definido por la interfaz. Las interfaces son especialmente útiles cuando diferentes partes de una aplicación comparten la misma estructura de datos.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Interfaces y contratos de objetos'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Construye el contrato';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Construye el contrato',
+            'Quieres representar un jugador con un nombre de texto y un nivel numérico. ¿Cuál interfaz define correctamente esa estructura?',
+            'opcion_multiple',
+            200,
+            'medio'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Construye el contrato'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'interface Jugador { nombre: string; nivel: number; }'
+    ) THEN
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'interface Jugador { nombre: string; nivel: number; }',
+            TRUE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'interface Jugador { nombre: number; nivel: string; }',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'interface Jugador { nombre, nivel }',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'Jugador interface { nombre: string; nivel: number; }',
+            FALSE
+        );
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 5
+    -- Type Aliases
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 5;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 5 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Type aliases y tipos personalizados';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Type aliases y tipos personalizados',
+            'Un type alias permite darle un nombre a una combinación o descripción de tipos. Esto ayuda a expresar conceptos del dominio de una aplicación de manera más clara. También permite crear tipos de unión, donde una variable puede aceptar diferentes alternativas, como type Estado = "activo" | "inactivo". Los aliases permiten reutilizar una definición de tipo sin repetirla.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Type aliases y tipos personalizados'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Reconoce un type alias';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Reconoce un type alias',
+            '¿Cuál declaración crea un tipo llamado Identificador que puede contener un número o una cadena?',
+            'opcion_multiple',
+            250,
+            'medio'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Reconoce un type alias'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'type Identificador = number | string;'
+    ) THEN
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'type Identificador = number | string;',
+            TRUE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'alias Identificador = number | string;',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'type Identificador(number, string);',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'interface Identificador = number | string;',
+            FALSE
+        );
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 6
+    -- Tipado de Funciones
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 6;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 6 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Funciones tipadas';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Funciones tipadas',
+            'Las funciones también pueden tener tipos en TypeScript. Puedes indicar el tipo de cada parámetro y el tipo del valor que devuelve la función. Por ejemplo, function sumar(a: number, b: number): number define dos parámetros numéricos y establece que el resultado también será un número. Los parámetros opcionales y los valores por defecto permiten construir funciones más flexibles manteniendo la seguridad del tipado.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Funciones tipadas'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Analiza el tipo de retorno';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Analiza el tipo de retorno',
+            'Observa la función function sumar(a: number, b: number): number. ¿Qué representa el último number?',
+            'opcion_multiple',
+            300,
+            'medio'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Analiza el tipo de retorno'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'El tipo del valor que devuelve la función'
+    ) THEN
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'El tipo del valor que devuelve la función',
+            TRUE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'El tipo de la primera variable',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'La cantidad de parámetros',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'El nombre de la función',
+            FALSE
+        );
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 7
+    -- Enums y Literales
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 7;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 7 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Enums y tipos literales';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Enums y tipos literales',
+            'Los enums permiten representar un conjunto de valores relacionados bajo un mismo nombre. Los tipos literales permiten restringir una variable a valores concretos. Por ejemplo, type Direccion = "norte" | "sur" | "este" | "oeste" limita las posibilidades a esas opciones. Estas herramientas ayudan a expresar reglas válidas directamente en el sistema de tipos.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Enums y tipos literales'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Controla las opciones válidas';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Controla las opciones válidas',
+            'Quieres que una variable estado solo pueda contener "activo", "pausado" o "finalizado". ¿Qué declaración expresa correctamente esa restricción?',
+            'opcion_multiple',
+            350,
+            'medio'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Controla las opciones válidas'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'type Estado = "activo" | "pausado" | "finalizado";'
+    ) THEN
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'type Estado = "activo" | "pausado" | "finalizado";',
+            TRUE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'type Estado = string;',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'type Estado = boolean;',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'type Estado = number;',
+            FALSE
+        );
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 8
+    -- Clases y Modificadores
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 8;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 8 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Clases y modificadores de acceso';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Clases y modificadores de acceso',
+            'Las clases permiten agrupar datos y comportamientos dentro de una misma estructura. TypeScript incorpora modificadores como public, private y protected para controlar desde dónde pueden utilizarse las propiedades y métodos. También existe readonly para indicar que una propiedad no debe modificarse después de su inicialización. Estos modificadores ayudan a proteger el estado interno de los objetos.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Clases y modificadores de acceso'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Protege el estado interno';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Protege el estado interno',
+            'Una clase contiene una propiedad que no debe poder modificarse directamente desde fuera de la clase. ¿Qué modificador expresa esta intención?',
+            'opcion_multiple',
+            400,
+            'dificil'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Protege el estado interno'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'private'
+    ) THEN
+        CALL sp_crear_respuesta(v_id_reto, 'private', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'public', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'protected', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'export', FALSE);
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 9
+    -- Genéricos
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 9;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 9 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Genéricos para código reutilizable';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Genéricos para código reutilizable',
+            'Los genéricos permiten crear funciones, clases o estructuras que trabajan con diferentes tipos sin perder la información del tipado. En lugar de escribir una función diferente para cada tipo, puedes utilizar un parámetro de tipo como T. Por ejemplo, function identidad<T>(valor: T): T recibe un valor de cualquier tipo y devuelve exactamente ese mismo tipo.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Genéricos para código reutilizable'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Comprende el parámetro genérico';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Comprende el parámetro genérico',
+            'En function identidad<T>(valor: T): T, ¿qué representa T?',
+            'opcion_multiple',
+            450,
+            'dificil'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Comprende el parámetro genérico'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'Un parámetro de tipo reutilizable'
+    ) THEN
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'Un parámetro de tipo reutilizable',
+            TRUE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'Una variable numérica',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'El nombre de la función',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'Una palabra reservada de JavaScript',
+            FALSE
+        );
+    END IF;
+
+
+    -- ========================================================
+    -- MISIÓN 10
+    -- Narrowing y Type Guards
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    INNER JOIN lenguaje l
+        ON l.id_lenguaje = n.id_lenguaje
+    WHERE LOWER(l.nombre) = LOWER('TypeScript')
+      AND n.numero_nivel = 10;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 10 de TypeScript.';
+    END IF;
+
+    SELECT id_leccion
+    INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel
+      AND titulo = 'Narrowing y Type Guards';
+
+    IF v_id_leccion IS NULL THEN
+
+        CALL sp_crear_leccion(
+            v_id_nivel,
+            'Narrowing y Type Guards',
+            'Cuando una variable puede tener más de un tipo, TypeScript necesita información que permita determinar cuál es el tipo concreto en una determinada sección del programa. El narrowing reduce las posibilidades mediante comprobaciones como typeof, instanceof o comprobaciones de propiedades. Los type guards permiten expresar estas comprobaciones de manera reutilizable y segura.',
+            1
+        );
+
+        SELECT id_leccion
+        INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel
+          AND titulo = 'Narrowing y Type Guards'
+        ORDER BY id_leccion DESC
+        LIMIT 1;
+
+    END IF;
+
+
+    SELECT id_reto
+    INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = 'Aplica narrowing con typeof';
+
+    IF v_id_reto IS NULL THEN
+
+        CALL sp_crear_reto(
+            v_id_leccion,
+            'Aplica narrowing con typeof',
+            'Una variable puede contener un string o un number. ¿Qué comprobación permite determinar si actualmente contiene un texto?',
+            'opcion_multiple',
+            500,
+            'dificil'
+        );
+
+        SELECT id_reto
+        INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = 'Aplica narrowing con typeof'
+        ORDER BY id_reto DESC
+        LIMIT 1;
+
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM respuesta
+        WHERE id_reto = v_id_reto
+          AND contenido = 'typeof valor === "string"'
+    ) THEN
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'typeof valor === "string"',
+            TRUE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'valor.type === "string"',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'typeof valor === string',
+            FALSE
+        );
+
+        CALL sp_crear_respuesta(
+            v_id_reto,
+            'valueof valor === "string"',
+            FALSE
+        );
+    END IF;
+
+END $$;
+
+
+-- ============================================================
+-- COMPROBACIÓN FINAL
+-- ============================================================
+
+SELECT
+    l.nombre AS lenguaje,
+    n.numero_nivel AS mision,
+    n.nombre AS nombre_mision,
+    le.id_leccion,
+    le.titulo AS leccion,
+    r.id_reto,
+    r.titulo AS cuestionario,
+    COUNT(res.id_respuesta) AS cantidad_respuestas,
+    COUNT(*) FILTER (WHERE res.es_correcta = TRUE) AS respuestas_correctas
+FROM lenguaje l
+INNER JOIN nivel n
+    ON n.id_lenguaje = l.id_lenguaje
+LEFT JOIN leccion le
+    ON le.id_nivel = n.id_nivel
+LEFT JOIN reto r
+    ON r.id_leccion = le.id_leccion
+LEFT JOIN respuesta res
+    ON res.id_reto = r.id_reto
+WHERE LOWER(l.nombre) = LOWER('TypeScript')
+GROUP BY
+    l.nombre,
+    n.numero_nivel,
+    n.nombre,
+    le.id_leccion,
+    le.titulo,
+    r.id_reto,
+    r.titulo
+ORDER BY n.numero_nivel;
+
+-- ============================================================
+-- CUESTIONARIOS TYPESCRIPT - CODEASCENT
+-- 10 CUESTIONARIOS / 4 RESPUESTAS CADA UNO
+-- ============================================================
+
+DO $$
+DECLARE
+    v_id_lenguaje INTEGER;
+    v_id_nivel INTEGER;
+    v_id_leccion INTEGER;
+    v_id_reto INTEGER;
+BEGIN
+
+    -- ========================================================
+    -- OBTENER TYPESCRIPT
+    -- ========================================================
+
+    SELECT id_lenguaje
+    INTO v_id_lenguaje
+    FROM lenguaje
+    WHERE LOWER(nombre) = 'typescript';
+
+    IF v_id_lenguaje IS NULL THEN
+        RAISE EXCEPTION 'El lenguaje TypeScript no existe.';
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 1 - TIPOS PRIMITIVOS
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 1;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Tipos primitivos',
+            '¿Cuál de los siguientes tipos se utiliza para almacenar texto en TypeScript?',
+            'opcion_multiple',
+            10,
+            'facil'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'string', true),
+            (v_id_reto, 'number', false),
+            (v_id_reto, 'boolean', false),
+            (v_id_reto, 'object', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 2 - INFERENCIA
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 2;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Inferencia de tipos',
+            'Si declaramos let edad = 20, ¿qué tipo infiere TypeScript?',
+            'opcion_multiple',
+            15,
+            'facil'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'number', true),
+            (v_id_reto, 'string', false),
+            (v_id_reto, 'boolean', false),
+            (v_id_reto, 'any', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 3 - ARREGLOS Y TUPLAS
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 3;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Arreglos y tuplas',
+            '¿Cuál declaración representa correctamente una tupla [string, number]?',
+            'opcion_multiple',
+            20,
+            'facil'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, '[string, number]', true),
+            (v_id_reto, '[number, string]', false),
+            (v_id_reto, 'string[]', false),
+            (v_id_reto, 'number[]', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 4 - INTERFACES
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 4;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Interfaces',
+            '¿Para qué sirve principalmente una interface en TypeScript?',
+            'opcion_multiple',
+            25,
+            'medio'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'Definir la estructura que debe cumplir un objeto', true),
+            (v_id_reto, 'Ejecutar código automáticamente', false),
+            (v_id_reto, 'Crear solamente números', false),
+            (v_id_reto, 'Eliminar tipos', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 5 - TYPE ALIASES
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 5;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Type aliases',
+            '¿Qué palabra clave permite crear un alias de tipo en TypeScript?',
+            'opcion_multiple',
+            30,
+            'medio'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'type', true),
+            (v_id_reto, 'alias', false),
+            (v_id_reto, 'typedef', false),
+            (v_id_reto, 'newtype', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 6 - FUNCIONES
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 6;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Funciones tipadas',
+            '¿Dónde se indica el tipo de retorno de una función TypeScript?',
+            'opcion_multiple',
+            35,
+            'medio'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'Después de los paréntesis, usando : tipo', true),
+            (v_id_reto, 'Antes del nombre usando return', false),
+            (v_id_reto, 'Dentro de console.log()', false),
+            (v_id_reto, 'Después de la palabra function solamente', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 7 - LITERALES
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 7;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Tipos literales',
+            'Si Dificultad = ''facil'' | ''medio'' | ''dificil'', ¿qué valores puede aceptar?',
+            'opcion_multiple',
+            40,
+            'medio'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'Solamente ''facil'', ''medio'' o ''dificil''', true),
+            (v_id_reto, 'Cualquier string', false),
+            (v_id_reto, 'Solamente números', false),
+            (v_id_reto, 'Cualquier valor', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 8 - CLASES
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 8;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Clases',
+            '¿Qué significa que una propiedad de una clase sea private?',
+            'opcion_multiple',
+            45,
+            'dificil'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'Solo puede utilizarse directamente dentro de la clase', true),
+            (v_id_reto, 'Puede utilizarse desde cualquier lugar', false),
+            (v_id_reto, 'Solo acepta números', false),
+            (v_id_reto, 'La propiedad desaparece', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 9 - GENÉRICOS
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 9;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Genéricos',
+            '¿Qué representa normalmente T en una función genérica como function mostrar<T>()?',
+            'opcion_multiple',
+            50,
+            'dificil'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'Un tipo que se determina al utilizar la función', true),
+            (v_id_reto, 'Siempre un string', false),
+            (v_id_reto, 'Siempre un número', false),
+            (v_id_reto, 'Una variable global', false);
+
+    END IF;
+
+
+    -- ========================================================
+    -- CUESTIONARIO 10 - NARROWING
+    -- ========================================================
+
+    SELECT n.id_nivel
+    INTO v_id_nivel
+    FROM nivel n
+    WHERE n.id_lenguaje = v_id_lenguaje
+      AND n.numero_nivel = 10;
+
+    SELECT l.id_leccion
+    INTO v_id_leccion
+    FROM leccion l
+    WHERE l.id_nivel = v_id_nivel
+    ORDER BY l.orden
+    LIMIT 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND tipo_reto = 'opcion_multiple'
+    ) THEN
+
+        INSERT INTO reto (
+            id_leccion,
+            titulo,
+            descripcion,
+            tipo_reto,
+            xp_recompensa,
+            dificultad
+        )
+        VALUES (
+            v_id_leccion,
+            'Cuestionario: Narrowing',
+            '¿Qué operador puede utilizarse para comprobar si un valor es string o number?',
+            'opcion_multiple',
+            60,
+            'dificil'
+        )
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES
+            (v_id_reto, 'typeof', true),
+            (v_id_reto, 'instance', false),
+            (v_id_reto, 'checktype', false),
+            (v_id_reto, 'istype', false);
+
+    END IF;
+
+
+    RAISE NOTICE 'Los 10 cuestionarios TypeScript fueron creados correctamente.';
+
+END $$;

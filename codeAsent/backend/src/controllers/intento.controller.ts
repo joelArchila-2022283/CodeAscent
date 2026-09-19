@@ -131,20 +131,31 @@ export class IntentoController {
         try {
 
             const nuevoIntento =
-                await IntentoService.crear(req.body);
+                await IntentoService.crear(
+                    req.body
+                );
 
             res.status(201).json({
-                mensaje: 'Intento creado correctamente',
-                datos: nuevoIntento
+
+                mensaje:
+                    'Intento creado correctamente',
+
+                datos:
+                    nuevoIntento
+
             });
 
         } catch (error) {
 
             res.status(400).json({
-                mensaje: error instanceof Error
-                    ? error.message
-                    : 'Error al crear el intento'
+
+                mensaje:
+                    error instanceof Error
+                        ? error.message
+                        : 'Error al crear el intento'
+
             });
+
         }
     }
 
