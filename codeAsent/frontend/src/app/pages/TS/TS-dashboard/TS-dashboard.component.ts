@@ -10,6 +10,7 @@ import { TSDashboardSectionComponent } from './TS-dashboard-section.component';
 
 import { DashboardService } from '../../../services/dashboard.service';
 import { TsDataService } from '../../../services/ts-data.service';
+import { obtenerUrlAvatar } from '../../../utils/avatar.util';
 
 export type TSSection =
   | 'dashboard'
@@ -47,12 +48,13 @@ export class TSDashboardComponent implements OnInit {
   activeSection = signal<TSSection>('dashboard');
 
   player = {
-    name: 'Cadete Bit',
+    name: '',
     level: 1,
     currentXp: 0,
     nextLevelXp: 100,
     energyWatts: 86
   };
+  jugadorCargando = signal(true);
 
   cartoonMascotState = signal<MascotState>('idle');
 
@@ -71,12 +73,14 @@ export class TSDashboardComponent implements OnInit {
         if (data?.usuario?.nombre) {
           this.player.name = data.usuario.nombre;
         }
+        this.jugadorCargando.set(false);
       },
       error: (err) => {
         console.error(
           'Error al cargar el usuario del HUD:',
           err
         );
+        this.jugadorCargando.set(false);
       }
     });
 
@@ -102,6 +106,10 @@ export class TSDashboardComponent implements OnInit {
         );
       }
     });
+  }
+
+  obtenerUrlAvatar(nombre: string | undefined): string {
+    return obtenerUrlAvatar(nombre);
   }
 
   navigateTo(section: TSSection): void {

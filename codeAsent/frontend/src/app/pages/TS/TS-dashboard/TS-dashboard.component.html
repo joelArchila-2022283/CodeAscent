@@ -19,21 +19,7 @@
           [class.bounce]="cartoonMascotState() === 'idle'"
           [title]="mascotDialogue()">
 
-          <div class="miner-helmet">
-            <div class="helmet-light"></div>
-          </div>
-
-          <div class="mascot-face">
-
-            <div class="eye left">
-              <div class="pupil"></div>
-            </div>
-
-            <div class="eye right">
-              <div class="pupil"></div>
-            </div>
-
-          </div>
+          <img class="miner-avatar-img" [src]="obtenerUrlAvatar(player.name || 'default')" alt="Avatar del jugador">
 
         </div>
 
@@ -62,7 +48,7 @@
         <div class="hud-name-row">
 
           <span class="hud-name">
-            {{ player.name }}
+            {{ jugadorCargando() ? 'CARGANDO...' : player.name }}
           </span>
 
           <span class="hud-rank">
