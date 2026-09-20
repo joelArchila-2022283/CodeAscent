@@ -8,6 +8,7 @@ import { HtmlProcessesComponent } from '../html-processes/html-processes.compone
 import { HtmlTerminalComponent } from '../html-terminal/html-terminal.component';
 import { HtmlTestComponent } from '../html-test/html-test.component';
 import { HtmlDashboardSectionComponent } from './html-dashboard-section.component';
+import { IReto } from '../../../interfaces/reto.interface';
 
 export type HTMLSection = 'dashboard' | 'data' | 'processes' | 'terminal' | 'test';
 
@@ -25,7 +26,7 @@ export class HtmlDashboardComponent implements OnInit {
   player = {
     name: '',
     level: 1,
-    currentXp: 320,
+    currentXp: 0,
     nextLevelXp: 500,
     energyWatts: 86
   };
@@ -33,6 +34,9 @@ export class HtmlDashboardComponent implements OnInit {
   cartoonMascotState = signal<'idle' | 'happy' | 'thinking' | 'shocked'>('idle');
   mascotDialogue = signal<string>('El sector HTML está listo para trabajar.');
   jugadorCargando = signal(true);
+  
+  retoSeleccionado = signal<IReto | null>(null);
+  leccionActual = signal<string>('');
 
   ngOnInit(): void {
     this.dashboardService.obtenerDatosDashboard().subscribe({
@@ -40,6 +44,10 @@ export class HtmlDashboardComponent implements OnInit {
         if (data?.usuario?.nombre) {
           this.player.name = data.usuario.nombre;
         }
+        const progreso = data?.progreso;
+        this.player.currentXp = Math.max(0, Number(progreso?.xp_actual ?? 0));
+        this.player.level = Math.max(1, Number(progreso?.id_nivel_actual ?? 1));
+        this.player.nextLevelXp = Math.max(1, Number(data?.progreso?.id_nivel_actual ? 500 : 50));
         this.jugadorCargando.set(false);
       },
       error: err => {
@@ -57,13 +65,28 @@ export class HtmlDashboardComponent implements OnInit {
     this.activeSection.set(section);
     const dialogos = {
       dashboard: 'Panel HTML principal listo.',
-      data: 'Los registros antiguos guardan la estructura de la web.',
-      processes: 'Procesos HTML listos para ejecutar.',
-      terminal: 'La consola CRT está lista para renderizar tus etiquetas.',
-      test: 'La prueba de compatibilidad está lista.'
+      data: 'Estudia el Manual Técnico antes de operar.',
+      processes: 'Selecciona una misión para comenzar.',
+      terminal: 'El laboratorio CRT está listo para recibir tus etiquetas.',
+      test: 'Demuestra lo aprendido en el cuestionario.'
     };
 
     this.mascotDialogue.set(dialogos[section]);
     this.cartoonMascotState.set(section === 'test' ? 'thinking' : 'happy');
+  }
+
+  seleccionarReto(reto: any): void {
+    this.retoSeleccionado.set(reto);
+    this.leccionActual.set(reto.leccionContenido || ''); 
+    this.navigateTo('data');
+  }
+
+  sumarExperiencia(xp: number): void {
+    this.player.currentXp = Math.max(0, this.player.currentXp + Math.max(0, Number(xp) || 0));
+  }
+
+  obtenerPorcentajeXp(): number {
+    if (!Number.isFinite(this.player.currentXp) || !Number.isFinite(this.player.nextLevelXp) || this.player.nextLevelXp <= 0) return 0;
+    return Math.min(100, Math.max(0, (this.player.currentXp / this.player.nextLevelXp) * 100));
   }
 }
