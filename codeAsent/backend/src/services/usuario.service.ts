@@ -2,6 +2,7 @@ import { IUsuario } from '../interfaces/usuario.interface';
 import { ModeloUsuario } from '../models/usuario.model';
 import * as bcrypt from 'bcryptjs';
 import { generarToken } from '../utils/jwt.util';
+import { ModeloProgreso } from '../models/progreso.model';
 
 export class UsuarioService {
 
@@ -64,10 +65,18 @@ export class UsuarioService {
 
         const passwordHash = await bcrypt.hash(datosUsuario.password, 10);
 
-        return await ModeloUsuario.crear({
+        await ModeloUsuario.crear({
             ...datosUsuario,
             password: passwordHash
         });
+
+        const usuarioCreado = await ModeloUsuario.obtenerPorCorreo(datosUsuario.correo);
+        if (!usuarioCreado?.id_usuario) {
+            throw new Error('No se pudo recuperar el usuario recién creado.');
+        }
+
+        await ModeloProgreso.inicializarParaUsuario(usuarioCreado.id_usuario);
+        return usuarioCreado;
     }
 
     static async actualizar(

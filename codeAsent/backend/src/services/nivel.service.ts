@@ -31,7 +31,8 @@ export class ServicioNivel {
             throw new Error('La XP requerida no puede ser negativa.');
         }
 
-        return await ModeloNivel.crear(datosNivel);
+        await ModeloNivel.crear(datosNivel);
+        return datosNivel;
     }
 
     static async actualizar(id_nivel: number, datosNivel: Partial<INivel>): Promise<boolean> {

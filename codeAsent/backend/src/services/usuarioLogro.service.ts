@@ -32,7 +32,8 @@ export class ServicioUsuarioLogro {
             throw new Error(`El usuario con ID ${id_usuario} ya posee desbloqueado el logro con ID ${id_logro}.`);
         }
 
-        return await ModeloUsuarioLogro.asignarLogro(id_usuario, id_logro);
+        await ModeloUsuarioLogro.asignarLogro(id_usuario, id_logro);
+        return { id_usuario, id_logro } as IUsuarioLogro;
     }
 
     static async eliminar(id_usuario_logro: number): Promise<boolean> {

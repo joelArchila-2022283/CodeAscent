@@ -16,7 +16,8 @@ export class RespuestaService {
     }
 
     async crear(datos: IRespuesta): Promise<IRespuesta> {
-        return await ModeloRespuesta.crear(datos);
+        await ModeloRespuesta.crear(datos);
+        return datos;
     }
 
     async actualizar(id: number, datos: Partial<IRespuesta>): Promise<boolean> {

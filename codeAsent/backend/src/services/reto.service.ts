@@ -54,7 +54,8 @@ export class ServicioReto {
             throw new Error('La recompensa en XP no puede ser un valor negativo.');
         }
 
-        return await ModeloReto.crear(reto);
+        await ModeloReto.crear(reto);
+        return reto;
     }
 
     static async actualizar(id_reto: number, reto: Partial<IReto>): Promise<boolean> {

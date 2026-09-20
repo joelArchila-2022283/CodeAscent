@@ -30,10 +30,12 @@ export class ServicioLenguaje {
             throw new Error(`Ya existe un lenguaje registrado con el nombre '${nombreLimpio}'.`);
         }
 
-        return await ModeloLenguaje.crear({
+        const nuevoLenguaje = {
             nombre: nombreLimpio,
             descripcion: datos.descripcion ? datos.descripcion.trim() : undefined
-        });
+        };
+        await ModeloLenguaje.crear(nuevoLenguaje);
+        return nuevoLenguaje;
     }
 
     static async actualizar(id_lenguaje: number, datos: Partial<ILenguaje>): Promise<boolean> {

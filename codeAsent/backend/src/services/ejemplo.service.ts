@@ -16,7 +16,8 @@ export class EjemploService {
     }
 
     static async crear(datosEjemplo: IEjemplo): Promise<IEjemplo> {
-        return await ModeloEjemplo.crear(datosEjemplo);
+        await ModeloEjemplo.crear(datosEjemplo);
+        return datosEjemplo;
     }
 
     static async actualizar(

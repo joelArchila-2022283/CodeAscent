@@ -16,7 +16,8 @@ export class NivelUsuarioService {
     }
 
     async crear(datos: INivelUsuario): Promise<INivelUsuario> {
-        return await ModeloNivelUsuario.crear(datos);
+        await ModeloNivelUsuario.crear(datos);
+        return datos;
     }
 
     async actualizar(id: number, datos: Partial<INivelUsuario>): Promise<boolean> {
