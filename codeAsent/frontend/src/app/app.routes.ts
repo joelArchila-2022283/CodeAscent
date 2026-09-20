@@ -25,6 +25,7 @@ import { authGuard, guestGuard } from './core/guards/auth-guard';
 //Rutas de comics
 import { ComicComponent } from './pages/comics/comic_1/comic.component';
 import { ComicComponent2 } from './pages/comics/comic_2/comic.component';
+import { ComicComponent3 } from './pages/comics/comic_3/comic.component';
 
 export const routes: Routes = [
   {
@@ -45,7 +46,7 @@ export const routes: Routes = [
   },
   {
     path: 'comic/3',
-    component: ComicComponent
+    component: ComicComponent3
   },
   {
     path: 'comic/4',
