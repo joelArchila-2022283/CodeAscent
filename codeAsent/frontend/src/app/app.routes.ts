@@ -27,6 +27,7 @@ import { ComicComponent } from './pages/comics/comic_1/comic.component';
 import { ComicComponent2 } from './pages/comics/comic_2/comic.component';
 import { ComicComponent3 } from './pages/comics/comic_3/comic.component';
 import { ComicComponent4 } from './pages/comics/comic_4/comic.component';
+import { ComicComponent5 } from './pages/comics/comic_5/comic.component';
 
 export const routes: Routes = [
   {
@@ -52,6 +53,10 @@ export const routes: Routes = [
   {
     path: 'comic/4',
     component: ComicComponent4
+  },
+  {
+    path: 'comic/5',
+    component: ComicComponent5
   },
 
   // ==========================================
