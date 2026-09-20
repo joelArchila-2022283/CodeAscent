@@ -20,13 +20,36 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
 // Guardianes de Autenticación
-import { authGuard, guestGuard } from './core/guards/auth-guard'; 
+import { authGuard, guestGuard } from './core/guards/auth-guard';
+
+//Rutas de comics
+import { ComicComponent } from './pages/comics/comic_1/comic.component';
+import { ComicComponent2 } from './pages/comics/comic_2/comic.component';
 
 export const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
+  },
+
+  //Rutas comics
+
+  {
+    path: 'comic/1',
+    component: ComicComponent
+  },
+  {
+    path: 'comic/2',
+    component: ComicComponent2
+  },
+  {
+    path: 'comic/3',
+    component: ComicComponent
+  },
+  {
+    path: 'comic/4',
+    component: ComicComponent
   },
 
   // ==========================================
