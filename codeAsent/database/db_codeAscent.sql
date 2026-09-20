@@ -1119,6 +1119,454 @@ CALL sp_crear_ejemplo(4, 'Regla CSS para Títulos', 'h1 {' || chr(10) || '  colo
 CALL sp_crear_ejemplo(5, 'Tipado de Variables TS', 'const nombreUsuario: string = "Carlos";' || chr(10) || 'const nivelActual: number = 5;' || chr(10) || 'const estaActivo: boolean = true;', 'Ejemplo de asignación explicita para string, number y boolean en TypeScript.');
 
 -- ============================================================
+-- CODEASCENT - CONTENIDO HTML
+-- 10 MISIONES / 10 LECCIONES / 10 CUESTIONARIOS
+-- ============================================================
+
+DO $$
+DECLARE
+    v_id_lenguaje INTEGER;
+    v_id_nivel INTEGER;
+    v_id_leccion INTEGER;
+    v_id_reto INTEGER;
+BEGIN
+
+    -- 1. Obtener ID del lenguaje HTML
+    SELECT id_lenguaje INTO v_id_lenguaje
+    FROM lenguaje WHERE LOWER(nombre) = 'html';
+
+    IF v_id_lenguaje IS NULL THEN
+        RAISE EXCEPTION 'El lenguaje HTML no existe en la base de datos.';
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 1: Estructura Básica
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 1;
+
+    IF v_id_nivel IS NOT NULL THEN
+                SELECT id_leccion INTO v_id_leccion
+                FROM leccion
+                WHERE id_nivel = v_id_nivel
+                    AND titulo = 'Estructura Fundamental de HTML5'
+                ORDER BY id_leccion DESC
+                LIMIT 1;
+
+                IF v_id_leccion IS NULL THEN
+                        CALL sp_crear_leccion(v_id_nivel, 'Estructura Fundamental de HTML5', 'HTML es el esqueleto de la web. Un archivo HTML5 requiere la etiqueta <!DOCTYPE html> para definir el estándar, la etiqueta <html> como raíz, el <head> para el cerebro invisible (metadatos) y el <body> para el contenido visual principal.', 1);
+                        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Estructura Fundamental de HTML5' ORDER BY id_leccion DESC LIMIT 1;
+                END IF;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Ubicación del contenido', 'Si escribes el texto "Hola Mundo" exactamente entre la etiqueta </head> y la etiqueta <body>, ¿qué hará el navegador web?', 'opcion_multiple', 50, 'facil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'Mostrará "Hola Mundo" correctamente, pero es una mala práctica porque rompe la semántica del documento.', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'La pantalla se quedará en blanco por un error crítico.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'El texto se ocultará automáticamente en la pestaña del navegador.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 2: Jerarquía de Texto
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 2;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Jerarquía de Texto y Títulos', 'El texto necesita jerarquía para el SEO y la accesibilidad. Usamos <h1> para el titular principal, <h2> a <h6> para subtítulos, y <p> para párrafos. Son elementos de bloque, por lo que siempre ocupan todo el ancho disponible y fuerzan un salto de línea.', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Comportamiento de bloques', 'Si escribes <h1>Hola</h1><h2>Mundo</h2> en una sola línea de tu código, ¿cómo se mostrará en el navegador?', 'opcion_multiple', 100, 'facil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, '"Hola" en una línea enorme y "Mundo" en la línea de abajo, ligeramente más pequeño.', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, '"Hola Mundo" en la misma línea, con "Mundo" más pequeño.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Causará un error de renderizado visual.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 3: Hipervínculos
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 3;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Hipervínculos y Atributos', 'La etiqueta de ancla <a> transforma un texto estático en un puente hacia otra URL. Es un elemento en línea y requiere obligatoriamente el atributo "href" para funcionar y saber a qué destino web debe dirigir al usuario al hacer clic.', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Atributos obligatorios', 'Si escribes <a>Ir a Google</a> sin declarar el atributo href, ¿qué sucede en la pantalla?', 'opcion_multiple', 150, 'medio');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'Se ve y se comporta como texto normal, sin formato azul ni subrayado, y no es cliqueable.', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'Funciona como un enlace, pero recarga la misma página actual.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Da un error de compilación de HTML en la consola.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 4: Imágenes y Multimedia
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 4;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Imágenes y Accesibilidad', 'La etiqueta <img> es de autocierre. Usa el atributo "src" para indicar la ruta de la imagen y el atributo "alt" para describir la imagen a los lectores de pantalla (accesibilidad) y a los motores de búsqueda.', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Accesibilidad de Imágenes', 'Si cometes un error tipográfico en la ruta del atributo src de una imagen, ¿qué leerá un usuario ciego que navega con un lector de pantalla?', 'opcion_multiple', 200, 'medio');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'El lector dictará exactamente lo que esté escrito en el atributo alt.', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'El lector dictará la palabra "Error 404".', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'El lector se saltará la imagen en completo silencio.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 5: Listas Estructuradas
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 5;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Listas Estructuradas', 'Usa <ol> para listas ordenadas (1, 2, 3) y <ul> para listas desordenadas (viñetas de puntos). Ambas listas requieren que cada elemento en su interior esté envuelto obligatoriamente en la etiqueta de hijo <li> (List Item).', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Anidación estricta', 'Si escribes el texto suelto "Manzanas" directamente dentro de un <ul>, pero sin envolverlo en un <li>, ¿es esto un HTML válido?', 'opcion_multiple', 250, 'medio');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'No, es una violación de la estructura estándar HTML.', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'Sí, generará un punto de viñeta automáticamente al renderizar.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Sí, pero se verá como texto fuera de la lista.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 6: Tablas de Datos
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 6;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Tablas de Datos Bidimensionales', 'Las tablas estructuran datos como en una hoja de cálculo. Se declaran envolviendo todo en <table>. Dentro de ella, las filas horizontales se crean con <tr>. Dentro de cada fila, los encabezados se definen con <th> y las celdas normales de datos con <td>.', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Dibujo de cuadrícula', 'Si escribes tres etiquetas <td> seguidas de tres etiquetas <tr>, ¿cómo se mostrará la cuadrícula?', 'opcion_multiple', 300, 'dificil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'Generará un error semántico porque las celdas (td) deben vivir obligatoriamente dentro de una fila (tr).', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'Se dibujará una tabla de 3x3 celdas.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Dibujará todo en una sola línea horizontal desordenada.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 7: Formularios Básicos
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 7;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Formularios y Elementos Interactivos', 'Un <form> agrupa campos interactivos para recolectar datos del usuario. La etiqueta <input> es de autocierre y cambia drásticamente según su atributo type (text, password, email, checkbox). Finalmente, usamos <button> para la acción de envío.', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Modificadores de Input', 'Si escribes <input type="password"> en lugar de type="text", ¿qué cambiará visualmente en la pantalla del usuario?', 'opcion_multiple', 350, 'medio');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'Los caracteres tipeados se enmascararán con puntos o asteriscos ocultando el valor.', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'El campo se pintará de color rojo indicando alta seguridad.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'El navegador forzará un teclado numérico de seguridad especial.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 8: Contenedores Genéricos
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 8;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Tipos de Input Avanzados', 'Los controles de formulario comunican la intención del dato. email valida una dirección, number representa cantidades y date permite seleccionar una fecha con controles nativos del navegador.', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Tipos de Input', 'Si utilizas input type="email" en lugar de type="text", ¿qué comportamiento adicional aporta el navegador?', 'opcion_multiple', 400, 'dificil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'El navegador puede validar el formato de correo antes del envío.', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'El navegador convierte el campo automáticamente en una contraseña.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'El navegador crea una tabla con los datos ingresados.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 9: Semántica Web Modernizada
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 9;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Etiquetas Semánticas', 'HTML5 introdujo etiquetas como <header>, <main> y <footer> para reemplazar el exceso de <div> genéricos. Tienen el mismo comportamiento visual que un div, pero le explican el propósito de esa zona a los motores de búsqueda (SEO) y a los lectores de pantalla.', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Jerarquía SEO', '¿Es una buena práctica colocar múltiples etiquetas <main> visibles en una sola página HTML?', 'opcion_multiple', 450, 'dificil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'No, el estándar dictamina que solo debe existir un elemento <main> visible por documento para no confundir a los buscadores.', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'Sí, cuantas más áreas principales tenga la web, mejor será su posicionamiento SEO.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Sí, pero solo si están incrustadas una dentro de la otra recursivamente.', FALSE);
+    END IF;
+
+    -- ========================================================
+    -- MISIÓN 10: Atributos Globales
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 10;
+
+    IF v_id_nivel IS NOT NULL THEN
+        CALL sp_crear_leccion(v_id_nivel, 'Identificadores y Clases', 'Los atributos globales sirven para manipular elementos con CSS o JS. El atributo "id" funciona como un número de pasaporte: es un identificador único e irrepetible. El atributo "class" funciona como un uniforme: se usa para agrupar múltiples elementos diferentes bajo un mismo estilo.', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
+
+        CALL sp_crear_reto(v_id_leccion, 'Predicción: Regla de Unicidad', 'Si asignas id="boton-rojo" a tres botones diferentes en la misma página HTML, ¿qué dice el estándar sobre esta práctica?', 'opcion_multiple', 500, 'dificil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
+
+        CALL sp_crear_respuesta(v_id_reto, 'Es un error grave de validación, el ID debe ser estrictamente único por página. Deberías usar una clase (class).', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'Es correcto si los tres botones son físicamente iguales en tamaño.', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Causará que el navegador elimine completamente los botones del renderizado visual.', FALSE);
+    END IF;
+
+    RAISE NOTICE 'Los 10 cuestionarios y lecciones de HTML fueron creados correctamente.';
+
+END $$;
+
+-- ============================================================
+-- HTML - MANUAL TECNICO Y PROBLEMAS ABP
+-- Opcion A: contenido enriquecido en leccion.contenido.
+-- ============================================================
+
+UPDATE leccion
+SET titulo = 'Tipos de Input Avanzados'
+WHERE titulo = 'Contenedores: div y span'
+    AND id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 8);
+
+UPDATE reto
+SET titulo = 'Predicción: Tipos de Input',
+        descripcion = 'Si utilizas input type="email" en lugar de type="text", ¿qué comportamiento adicional aporta el navegador?'
+WHERE titulo = 'Predicción: Bloque vs Línea'
+    AND id_leccion = (SELECT le.id_leccion FROM leccion le JOIN nivel n ON n.id_nivel = le.id_nivel JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 8);
+
+UPDATE respuesta
+SET contenido = CASE
+        WHEN es_correcta THEN 'El navegador puede validar el formato de correo antes del envío.'
+        WHEN id_respuesta = (SELECT MIN(r2.id_respuesta) FROM respuesta r2 JOIN reto rt2 ON rt2.id_reto = r2.id_reto WHERE rt2.titulo = 'Predicción: Tipos de Input') THEN 'El navegador convierte el campo automáticamente en una contraseña.'
+        ELSE 'El navegador crea una tabla con los datos ingresados.'
+END
+WHERE id_reto = (SELECT rt.id_reto FROM reto rt WHERE rt.titulo = 'Predicción: Tipos de Input' AND rt.id_leccion = (SELECT le.id_leccion FROM leccion le JOIN nivel n ON n.id_nivel = le.id_nivel JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 8));
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+Un documento HTML es como un edificio: html es la estructura completa, head contiene los planos y metadatos, y body contiene las salas visibles para el visitante.
+
+NIVEL LOGICO
+El navegador recibe el documento, identifica el DOCTYPE, construye el arbol html, procesa head y despues pinta body en el orden recibido.
+
+NIVEL SINTACTICO
+Usa <!DOCTYPE html>, <html>, <head> y <body>. El contenido visible debe vivir dentro de body.
+
+PROBLEMA ABP
+El equipo de CodeAscent necesita publicar la ficha de una expedicion. Construye un documento HTML5 valido con una zona de metadatos y una zona visible para el jugador.
+
+REQUISITO TECNICO
+Debe existir html, head y body, ademas de una declaracion DOCTYPE.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 1)
+    AND titulo = 'Estructura Fundamental de HTML5';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+Los encabezados son los titulos de un libro y los parrafos son sus bloques de explicacion. h1 representa el titulo principal; h2 a h6 organizan subtemas; p contiene texto normal.
+
+NIVEL LOGICO
+El navegador crea bloques en el arbol DOM. Cada encabezado conserva su jerarquia y cada parrafo se coloca como una unidad independiente.
+
+NIVEL SINTACTICO
+Escribe <h1>Titulo</h1>, <h2>Subtitulo</h2> y <p>Descripcion</p>. No uses encabezados solo para cambiar el tamano visual.
+
+PROBLEMA ABP
+La portada de una expedicion necesita un titulo principal y una descripcion para que visitantes y lectores de pantalla comprendan el objetivo.
+
+REQUISITO TECNICO
+Incluye al menos un h1 y un p relacionados con la expedicion.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 2)
+    AND titulo = 'Jerarquía de Texto y Títulos';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+Un enlace es un puente: el texto visible es el letrero y href indica hacia que destino conduce.
+
+NIVEL LOGICO
+El navegador crea un elemento interactivo solo cuando encuentra una etiqueta a con un destino href interpretable.
+
+NIVEL SINTACTICO
+Usa <a href="/mapa">Ir al mapa</a>. href puede contener una ruta relativa o una URL absoluta.
+
+PROBLEMA ABP
+La base de operaciones necesita un menu que dirija al mapa, al manual y al panel de progreso.
+
+REQUISITO TECNICO
+Incluye un enlace a con un atributo href no vacio.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 3)
+    AND titulo = 'Hipervínculos y Atributos';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+Una imagen es una senal visual y alt es su descripcion alternativa para quien no puede verla.
+
+NIVEL LOGICO
+El navegador solicita el recurso indicado por src. Si falla, alt mantiene la informacion disponible para accesibilidad y contexto.
+
+NIVEL SINTACTICO
+Usa <img src="expedicion.jpg" alt="Equipo explorando una cueva">. img no requiere etiqueta de cierre.
+
+PROBLEMA ABP
+El catalogo de CodeAscent necesita una imagen de cada sector que tambien pueda ser interpretada por un lector de pantalla.
+
+REQUISITO TECNICO
+Incluye img con src y alt descriptivos.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 4)
+    AND titulo = 'Imágenes y Accesibilidad';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+Una lista es un inventario. ul comunica elementos sin orden obligatorio y ol comunica una secuencia; li representa cada entrada.
+
+NIVEL LOGICO
+El navegador interpreta ul u ol como contenedor y espera que sus hijos directos sean elementos li.
+
+NIVEL SINTACTICO
+Usa <ul><li>HTML</li><li>CSS</li></ul> o cambia ul por ol cuando el orden importe.
+
+PROBLEMA ABP
+El equipo debe publicar los recursos necesarios para completar una expedicion sin perder la relacion entre lista y elementos.
+
+REQUISITO TECNICO
+Incluye ul u ol con al menos tres elementos li.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 5)
+    AND titulo = 'Listas Estructuradas';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+Una tabla es una hoja de calculo: table es la hoja, tr es una fila, th es un encabezado y td es una celda de datos.
+
+NIVEL LOGICO
+El navegador agrupa celdas dentro de filas y filas dentro de la tabla para construir una cuadricula coherente.
+
+NIVEL SINTACTICO
+Usa <table><tr><th>Nombre</th><th>Nivel</th></tr><tr><td>Cadete</td><td>1</td></tr></table>.
+
+PROBLEMA ABP
+El panel de control debe mostrar una tabla con jugadores y niveles alcanzados para que el equipo compare su avance.
+
+REQUISITO TECNICO
+Incluye table, tr y al menos una celda td dentro de una fila.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 6)
+    AND titulo = 'Tablas de Datos Bidimensionales';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+Un formulario es una ficha de ingreso: form agrupa la ficha, label explica cada campo, input recibe datos y button confirma la accion.
+
+NIVEL LOGICO
+El navegador relaciona controles, nombres y eventos dentro del formulario antes de enviarlos al destino configurado.
+
+NIVEL SINTACTICO
+Usa <form><label for="correo">Correo</label><input id="correo" type="email"><button>Enviar</button></form>.
+
+PROBLEMA ABP
+El registro de expedicion necesita capturar correo y aceptar el envio de la ficha del jugador.
+
+REQUISITO TECNICO
+Incluye form, label, input y button.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 7)
+    AND titulo = 'Formularios y Elementos Interactivos';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+El atributo type es la regla que define el instrumento: email valida correo, number espera cantidades y date representa fechas.
+
+NIVEL LOGICO
+El navegador selecciona controles y validaciones nativas segun el valor de type antes de enviar el formulario.
+
+NIVEL SINTACTICO
+Usa <input type="email">, <input type="number"> y <input type="date">.
+
+PROBLEMA ABP
+El panel de registro debe pedir correo, nivel inicial y fecha de ingreso usando controles apropiados.
+
+REQUISITO TECNICO
+Incluye inputs de tipo email, number y date.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 8)
+    AND titulo = 'Tipos de Input Avanzados';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+Las etiquetas semanticas son carteles de un edificio: header marca cabecera, nav orienta, main identifica el contenido principal, section agrupa y footer cierra la pagina.
+
+NIVEL LOGICO
+El navegador conserva el mismo flujo visual basico, pero herramientas de accesibilidad y buscadores interpretan mejor el proposito de cada region.
+
+NIVEL SINTACTICO
+Usa <header>, <nav>, <main>, <section> y <footer> en lugar de llenar todo con div.
+
+PROBLEMA ABP
+La pagina del laboratorio necesita una estructura que pueda recorrer un lector de pantalla por regiones.
+
+REQUISITO TECNICO
+Incluye header, nav, main, section y footer.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 9)
+    AND titulo = 'Etiquetas Semánticas';
+
+UPDATE leccion
+SET contenido = $html_manual$
+MANUAL TECNICO
+
+NIVEL CONCEPTUAL
+id es un pasaporte unico y class es el uniforme compartido por varios elementos. lang indica el idioma del documento y aria-label ofrece una etiqueta accesible.
+
+NIVEL LOGICO
+El navegador expone estos atributos al CSS, JavaScript, motores de busqueda y tecnologias de asistencia sin cambiar por si mismos el contenido visible.
+
+NIVEL SINTACTICO
+Usa <html lang="es">, <section id="mapa" class="panel" aria-label="Mapa de progreso">.
+
+PROBLEMA ABP
+El laboratorio debe identificar sus regiones y describirlas para que puedan encontrarse por estilos, scripts y lectores de pantalla.
+
+REQUISITO TECNICO
+Incluye lang, id, class y aria-label, manteniendo cada id unico.
+$html_manual$
+WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = 'html' AND n.numero_nivel = 10)
+    AND titulo = 'Identificadores y Clases';
+
+-- ============================================================
 -- CODEASCENT - CONTENIDO TYPESCRIPT
 -- 10 MISIONES / 10 LECCIONES / 10 CUESTIONARIOS
 -- ============================================================
