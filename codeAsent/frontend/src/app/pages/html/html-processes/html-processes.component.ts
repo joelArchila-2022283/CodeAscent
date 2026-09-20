@@ -1,10 +1,46 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import { HtmlDataService, HtmlMision } from '../../../services/html-data.service';
 
-@Component({ selector: 'app-html-processes', standalone: true, imports: [CommonModule], templateUrl: './html-processes.component.html', styleUrl: './html-processes.component.scss' })
-export class HtmlProcessesComponent {
+@Component({
+  selector: 'app-html-processes',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './html-processes.component.html',
+  styleUrl: './html-processes.component.scss'
+})
+export class HtmlProcessesComponent implements OnInit {
   @Output() back = new EventEmitter<void>();
-  completed = signal<number[]>([1]);
-  missions = [{ id: 1, code: 'MIN-01', title: 'Abrir la compuerta', detail: 'Crea una página con un título y un párrafo.', reward: '+40 XP', icon: 'bi-door-open' }, { id: 2, code: 'MIN-02', title: 'Marcar el sendero', detail: 'Usa una lista para señalizar tres recursos.', reward: '+60 XP', icon: 'bi-signpost-2' }, { id: 3, code: 'MIN-03', title: 'Encender el HTML', detail: 'Añade una imagen con texto alternativo.', reward: '+80 XP', icon: 'bi-gem' }];
-  toggleMission(id: number) { this.completed.update(items => items.includes(id) ? items.filter(item => item !== id) : [...items, id]); }
+  @Output() missionSelected = new EventEmitter<any>();
+
+  private readonly htmlDataService = inject(HtmlDataService);
+  
+  missions = signal<HtmlMision[]>([]);
+  cargando = signal(true);
+  errorCarga = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.htmlDataService.obtenerMisiones().subscribe({
+      next: misiones => {
+        this.missions.set(misiones);
+        this.cargando.set(false);
+      },
+      error: error => {
+        console.error(error);
+        this.errorCarga.set('No se pudieron cargar las misiones HTML.');
+        this.cargando.set(false);
+      }
+    });
+  }
+
+  seleccionarMision(mision: any): void {
+    if (mision.desbloqueada && mision.reto) {
+      const retoParaDashboard = {
+        ...mision.reto,
+        leccionContenido: mision.leccion?.contenido || '',
+        respuestas: mision.respuestas || mision.reto.respuestas || []
+      };
+      this.missionSelected.emit(retoParaDashboard);
+    }
+  }
 }

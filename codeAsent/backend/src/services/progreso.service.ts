@@ -47,7 +47,8 @@ export class ServicioProgreso {
             throw new Error('El porcentaje debe ser un número entre 0.00 y 100.00.');
         }
 
-        return await ModeloProgreso.crear(datosProgreso);
+        await ModeloProgreso.crear(datosProgreso);
+        return datosProgreso;
     }
 
     static async actualizar(id_progreso: number, datosProgreso: Partial<IProgreso>): Promise<boolean> {

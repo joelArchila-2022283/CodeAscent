@@ -34,7 +34,8 @@ export class ServicioLeccion {
             throw new Error('El orden de la lección debe ser un número mayor a 0.');
         }
 
-        return await ModeloLeccion.crear(datosLeccion);
+        await ModeloLeccion.crear(datosLeccion);
+        return datosLeccion;
     }
 
     static async actualizar(id_leccion: number, datosLeccion: Partial<ILeccion>): Promise<boolean> {

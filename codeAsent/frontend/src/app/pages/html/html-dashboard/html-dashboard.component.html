@@ -26,7 +26,7 @@
           <span class="hud-rank">RANGO LVL {{ player.level }}</span>
         </div>
         <div class="hud-xp-rail">
-          <div class="hud-xp-fill" [style.width.%]="(player.currentXp / player.nextLevelXp) * 100"></div>
+          <div class="hud-xp-fill" [style.width.%]="obtenerPorcentajeXp()"></div>
         </div>
         <div class="hud-meta-row">
           <span>{{ player.currentXp }}/{{ player.nextLevelXp }} XP</span>
@@ -50,28 +50,28 @@
         </button>
       </li>
       <li>
-        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'data'" (click)="navigateTo('data')">
-          <span class="rock-btn__icon"><i class="bi bi-file-earmark-binary"></i></span>
-          <span class="rock-btn__text">DATA</span>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'processes'" (click)="navigateTo('processes')">
+          <span class="rock-btn__icon"><i class="bi bi-journal-check"></i></span>
+          <span class="rock-btn__text">MISIONES</span>
+          <span class="rock-badge">4</span>
         </button>
       </li>
       <li>
-        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'processes'" (click)="navigateTo('processes')">
-          <span class="rock-btn__icon"><i class="bi bi-gear-wide-connected"></i></span>
-          <span class="rock-btn__text">PROCESSES</span>
-          <span class="rock-badge">4</span>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'data'" (click)="navigateTo('data')">
+          <span class="rock-btn__icon"><i class="bi bi-book"></i></span>
+          <span class="rock-btn__text">MANUAL</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')">
+          <span class="rock-btn__icon"><i class="bi bi-patch-question"></i></span>
+          <span class="rock-btn__text">CUESTIONARIO</span>
         </button>
       </li>
       <li>
         <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'terminal'" (click)="navigateTo('terminal')">
           <span class="rock-btn__icon"><i class="bi bi-terminal-fill"></i></span>
-          <span class="rock-btn__text">TERMINAL</span>
-        </button>
-      </li>
-      <li>
-        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')">
-          <span class="rock-btn__icon"><i class="bi bi-floppy-fill"></i></span>
-          <span class="rock-btn__text">TEST</span>
+          <span class="rock-btn__text">LABORATORIO</span>
         </button>
       </li>
     </ul>
@@ -83,16 +83,16 @@
         <app-html-dashboard-section (sectionSelected)="navigateTo($event)" />
       }
       @case ('data') {
-        <app-html-data (back)="navigateTo('dashboard')" />
+        <app-html-data [leccionRaw]="leccionActual()" (back)="navigateTo('processes')" (next)="navigateTo('test')" />
       }
       @case ('processes') {
-        <app-html-processes (back)="navigateTo('dashboard')" />
+        <app-html-processes (missionSelected)="seleccionarReto($event)" (back)="navigateTo('dashboard')" />
       }
       @case ('terminal') {
-        <app-html-terminal (back)="navigateTo('dashboard')" />
+        <app-html-terminal [retoSeleccionado]="retoSeleccionado()" (missionCompleted)="sumarExperiencia($event)" (back)="navigateTo('dashboard')" />
       }
       @case ('test') {
-        <app-html-test (back)="navigateTo('dashboard')" />
+        <app-html-test [retoPrediccion]="retoSeleccionado()" (back)="navigateTo('data')" (next)="navigateTo('terminal')" />
       }
     }
   </div>

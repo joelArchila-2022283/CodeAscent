@@ -1,1 +1,24 @@
-<section class="html-section process-section"><header><span class="section-kicker"><i class="bi bi-tools"></i> COLA DE CANTERA / 03 DIRECTIVAS</span><h2>PROCESOS ACTIVOS</h2><p>Completa cada excavación para abrir nuevas cámaras de conocimiento.</p></header><div class="mission-list"><button class="mission" *ngFor="let mission of missions" [class.done]="completed().includes(mission.id)" (click)="toggleMission(mission.id)"><span class="mission-icon"><i class="bi" [class]="mission.icon"></i></span><span class="mission-copy"><small>{{ mission.code }}</small><strong>{{ mission.title }}</strong><span>{{ mission.detail }}</span></span><span class="mission-reward">{{ completed().includes(mission.id) ? 'LISTO' : mission.reward }} <i class="bi" [class.bi-check-circle-fill]="completed().includes(mission.id)" [class.bi-lock-fill]="!completed().includes(mission.id)"></i></span></button></div><button class="html-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER AL PANEL</button></section>
+<section class="html-section process-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-tools"></i> MISIONES ACTIVAS</span>
+    <h2>SELECCIÓN DE MISIÓN</h2>
+    <p>Completa cada excavación para abrir nuevas cámaras de conocimiento.</p>
+  </header>
+  
+  <p *ngIf="cargando()">Cargando misiones...</p>
+  <p *ngIf="errorCarga()" role="alert">{{ errorCarga() }}</p>
+  
+  <div class="mission-list">
+    <button class="mission" *ngFor="let mission of missions()" [class.done]="mission.completada" [disabled]="!mission.desbloqueada || !mission.reto" (click)="seleccionarMision(mission)">
+      <span class="mission-icon"><i class="bi" [class]="mission.completada ? 'bi-check-circle-fill' : (mission.desbloqueada ? 'bi-door-open' : 'bi-lock-fill')"></i></span>
+      <span class="mission-copy">
+        <small>HTML-{{ mission.nivel.numero_nivel | number:'2.0-0' }}</small>
+        <strong>{{ mission.nivel.nombre }}</strong>
+        <span>{{ mission.nivel.descripcion }}</span>
+      </span>
+      <span class="mission-reward">{{ mission.completada ? 'LISTO' : '+' + (mission.nivel.xp_requerida || 0) + ' XP' }}</span>
+    </button>
+  </div>
+  
+  <button class="html-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER AL PANEL</button>
+</section>

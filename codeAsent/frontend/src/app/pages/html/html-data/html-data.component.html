@@ -1,1 +1,45 @@
-<section class="html-section data-section"><header><span class="section-kicker"><i class="bi bi-journal-richtext"></i> ARCHIVO DE MEMORIA</span><h2>DATOS DEL SECTOR HTML</h2><p>Lecturas y conceptos esenciales para avanzar por el cañón HTML.</p></header><div class="data-grid"><article><i class="bi bi-filetype-html"></i><h3>ESTRUCTURA</h3><strong>12</strong><span>jeroglíficos dominados</span></article><article><i class="bi bi-diagram-3"></i><h3>RUTA ACTUAL</h3><strong>HTML / 01</strong><span>fundamentos de etiquetas</span></article><article><i class="bi bi-clock-history"></i><h3>REGISTRO</h3><strong>48 min</strong><span>tiempo en la expedición</span></article></div><div class="lesson-strip"><span><i class="bi bi-lightbulb"></i> CONSEJO DEL MINERO</span><p>Una etiqueta semántica describe su propósito: deja que el navegador lea tus mapas con claridad.</p></div><button class="html-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER AL PANEL</button></section>
+<section class="html-section data-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-book-half"></i> ARCH-01 / LECTURA</span>
+    <h2>MANUAL TÉCNICO</h2>
+    <p>Analiza la teoría, comprende la lógica y estudia la sintaxis.</p>
+  </header>
+
+  <div class="manual-grid">
+    <div class="manual-content">
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-lightbulb-fill"></i> Nivel Conceptual</h3>
+        <p>{{ manual().conceptual }}</p>
+      </div>
+
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-gear-fill"></i> Nivel Lógico</h3>
+        <p>{{ manual().logico }}</p>
+      </div>
+
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-code-slash"></i> Nivel Sintáctico</h3>
+        <pre><code>{{ manual().sintactico }}</code></pre>
+      </div>
+    </div>
+
+    <div class="manual-graphic">
+      <div class="graphic-placeholder">
+        <i class="bi bi-diagram-3"></i>
+        <span>Representación Estructural</span>
+        <div class="wireframe-box">
+          <div class="w-head"></div>
+          <div class="w-body">
+            <div class="w-element"></div>
+            <div class="w-element short"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="html-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> ELEGIR OTRA MISIÓN</button>
+    <button class="html-next" (click)="next.emit()">IR AL CUESTIONARIO <i class="bi bi-arrow-right"></i></button>
+  </div>
+</section>

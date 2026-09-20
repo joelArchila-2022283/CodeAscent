@@ -1,1 +1,113 @@
-.html-section { animation: htmlReveal .45s ease both; } header { margin-bottom: 1.5rem; } .section-kicker { color:#00e5ff; font:700 .72rem monospace; letter-spacing:.14em; } h2 { margin:.35rem 0; color:#ffb700; font:2.1rem 'Bangers',cursive; letter-spacing:.05em; } header p,.lesson-strip p { color:#9a8a80; } .data-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; } article { padding:1.3rem; background:#1b1411d9; border:2px solid #42342c; border-radius:10px; } article i { color:#ff9100; font-size:1.8rem; } h3 { margin:1rem 0 .2rem; color:#9a8a80; font:1rem 'Bangers',cursive; letter-spacing:.08em; } strong { display:block; color:#e6ded6; font:1.8rem 'Bangers',cursive; } article span { color:#9a8a80; font-size:.8rem; } .lesson-strip { margin:1.25rem 0; padding:1.2rem; border-left:4px solid #00e5ff; background:rgba(0,229,255,.07); } .lesson-strip span { color:#00e5ff; font:700 .75rem monospace; } .html-back { padding:.7rem 1rem; color:#ffb700; background:#211711; border:2px solid #6a4b2d; border-radius:8px; font:1rem 'Bangers',cursive; cursor:pointer; } @keyframes htmlReveal { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+.html-section { animation: htmlReveal 0.45s ease both; }
+header { margin-bottom: 1.5rem; }
+.section-kicker { color: #00e5ff; font: 700 0.72rem monospace; letter-spacing: 0.14em; }
+h2 { margin: 0.35rem 0; color: #ffb700; font: 2.1rem 'Bangers', cursive; letter-spacing: 0.05em; }
+header p { color: #9a8a80; }
+
+.manual-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.concept-box {
+  background: #110c0a;
+  border: 2px solid #42342c;
+  padding: 1.2rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  
+  .box-subtitle {
+    color: #ff9100;
+    margin-top: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  p { margin: 0; font-size: 1rem; line-height: 1.5; color: #e6ded6; }
+  pre {
+    background: #000;
+    padding: 1rem;
+    border-radius: 6px;
+    color: #00e5ff;
+    overflow-x: auto;
+    margin: 0.8rem 0 0 0;
+    border: 1px solid #25463f;
+  }
+}
+
+.manual-graphic {
+  background: #17110f;
+  border: 2px dashed #ffb700;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 300px;
+
+  .graphic-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #ffb700;
+    opacity: 0.7;
+
+    i { font-size: 3rem; margin-bottom: 1rem; }
+    span { font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: 0.05em; margin-bottom: 1.5rem; }
+
+    .wireframe-box {
+      width: 100%;
+      min-width: 200px;
+      border: 2px solid #ff9100;
+      border-radius: 6px;
+      padding: 0.5rem;
+
+      .w-head { height: 20px; background: rgba(0, 229, 255, 0.2); margin-bottom: 0.5rem; border-radius: 4px; }
+      .w-body {
+        border: 2px solid rgba(255, 145, 0, 0.5);
+        padding: 0.5rem;
+        border-radius: 4px;
+        .w-element { height: 15px; background: rgba(255, 255, 255, 0.1); margin-bottom: 0.5rem; border-radius: 4px; }
+        .w-element.short { width: 60%; }
+      }
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.html-back, .html-next {
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  font: 1rem 'Bangers', cursive;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.html-back {
+  color: #ffb700;
+  background: #211711;
+  border: 2px solid #6a4b2d;
+  &:hover { background: #342414; transform: translateY(-2px); }
+}
+
+.html-next {
+  color: #0c0908;
+  background: #00e676;
+  border: 2px solid #00b359;
+  &:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 230, 118, 0.4); }
+}
+
+@keyframes htmlReveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (max-width: 900px) { .manual-grid { grid-template-columns: 1fr; } }

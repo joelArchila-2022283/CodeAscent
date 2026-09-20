@@ -28,12 +28,14 @@ export class LogroService {
             throw new Error(`Ya existe un logro registrado con el nombre '${nombreLimpio}'.`);
         }
 
-        return await ModeloLogro.crear({
+        const nuevoLogro = {
             ...datos,
             nombre: nombreLimpio,
             descripcion: datos.descripcion ? datos.descripcion.trim() : null,
             requisito: datos.requisito ? datos.requisito.trim() : null
-        });
+        };
+        await ModeloLogro.crear(nuevoLogro);
+        return nuevoLogro;
     }
 
     static async actualizar(id_logro: number, datos: Partial<Logro>): Promise<boolean> {

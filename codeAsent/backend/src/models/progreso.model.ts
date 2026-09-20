@@ -3,6 +3,19 @@ import { IProgreso, IProgresoRow } from '../interfaces/progreso.interface';
 
 export class ModeloProgreso {
 
+    static async inicializarParaUsuario(id_usuario: number): Promise<void> {
+        const lenguajes = await pool.query<{ id_lenguaje: number }>(
+            'SELECT id_lenguaje FROM lenguaje WHERE estado = TRUE'
+        );
+
+        for (const lenguaje of lenguajes.rows) {
+            await pool.query(
+                'CALL sp_crear_progreso($1, $2, $3, $4, $5)',
+                [id_usuario, lenguaje.id_lenguaje, null, 0, 0]
+            );
+        }
+    }
+
     static async obtenerTodos(): Promise<IProgreso[]> {
         const resultado = await pool.query<IProgresoRow>(
             'SELECT * FROM fn_obtener_progresos()'
