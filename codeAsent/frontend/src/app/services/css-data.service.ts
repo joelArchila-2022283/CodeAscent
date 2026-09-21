@@ -9,6 +9,7 @@ import { ILenguaje } from '../interfaces/lenguaje.interface';
 import { INivel } from '../interfaces/nivel.interface';
 import { IProgreso } from '../interfaces/progreso.interface';
 import { ILeccion } from '../interfaces/leccion.interface';
+import { NivelCss } from '../interfaces/css.interface';
 
 const NOMBRE_LENGUAJE_CSS = 'css';
 
@@ -16,6 +17,7 @@ interface RespuestaLenguajes { exito: boolean; datos: ILenguaje[]; }
 interface RespuestaNiveles { status: string; data: INivel[]; }
 interface RespuestaProgreso { status: string; data: IProgreso; }
 interface RespuestaLecciones { status: string; data: ILeccion[]; }
+interface RespuestaNivelesCss { status: string; data: NivelCss[]; }
 
 export interface ContextoCSS {
   idLenguaje: number;
@@ -27,6 +29,19 @@ export interface ContextoCSS {
 export interface LeccionesNivelCSS {
   nivel: INivel | null;
   lecciones: ILeccion[];
+}
+
+
+export interface ResultadoIntentoCss {
+  correcto: boolean;
+  xp_obtenida: number;
+  ya_completado: boolean;
+  progreso: IProgreso | null;
+}
+
+interface RespuestaIntentoCss {
+  status: string;
+  data: ResultadoIntentoCss;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -89,4 +104,21 @@ export class CssDataService {
       })
     );
   }
+
+  obtenerNivelesPedagogicos(): Observable<NivelCss[]> {
+    return this.http.get<RespuestaNivelesCss>(`${this.apiUrl}/css/niveles`).pipe(
+      map(respuesta => respuesta.data || [])
+    );
+  }
+
+
+  registrarIntentoCss(idReto: number, codigo: string): Observable<ResultadoIntentoCss> {
+    return this.http.post<RespuestaIntentoCss>(
+      `${this.apiUrl}/css/retos/${idReto}/intentos`,
+      { codigo }
+    ).pipe(
+      map(respuesta => respuesta.data)
+    );
+  }
+
 }

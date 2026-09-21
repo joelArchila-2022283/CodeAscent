@@ -1,44 +1,6 @@
 <section class="content">
-  <button class="back" (click)="back.emit()">← DASHBOARD</button>
-  <div class="eyebrow">DATA // MANUAL DE CAMPO CSS</div>
-  <h2>APRENDE ANTES DE PROGRAMAR</h2>
-  <p class="lead">Cada tema tiene una idea clave, un ejemplo explicado y una pista. Después podrás aplicarlo en Terminal.</p>
-
-  <div class="tabs">
-    <button [class.active]="activeTopic() === 'selectores'" (click)="select('selectores')">01 · Selectores</button>
-    <button [class.active]="activeTopic() === 'colores'" (click)="select('colores')">02 · Colores</button>
-    <button [class.active]="activeTopic() === 'box'" (click)="select('box')">03 · Box Model</button>
-    <button [class.active]="activeTopic() === 'tipografia'" (click)="select('tipografia')">04 · Tipografía</button>
-  </div>
-
-  <div class="layout">
-    <article class="card theory-card">
-      <span class="card-label">CONCEPTO ACTIVO</span>
-      <h3>{{ current().title }}</h3>
-      <p class="objective"><b>Objetivo:</b> {{ current().objective }}</p>
-      <p>{{ current().description }}</p>
-      <h4>LO QUE DEBES RECORDAR</h4>
-      <ul>
-        @for (point of current().keyPoints; track point) { <li>{{ point }}</li> }
-      </ul>
-    </article>
-
-    <article class="card example-card">
-      <span class="card-label">EJEMPLO EXPLICADO</span>
-      <pre>{{ current().code }}</pre>
-      <p>{{ current().explanation }}</p>
-      <div class="hint"><b>💡 {{ current().hint }}</b></div>
-      <div class="challenge"><b>PRÓXIMA APLICACIÓN:</b> {{ current().challenge }}</div>
-      <button class="primary" (click)="practice.emit()">PRACTICAR EN TERMINAL →</button>
-    </article>
-  </div>
-
-  <article class="rule-map">
-    <div><span class="token selector">.tarjeta</span><small>SELECTOR<br>¿A quién?</small></div>
-    <b>{{ '{' }}</b>
-    <div><span class="token property">padding</span><small>PROPIEDAD<br>¿Qué cambia?</small></div>
-    <b>:</b>
-    <div><span class="token value">20px</span><small>VALOR<br>¿Cuánto/cómo?</small></div>
-    <b>;</b><b>{{ '}' }}</b>
-  </article>
+<button class="back" (click)="back.emit()">← DASHBOARD</button><div class="eyebrow">DATA // MANUAL TÉCNICO CSS</div><h2>APRENDE ANTES DE PROGRAMAR</h2>
+@if(loading()){<p class="lead">Cargando contenido CSS desde PostgreSQL...</p>} @else if(error()){<p class="lead">{{ error() }}</p>} @else {
+<div class="tabs">@for(level of levels;track level.id_nivel){<button [class.active]="activeLevel()===level.numero_nivel" (click)="select(level.numero_nivel)">{{ level.numero_nivel<10?'0'+level.numero_nivel:level.numero_nivel }}</button>}</div>
+@if(current(); as level){<div class="layout"><article class="card theory-card"><span class="card-label">NIVEL {{ level.numero_nivel }} · {{ level.nombre }}</span><h3>{{ level.nombre }}</h3><p class="objective"><b>Objetivo:</b> {{ level.descripcion }}</p>@for(leccion of level.lecciones;track leccion.id_leccion){<h4>{{ leccion.titulo }}</h4><p>{{ leccion.contenido }}</p>}</article><article class="card example-card"><span class="card-label">EJEMPLOS</span>@for(leccion of level.lecciones;track leccion.id_leccion){@for(ejemplo of leccion.ejemplos;track ejemplo.id_ejemplo){<h4>{{ ejemplo.titulo }}</h4><pre>{{ ejemplo.codigo }}</pre><p>{{ ejemplo.explicacion }}</p>}}<button class="primary" (click)="practice.emit(level.numero_nivel)">PRACTICAR NIVEL {{ level.numero_nivel }} →</button></article></div>} }
 </section>

@@ -1,12 +1,58 @@
 <section class="content">
-  <button class="back" (click)="back.emit()">← DASHBOARD</button>
-  <div class="eyebrow">TERMINAL // CSS LIVE LAB</div>
+  <button class="back" type="button" (click)="back.emit()">← DASHBOARD</button>
+  <div class="eyebrow">TERMINAL // MISIÓN CSS DESDE POSTGRESQL</div>
   <h2>APLICA LO APRENDIDO</h2>
-  <p class="lead">Aquí no recibes la solución: tienes un objetivo, una pista opcional y una previsualización para comprobar tu trabajo.</p>
-  <div class="task-tabs">@for (task of tasks; track task.title; let i=$index){<button [class.active]="taskIndex()===i" (click)="chooseTask(i)">{{ i + 1 }}</button>}</div>
-  <article class="objective"><small>EJERCICIO ACTIVO</small><h3>{{ currentTask().title }}</h3><p>{{ currentTask().instruction }}</p><button class="hint-btn" (click)="showHint.set(!showHint())">💡 {{ showHint() ? 'OCULTAR PISTA' : 'VER PISTA' }}</button>@if(showHint()){<div class="hint">{{ currentTask().hint }}</div>}</article>
-  <div class="terminal-grid">
-    <div class="terminal-box"><label>EDITOR CSS</label><textarea [(ngModel)]="code" spellcheck="false"></textarea><div class="actions"><button class="primary" (click)="run()">▶ EJECUTAR CSS</button><button (click)="reset()">REINICIAR</button></div><pre class="console">{{ consoleText() }}</pre></div>
-    <div class="preview"><b>PREVISUALIZACIÓN</b><p class="preview-note">El resultado cambia al ejecutar tu CSS.</p><div class="demo css-live-demo"><h3>Tarjeta CodeAscent</h3><p>Estoy esperando tus estilos.</p><button>BOTÓN</button></div></div>
-  </div>
+
+  @if (loading()) {
+    <p class="lead">Cargando niveles CSS...</p>
+  } @else if (error()) {
+    <div class="objective"><h3>NO SE PUDIERON CARGAR LOS NIVELES</h3><p>{{ error() }}</p></div>
+  } @else if (levels.length > 0) {
+    <div class="task-tabs">
+      @for (level of levels; track level.id_nivel; let i = $index) {
+        <button type="button" [class.active]="taskIndex() === i" (click)="chooseTask(i)">{{ level.numero_nivel }}</button>
+      }
+    </div>
+
+    @if (currentLevel(); as level) {
+      @if (currentTask(); as task) {
+        <article class="objective">
+          <small>NIVEL {{ level.numero_nivel }} · {{ level.nombre }}</small>
+          <h3>{{ task.titulo }}</h3>
+          <p>{{ task.descripcion }}</p>
+          <div class="hint">XP BASE: {{ task.xp_recompensa }}</div>
+        </article>
+
+        <div class="terminal-grid">
+          <div class="terminal-box">
+            <label>EDITOR CSS</label>
+            <textarea [(ngModel)]="code" spellcheck="false" placeholder="Escribe tu CSS aquí..."></textarea>
+            <div class="actions">
+              <button class="primary" type="button" [disabled]="validating()" (click)="run()">
+                {{ validating() ? 'VALIDANDO...' : '▶ VALIDAR CSS' }}
+              </button>
+              <button type="button" [disabled]="validating()" (click)="reset()">REINICIAR</button>
+            </div>
+            <pre class="console">{{ consoleText() }}</pre>
+          </div>
+
+          <div class="preview">
+            <b>PREVISUALIZACIÓN</b>
+            <div class="demo css-live-demo">
+              <h3 class="cartel">Poblado Antiguo</h3>
+              <p class="letrero archivo">Sistema CSS de práctica.</p>
+              <div class="caja"><div class="pieza">PIEZA</div></div>
+              <div class="taller almacen"><div class="modulo-principal">MÓDULO</div></div>
+              <div class="plano"><div class="panel">PANEL</div></div>
+              <button class="boton">REACTIVAR</button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="objective"><h3>{{ level.nombre }}</h3><p>Este nivel todavía no tiene una misión de código registrada.</p></div>
+      }
+    }
+  } @else {
+    <div class="objective"><h3>SIN NIVELES CSS</h3><p>No se encontraron niveles CSS registrados.</p></div>
+  }
 </section>

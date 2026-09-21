@@ -1,3 +1,4 @@
+
 -- PostgreSQL
 -- Crea primero la base de datos (desde postgres o pgAdmin):
 -- CREATE DATABASE "DBcodeAscent_in5cm";
@@ -3111,3 +3112,777 @@ BEGIN
     RAISE NOTICE 'Los 10 cuestionarios TypeScript fueron creados correctamente.';
 
 END $$;
+
+
+-- ============================================================
+-- CODEASCENT - CONTENIDO CSS
+-- 10 NIVELES / 10 LECCIONES / EJEMPLOS / MISIONES / CUESTIONARIOS
+-- Agregado para el sector "Poblado Antiguo"
+-- No usa IDs fijos: localiza CSS y cada nivel por numero_nivel.
+-- ============================================================
+
+DO $css$
+DECLARE
+    v_id_lenguaje INTEGER;
+    v_id_nivel INTEGER;
+    v_id_leccion INTEGER;
+    v_id_reto INTEGER;
+BEGIN
+    SELECT id_lenguaje INTO v_id_lenguaje
+    FROM lenguaje
+    WHERE LOWER(nombre) = 'css';
+
+    IF v_id_lenguaje IS NULL THEN
+        RAISE EXCEPTION 'El lenguaje CSS no existe.';
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 1: Sintaxis y Selectores Básicos
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 1;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 1 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Selectores y reglas CSS$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Selectores y reglas CSS$txt$, $txt$CSS utiliza reglas formadas por un selector y un bloque de declaraciones. Un selector indica qué elemento se desea modificar. Los selectores básicos incluyen elementos como h1, clases como .cartel e identificadores como #principal. Cada declaración contiene una propiedad y un valor.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Ejemplo de selector de clase$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Ejemplo de selector de clase$txt$, $txt$.cartel {
+  color: rebeccapurple;
+}$txt$, $txt$Aplica color morado a todos los elementos con la clase cartel.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Reparar el cartel del poblado$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Reparar el cartel del poblado$txt$, $txt$El cartel principal perdió su estilo. Escribe una regla CSS para que los elementos con la clase .cartel tengan color rebeccapurple.$txt$, 'codigo', 50, 'facil')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.cartel { color: rebeccapurple; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Selectores CSS$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Selectores CSS$txt$, $txt$¿Qué selector CSS selecciona todos los elementos que tienen la clase cartel?$txt$, 'opcion_multiple', 10, 'facil')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.cartel$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$#cartel$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$cartel$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$*cartel$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 2: Modelo de Caja (Box Model)
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 2;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 2 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$El modelo de caja$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$El modelo de caja$txt$, $txt$Todo elemento HTML puede entenderse como una caja compuesta por contenido, padding, border y margin. El padding crea espacio interno alrededor del contenido; el border rodea el padding y el contenido; y el margin crea separación exterior respecto de otros elementos.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Caja con espacio interior$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Caja con espacio interior$txt$, $txt$.caja {
+  padding: 20px;
+  border: 2px solid #663399;
+  margin: 10px;
+}$txt$, $txt$Define espacio interior, borde y separación exterior.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Reconstruir la caja del almacén$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Reconstruir la caja del almacén$txt$, $txt$La caja del almacén quedó comprimida. Agrega 20px de padding a los elementos con la clase .caja.$txt$, 'codigo', 100, 'facil')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.caja { padding: 20px; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Box Model$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Box Model$txt$, $txt$¿Qué propiedad crea espacio entre el contenido de un elemento y su borde?$txt$, 'opcion_multiple', 10, 'facil')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$padding$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$margin$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$display$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$position$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 3: Colores y Fondos
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 3;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 3 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Colores y fondos en CSS$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Colores y fondos en CSS$txt$, $txt$CSS permite definir colores mediante nombres, HEX, RGB y HSL. La propiedad color modifica el texto y background-color modifica el color de fondo. Estas propiedades permiten crear contraste y jerarquía visual.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Letrero con fondo$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Letrero con fondo$txt$, $txt$.letrero {
+  color: white;
+  background-color: rebeccapurple;
+}$txt$, $txt$Crea texto blanco sobre un fondo morado.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Restaurar los letreros$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Restaurar los letreros$txt$, $txt$Los letreros del poblado perdieron contraste. Configura .letrero con texto white y fondo rebeccapurple.$txt$, 'codigo', 150, 'facil')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.letrero { color: white; background-color: rebeccapurple; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Colores y Fondos$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Colores y Fondos$txt$, $txt$¿Qué propiedad modifica específicamente el color de fondo de un elemento?$txt$, 'opcion_multiple', 10, 'facil')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$background-color$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$color$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$font-color$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$border-color$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 4: Tipografía y Fuentes
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 4;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 4 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Tipografía y legibilidad$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Tipografía y legibilidad$txt$, $txt$Las propiedades tipográficas controlan la presentación del texto. font-family selecciona la familia tipográfica, font-size controla el tamaño, font-weight el grosor y line-height la separación vertical entre líneas.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Texto del archivo$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Texto del archivo$txt$, $txt$.archivo {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.5;
+}$txt$, $txt$Mejora tamaño, peso y separación del texto.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Recuperar los archivos del poblado$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Recuperar los archivos del poblado$txt$, $txt$Los registros son difíciles de leer. Haz que .archivo tenga font-size de 18px y font-weight bold.$txt$, 'codigo', 200, 'medio')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.archivo { font-size: 18px; font-weight: bold; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Tipografía$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Tipografía$txt$, $txt$¿Qué propiedad CSS controla el tamaño del texto?$txt$, 'opcion_multiple', 10, 'medio')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$font-size$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$font-weight$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$line-height$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$text-size$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 5: Posicionamiento
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 5;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 5 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Posicionamiento de elementos$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Posicionamiento de elementos$txt$, $txt$La propiedad position define cómo se ubica un elemento. static es el comportamiento normal; relative permite desplazarlo desde su posición original; absolute lo posiciona respecto de un ancestro posicionado; y fixed lo fija respecto de la ventana.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Módulo posicionado$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Módulo posicionado$txt$, $txt$.modulo-principal {
+  position: relative;
+  top: 10px;
+}$txt$, $txt$Desplaza el módulo desde su posición original.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Reubicar el módulo principal$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Reubicar el módulo principal$txt$, $txt$El módulo central está desalineado. Usa position: relative en .modulo-principal.$txt$, 'codigo', 250, 'medio')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.modulo-principal { position: relative; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Posicionamiento$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Posicionamiento$txt$, $txt$¿Qué valor de position permite desplazar un elemento conservando su espacio original?$txt$, 'opcion_multiple', 10, 'medio')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$relative$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$static$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$fixed$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$absolute$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 6: Flexbox Contenedor
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 6;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 6 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Contenedores Flexbox$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Contenedores Flexbox$txt$, $txt$Flexbox organiza elementos en una dimensión. display: flex activa el modelo flexible. justify-content distribuye elementos sobre el eje principal y align-items controla su alineación sobre el eje transversal.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Taller flexible$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Taller flexible$txt$, $txt$.taller {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}$txt$, $txt$Centra las piezas del taller con Flexbox.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Organizar el taller$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Organizar el taller$txt$, $txt$Las piezas del taller están desordenadas. Convierte .taller en un contenedor flex y centra sus elementos horizontalmente.$txt$, 'codigo', 300, 'medio')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.taller { display: flex; justify-content: center; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Flexbox Contenedor$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Flexbox Contenedor$txt$, $txt$¿Qué declaración activa Flexbox en un contenedor?$txt$, 'opcion_multiple', 10, 'medio')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$display: flex;$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$position: flex;$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$flex: display;$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$layout: flex;$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 7: Flexbox Elementos
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 7;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 7 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Elementos dentro de Flexbox$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Elementos dentro de Flexbox$txt$, $txt$Los elementos flexibles pueden controlar su comportamiento individual. flex-grow indica cuánto puede crecer un elemento, flex-shrink cuánto puede reducirse y align-self permite cambiar la alineación de un elemento específico.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Pieza flexible$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Pieza flexible$txt$, $txt$.pieza {
+  flex-grow: 1;
+  align-self: center;
+}$txt$, $txt$Permite que una pieza crezca y se alinee de forma individual.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Distribuir las piezas$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Distribuir las piezas$txt$, $txt$Una pieza debe aprovechar el espacio disponible. Aplica flex-grow: 1 a .pieza.$txt$, 'codigo', 350, 'medio')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.pieza { flex-grow: 1; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Elementos Flexbox$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Elementos Flexbox$txt$, $txt$¿Qué propiedad permite que un elemento flex crezca para ocupar espacio disponible?$txt$, 'opcion_multiple', 10, 'medio')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$flex-grow$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$flex-shrink$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$justify-content$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$grid-grow$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 8: CSS Grid Layout
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 8;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 8 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Diseño con CSS Grid$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Diseño con CSS Grid$txt$, $txt$CSS Grid organiza contenido en filas y columnas. display: grid activa el sistema. grid-template-columns define las columnas y gap establece separación entre las celdas del diseño.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Plano en cuadrícula$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Plano en cuadrícula$txt$, $txt$.plano {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}$txt$, $txt$Crea un plano de dos columnas del mismo tamaño.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Reconstruir el plano$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Reconstruir el plano$txt$, $txt$El plano del poblado debe mostrar dos columnas iguales. Usa Grid en .plano y define dos columnas de 1fr.$txt$, 'codigo', 400, 'dificil')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.plano { display: grid; grid-template-columns: 1fr 1fr; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: CSS Grid$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: CSS Grid$txt$, $txt$¿Qué propiedad define las columnas de una cuadrícula CSS?$txt$, 'opcion_multiple', 10, 'dificil')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$grid-template-columns$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$grid-columns$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$flex-columns$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$column-layout$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 9: Diseño Responsivo
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 9;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 9 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Diseño adaptable$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Diseño adaptable$txt$, $txt$El diseño responsivo adapta una interfaz a diferentes tamaños de pantalla. Las media queries aplican reglas bajo determinadas condiciones y unidades relativas como rem, em y porcentajes ayudan a evitar dimensiones rígidas.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Panel adaptable$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Panel adaptable$txt$, $txt$@media (max-width: 600px) {
+  .panel {
+    width: 100%;
+  }
+}$txt$, $txt$Hace que el panel use todo el ancho en pantallas pequeñas.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Adaptar el sistema$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Adaptar el sistema$txt$, $txt$El panel debe ocupar todo el ancho cuando la pantalla mida 600px o menos. Crea una media query para .panel.$txt$, 'codigo', 450, 'dificil')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$@media (max-width: 600px) { .panel { width: 100%; } }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Responsive$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Responsive$txt$, $txt$¿Qué característica de CSS permite aplicar estilos según el tamaño de la pantalla?$txt$, 'opcion_multiple', 10, 'dificil')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$@media$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$@screen$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$@responsive$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$@viewport-style$txt$, FALSE);
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 10: Transiciones y Animaciones
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 10;
+
+    IF v_id_nivel IS NULL THEN
+        RAISE EXCEPTION 'No se encontró el nivel 10 de CSS.';
+    END IF;
+
+    SELECT id_leccion INTO v_id_leccion
+    FROM leccion
+    WHERE id_nivel = v_id_nivel AND titulo = $txt$Movimiento y transiciones$txt$
+    ORDER BY id_leccion DESC LIMIT 1;
+
+    IF v_id_leccion IS NULL THEN
+        INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+        VALUES (v_id_nivel, $txt$Movimiento y transiciones$txt$, $txt$transition permite suavizar cambios entre valores de propiedades. transform modifica visualmente un elemento mediante operaciones como scale, rotate y translate. @keyframes permite definir animaciones con varias etapas.$txt$, 1)
+        RETURNING id_leccion INTO v_id_leccion;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM ejemplo
+        WHERE id_leccion = v_id_leccion AND titulo = $txt$Botón de reactivación$txt$
+    ) THEN
+        INSERT INTO ejemplo (id_leccion, titulo, codigo, explicacion)
+        VALUES (v_id_leccion, $txt$Botón de reactivación$txt$, $txt$.boton {
+  transition: transform 0.3s;
+}
+.boton:hover {
+  transform: scale(1.1);
+}$txt$, $txt$Suaviza el cambio de escala cuando el usuario pasa sobre el botón.$txt$);
+    END IF;
+
+    -- Misión práctica de código
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Reactivar la computadora central$txt$
+      AND tipo_reto = 'codigo'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Reactivar la computadora central$txt$, $txt$El botón de reactivación debe responder suavemente. Agrega una transición de transform de 0.3s a .boton.$txt$, 'codigo', 500, 'dificil')
+        RETURNING id_reto INTO v_id_reto;
+
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$.boton { transition: transform 0.3s; }$txt$, TRUE);
+    END IF;
+
+    -- Cuestionario
+    SELECT id_reto INTO v_id_reto
+    FROM reto
+    WHERE id_leccion = v_id_leccion
+      AND titulo = $txt$Cuestionario: Transiciones$txt$
+      AND tipo_reto = 'opcion_multiple'
+    ORDER BY id_reto DESC LIMIT 1;
+
+    IF v_id_reto IS NULL THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, $txt$Cuestionario: Transiciones$txt$, $txt$¿Qué propiedad CSS permite suavizar el cambio entre valores de una propiedad?$txt$, 'opcion_multiple', 10, 'dificil')
+        RETURNING id_reto INTO v_id_reto;
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$transition$txt$, TRUE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$transform$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$animation-name$txt$, FALSE);
+        INSERT INTO respuesta (id_reto, contenido, es_correcta)
+        VALUES (v_id_reto, $txt$display$txt$, FALSE);
+    END IF;
+
+    RAISE NOTICE 'Contenido CSS agregado correctamente.';
+END
+$css$;
+
+-- ============================================================
+-- COMPROBACIÓN FINAL CSS
+-- ============================================================
+SELECT
+    l.nombre AS lenguaje,
+    n.numero_nivel,
+    n.nombre AS nivel,
+    le.titulo AS leccion,
+    r.tipo_reto,
+    r.titulo AS reto,
+    COUNT(res.id_respuesta) AS respuestas
+FROM lenguaje l
+INNER JOIN nivel n ON n.id_lenguaje = l.id_lenguaje
+LEFT JOIN leccion le ON le.id_nivel = n.id_nivel
+LEFT JOIN reto r ON r.id_leccion = le.id_leccion
+LEFT JOIN respuesta res ON res.id_reto = r.id_reto
+WHERE LOWER(l.nombre) = 'css'
+GROUP BY l.nombre, n.numero_nivel, n.nombre, le.id_leccion, le.titulo,
+         r.id_reto, r.tipo_reto, r.titulo
+ORDER BY n.numero_nivel, le.id_leccion, r.id_reto;
