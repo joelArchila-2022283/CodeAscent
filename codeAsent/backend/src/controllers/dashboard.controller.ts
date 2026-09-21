@@ -105,6 +105,26 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       ORDER BY ul.fecha_obtenido DESC
     `, [idUsuario]);
 
+    await pool.query(`
+      INSERT INTO logro (nombre, descripcion, xp_recompensa, requisito, estado)
+      VALUES
+        ('SQL: Primer Comando', 'Ejecuta correctamente tu primera misión SQL.', 25, 'Completar 1 misión SQL', TRUE),
+        ('SQL: Operador de Datos', 'Domina cinco misiones del circuito SQL.', 75, 'Completar 5 misiones SQL', TRUE),
+        ('SQL: Arquitecto del Valle', 'Completa las diez misiones SQL registradas.', 150, 'Completar 10 misiones SQL', TRUE)
+      ON CONFLICT (nombre) DO UPDATE SET estado = TRUE
+    `);
+
+    const resLogrosSql = await pool.query(`
+      SELECT l.id_logro, l.nombre, l.descripcion, l.xp_recompensa, l.requisito,
+             EXISTS (
+               SELECT 1 FROM usuario_logro ul
+               WHERE ul.id_usuario = $1 AND ul.id_logro = l.id_logro
+             ) AS obtenido
+      FROM logro l
+      WHERE l.estado = TRUE AND l.nombre LIKE 'SQL:%'
+      ORDER BY l.xp_recompensa ASC, l.id_logro ASC
+    `, [idUsuario]);
+
     const estadisticas = resEstadisticas.rows[0] || {};
     const intentosTotales = Number(estadisticas.intentos_totales || 0);
     const intentosCorrectos = Number(estadisticas.intentos_correctos || 0);
@@ -289,7 +309,8 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
           precision: intentosTotales ? Math.round((intentosCorrectos / intentosTotales) * 100) : 0
         },
         actividadSemanal: resActividad.rows,
-        logros: resLogrosPerfil.rows
+        logros: resLogrosPerfil.rows,
+        logrosSql: resLogrosSql.rows
       },
       nodosMapa,
 

@@ -1,0 +1,52 @@
+<div class="vista-misiones">
+  <header class="cabecera-misiones">
+    <div>
+      <span class="eyebrow">Ruta de aprendizaje</span>
+      <h2>Catálogo de Misiones de Extracción</h2>
+    </div>
+    <span class="contador-niveles">{{ listaRetosSql.length }}/10</span>
+  </header>
+
+  <div class="cuadricula-retos">
+    @if (errorCarga) {
+      <div class="mensaje-vacio mensaje-vacio--error" role="alert">
+        <i class="bi bi-database-exclamation"></i>
+        <strong>{{ errorCarga }}</strong>
+      </div>
+    }
+    @for (reto of listaRetosSql; track reto.id_reto) {
+      <article class="tarjeta-mision" [class.is-locked]="!reto.desbloqueado" [class.is-complete]="reto.completado">
+        <div class="cabecera-mision">
+          <div class="icono-mision">
+            <i class="bi" [ngClass]="reto.completado ? 'bi-check-circle-fill' : reto.desbloqueado ? 'bi-terminal-fill' : 'bi-lock-fill'"></i>
+          </div>
+          <div>
+            <small>Nivel {{ reto.id_nivel ?? reto.id_reto }}</small>
+            <h3>{{ reto.nombre_nivel || reto.titulo_reto }}</h3>
+          </div>
+        </div>
+
+        <div class="cuerpo-mision">
+          <p class="meta-descripcion">{{ reto.meta_resolver }}</p>
+          <div class="meta-linea">
+            <span class="chip chip-dificultad">{{ reto.dificultad }}</span>
+            <span class="chip chip-xp">+{{ reto.xp_recompensa }} XP</span>
+          </div>
+        </div>
+
+        <footer class="estadisticas-mision">
+          <span class="estado-mision" [class.activo]="reto.desbloqueado" [class.bloqueado]="!reto.desbloqueado" [class.completado]="reto.completado">
+            {{ reto.completado ? 'Completado' : reto.desbloqueado ? 'Disponible' : 'Bloqueado' }}
+          </span>
+          <button class="boton-iniciar" [disabled]="!reto.desbloqueado" (click)="cargarReto(reto)">
+            {{ reto.desbloqueado ? 'Ingresar' : 'Bloqueado' }}
+          </button>
+        </footer>
+      </article>
+    } @empty {
+      @if (!errorCarga) {
+        <p class="mensaje-vacio">La base de datos no devolvió niveles SQL disponibles.</p>
+      }
+    }
+  </div>
+</div>

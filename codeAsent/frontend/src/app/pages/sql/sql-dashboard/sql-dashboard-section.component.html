@@ -1,0 +1,32 @@
+<section class="sql-panel-home">
+  <header class="panel-heading">
+    <div>
+      <span class="section-kicker"><i class="bi bi-activity"></i> TELEMETRÍA DEL VALLE</span>
+      <h2>Centro de operaciones SQL</h2>
+      <p>Restablece el flujo de datos, estudia el esquema y ejecuta cada misión en orden.</p>
+    </div>
+    <div class="panel-signal"><span></span> SISTEMA EN LÍNEA</div>
+  </header>
+
+  <div class="panel-metrics">
+    <article><i class="bi bi-stack"></i><strong>{{ retos.length || 0 }}/10</strong><span>MISIONES REGISTRADAS</span></article>
+    <article><i class="bi bi-unlock-fill"></i><strong>{{ disponibles }}</strong><span>RUTAS DISPONIBLES</span></article>
+    <article><i class="bi bi-check2-circle"></i><strong>{{ completadas }}</strong><span>SECTORES COMPLETADOS</span></article>
+    <article><i class="bi bi-lightning-charge-fill"></i><strong>{{ xpRuta }}</strong><span>XP EN LA RUTA</span></article>
+  </div>
+
+  <div class="tarjetas-acceso-rapido">
+    <button class="tarjeta-modulo tarjeta-manual" type="button" (click)="seleccionarVista('manual')">
+      <span class="tarjeta-icon"><i class="bi bi-book-half"></i></span><span class="tarjeta-index">01 / PREPARACIÓN</span>
+      <h3>Manual de Campo</h3><p>Lee el esquema, entiende la consulta y revisa ejemplos antes de ejecutar.</p><span class="tarjeta-action">ABRIR MANUAL <i class="bi bi-arrow-up-right"></i></span>
+    </button>
+    <button class="tarjeta-modulo tarjeta-misiones" type="button" (click)="seleccionarVista('misiones')">
+      <span class="tarjeta-icon"><i class="bi bi-diagram-3-fill"></i></span><span class="tarjeta-index">02 / PROGRESIÓN</span>
+      <h3>Ruta de misiones</h3><p>Completa los diez niveles de la base de datos sin saltarte el orden.</p><span class="tarjeta-action">VER RUTA <i class="bi bi-arrow-up-right"></i></span>
+    </button>
+    <button class="tarjeta-modulo tarjeta-terminal" type="button" (click)="seleccionarVista('consola')">
+      <span class="tarjeta-icon"><i class="bi bi-terminal-fill"></i></span><span class="tarjeta-index">03 / EJECUCIÓN</span>
+      <h3>Terminal de extracción</h3><p>Escribe la respuesta del reto activo y recibe retroalimentación inmediata.</p><span class="tarjeta-action">IR A TERMINAL <i class="bi bi-arrow-up-right"></i></span>
+    </button>
+  </div>
+</section>

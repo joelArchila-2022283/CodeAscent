@@ -1,0 +1,80 @@
+<div class="entorno-consola">
+  <div class="toolbar-terminal">
+    <button class="btn btn-secondary" type="button" (click)="volver.emit()">
+      <i class="bi bi-arrow-left"></i> Volver al panel
+    </button>
+  </div>
+
+  <div class="panel-superior">
+    <div class="planteamiento-mision">
+      <div class="encabezado-panel">
+        <span class="kicker">Objetivo activo</span>
+        <h3>{{ retoEnCurso?.titulo_reto || 'Terminal sin misión activa' }}</h3>
+      </div>
+      @if (retoEnCurso) {
+        <p class="contexto-historico">{{ retoEnCurso.contexto_abp }}</p>
+        <p class="meta-final"><strong>Requerimiento:</strong> {{ retoEnCurso.meta_resolver }}</p>
+      }
+    </div>
+
+    <div class="esquema-referencia">
+      <div class="encabezado-panel">
+        <span class="kicker">Estructura de datos</span>
+        <h3>Esquema</h3>
+      </div>
+      <pre class="bloque-codigo-esquema">{{ retoEnCurso?.esquema_bd || 'Selecciona una misión para cargar su esquema.' }}</pre>
+    </div>
+  </div>
+
+  @if (bannerEstado) {
+    <div class="banner-estado" [ngClass]="'banner-' + tipoBanner">
+      <i class="bi" [ngClass]="tipoBanner === 'success' ? 'bi-check-circle-fill' : tipoBanner === 'warning' ? 'bi-exclamation-triangle-fill' : tipoBanner === 'error' ? 'bi-x-octagon-fill' : 'bi-info-circle-fill'"></i>
+      <span>{{ bannerEstado }}</span>
+    </div>
+  }
+
+  <div class="area-desarrollo">
+    <div class="editor-codigo">
+      <div class="encabezado-panel">
+        <span class="kicker">Terminal</span>
+        <h3>Terminal de extracción</h3>
+      </div>
+      <textarea 
+        class="entrada-sql" 
+        [(ngModel)]="comandoUsuario" 
+        placeholder="Ingresa tu sentencia SQL aquí..."></textarea>
+      <div class="acciones-terminal">
+        <button class="boton-ejecutar-codigo" (click)="procesarComando()">
+          <i class="bi bi-play-fill"></i>
+          Ejecutar sentencia
+        </button>
+      </div>
+    </div>
+
+    <aside class="panel-andamiaje">
+      <div class="encabezado-panel">
+        <span class="kicker">Soporte táctico</span>
+        <h3>Pistas</h3>
+      </div>
+      <div class="acciones-pistas">
+        @for (pista of retoEnCurso?.pistas_disponibles || []; track $index) {
+          <button (click)="solicitarPista($index + 1)"><span>{{ $index + 1 }}</span> Revelar pista (-1 estrella)</button>
+        }
+        <small class="contador-estrellas"><i class="bi bi-star-fill"></i> {{ estrellasRestantes }} estrellas de precisión</small>
+      </div>
+      
+      @if (pistaRevelada) {
+        <div class="caja-pista">
+          <p>{{ textoPistaActual }}</p>
+        </div>
+      }
+    </aside>
+  </div>
+
+  @if (huboErrorEjecucion) {
+    <div class="retroalimentacion-diagnostica">
+      <h3>Análisis de fallo en consola</h3>
+      <p class="pregunta-guia">{{ preguntaDiagnostica }}</p>
+    </div>
+  }
+</div>

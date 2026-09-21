@@ -1,0 +1,172 @@
+$color-borde: #1a1a1a;
+$color-verde-bosque: #2e5a3c;
+$color-panel: rgba(22, 32, 28, 0.94);
+$color-panel-alt: rgba(30, 44, 36, 0.96);
+$color-texto: #edf4ee;
+$color-texto-suave: #cfe4d4;
+$color-oro: #f3b947;
+
+.vista-manual-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: $color-texto;
+  max-width: 980px;
+  margin: 0 auto;
+
+  .manual-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    border-bottom: 3px solid rgba(160, 230, 176, 0.82);
+    padding-bottom: 12px;
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: $color-oro;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    h2 {
+      color: $color-oro;
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin: 8px 0 0;
+      text-transform: uppercase;
+    }
+
+    .manual-header__actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+  }
+
+  .bloque-contexto, .fases-aprendizaje section {
+    background: linear-gradient(180deg, rgba(38, 58, 47, 0.95), rgba(18, 28, 22, 0.98));
+    border: 3px solid $color-borde;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 4px 4px 0px $color-borde, 0 0 18px rgba(160, 230, 176, 0.12);
+  }
+
+  .manual-signal { display: flex; align-items: center; gap: .65rem; margin-top: 1rem; padding: .8rem 1rem; border: 1px solid rgba(105, 227, 255, .35); background: rgba(105, 227, 255, .06); color: $color-texto-suave; }
+  .manual-signal i, .manual-signal em { color: $color-oro; }
+  .manual-signal span { color: #69e3ff; font: .65rem monospace; letter-spacing: .1em; }
+  .manual-signal strong { flex: 1; color: $color-texto; }
+  .manual-signal em { font-style: normal; font-weight: 900; }
+  .ejemplo-sql { margin-top: 1rem; padding: 1rem; border: 1px solid rgba(105, 227, 255, .35); background: #07161d; }
+  .ejemplo-sql > div { color: #69e3ff; font: .72rem monospace; letter-spacing: .08em; }
+  .ejemplo-sql pre, .flujo-sql { margin: .75rem 0 .4rem; padding: .85rem; overflow-x: auto; color: #d7faff; background: #02090c; border-left: 3px solid #ffc857; font: .85rem/1.6 'Consolas', monospace; }
+  .ejemplo-sql small { color: $color-texto-suave; }
+  .flujo-sql span { color: #69e3ff; }
+  .manual-vacio { text-align: center; padding: 4rem 1rem; background: rgba(7, 22, 29, .9); border: 1px solid rgba(105, 227, 255, .3); }
+  .manual-vacio i { color: #ffc857; font-size: 2.5rem; }
+
+  .bloque-contexto {
+    h3 {
+      color: $color-oro;
+      margin-top: 0;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p {
+      color: $color-texto-suave;
+      margin: 0;
+      line-height: 1.7;
+    }
+  }
+
+  .fases-aprendizaje {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    section {
+      margin: 0;
+      color: $color-texto;
+
+      h3 {
+        color: $color-oro;
+        font-weight: 900;
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      p {
+        color: $color-texto-suave;
+        line-height: 1.7;
+      }
+    }
+  }
+
+  .listado-tablas {
+    display: grid;
+    gap: 12px;
+  }
+
+  .detalle-entidad {
+    background: rgba(255, 255, 255, 0.04);
+    border: 3px solid rgba(160, 230, 176, 0.7);
+    padding: 14px;
+    border-radius: 8px;
+
+    h4 {
+      color: $color-texto;
+      font-weight: 900;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p {
+      color: $color-texto-suave;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 24px;
+      color: $color-texto;
+      font-weight: 700;
+    }
+  }
+}
+
+.btn {
+  border: 3px solid $color-borde;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translate(-1px, -1px);
+  }
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, rgba(62, 130, 83, 0.9), rgba(26, 63, 42, 0.94));
+  color: #fff;
+  box-shadow: 3px 3px 0px $color-borde;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: $color-texto;
+  border-color: rgba(160, 230, 176, 0.75);
+  box-shadow: 2px 2px 0px $color-borde;
+}

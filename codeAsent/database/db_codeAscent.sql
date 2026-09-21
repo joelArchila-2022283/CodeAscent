@@ -50,6 +50,7 @@ CREATE TABLE leccion (
     id_nivel INTEGER NOT NULL,
     titulo VARCHAR(150) NOT NULL,
     contenido TEXT NOT NULL,
+    manual_tecnico TEXT, -- Extensión para teoría profunda
     orden INTEGER NOT NULL,
     estado BOOLEAN DEFAULT TRUE,
     CONSTRAINT fk_leccion_nivel FOREIGN KEY (id_nivel)
@@ -77,6 +78,9 @@ CREATE TABLE reto (
     id_leccion INTEGER NOT NULL,
     titulo VARCHAR(150) NOT NULL,
     descripcion TEXT NOT NULL,
+    contexto_abp TEXT,   -- Planteamiento del Problema ABP
+    esquema_bd TEXT,     -- Definición de tablas implicadas
+    pistas JSONB,        -- Sistema de pistas progresivas
     tipo_reto VARCHAR(30) NOT NULL,
     xp_recompensa INTEGER NOT NULL DEFAULT 10,
     dificultad VARCHAR(20) DEFAULT 'facil',
@@ -1034,6 +1038,20 @@ BEGIN
 END;
 $$;
 
+-- ==========================================
+-- LOGROS DEL MODULO SQL
+-- ==========================================
+INSERT INTO logro (nombre, descripcion, xp_recompensa, requisito, estado)
+VALUES
+    ('SQL: Primer Comando', 'Ejecuta correctamente tu primera misión SQL.', 25, 'Completar 1 misión SQL', TRUE),
+    ('SQL: Operador de Datos', 'Domina cinco misiones del circuito SQL.', 75, 'Completar 5 misiones SQL', TRUE),
+    ('SQL: Arquitecto del Valle', 'Completa las diez misiones SQL registradas.', 150, 'Completar 10 misiones SQL', TRUE)
+ON CONFLICT (nombre) DO UPDATE SET
+    descripcion = EXCLUDED.descripcion,
+    xp_recompensa = EXCLUDED.xp_recompensa,
+    requisito = EXCLUDED.requisito,
+    estado = TRUE;
+
 -- ------------------------------------------------------------
 -- INSERCIÓN DE DATOS
 -- ------------------------------------------------------------
@@ -1171,7 +1189,7 @@ BEGIN
     SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 2;
 
     IF v_id_nivel IS NOT NULL THEN
-        CALL sp_crear_leccion(v_id_nivel, 'Jerarquía de Texto y Títulos', 'El texto necesita jerarquía para el SEO y la accesibilidad. Usamos <h1> para el titular principal, <h2> a <h6> para subtítulos, y <p> para párrafos. Son elementos de bloque, por lo que siempre ocupan todo el ancho disponible y fuerzan un salto de línea.', 1);
+        CALL sp_crear_leccion(v_id_nivel, 'Jerarquía de Texto y Títulos', 'El texto necesita jerarquía para el SEO y la accesibilidad. Usamos <h1> para el titular principal, 2 a 6 para subtítulos, y <p> para párrafos. Son elementos de bloque, por lo que siempre ocupan todo el ancho disponible y fuerzan un salto de línea.', 1);
         SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion DESC LIMIT 1;
 
         CALL sp_crear_reto(v_id_leccion, 'Predicción: Comportamiento de bloques', 'Si escribes <h1>Hola</h1><h2>Mundo</h2> en una sola línea de tu código, ¿cómo se mostrará en el navegador?', 'opcion_multiple', 100, 'facil');
@@ -1313,7 +1331,7 @@ BEGIN
         CALL sp_crear_reto(v_id_leccion, 'Predicción: Regla de Unicidad', 'Si asignas id="boton-rojo" a tres botones diferentes en la misma página HTML, ¿qué dice el estándar sobre esta práctica?', 'opcion_multiple', 500, 'dificil');
         SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion ORDER BY id_reto DESC LIMIT 1;
 
-        CALL sp_crear_respuesta(v_id_reto, 'Es un error grave de validación, el ID debe ser estrictamente único por página. Deberías usar una clase (class).', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'Es un error grave de validación, el ID debe ser strictly único por página. Deberías usar una clase (class).', TRUE);
         CALL sp_crear_respuesta(v_id_reto, 'Es correcto si los tres botones son físicamente iguales en tamaño.', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'Causará que el navegador elimine completamente los botones del renderizado visual.', FALSE);
     END IF;
@@ -1570,19 +1588,6 @@ WHERE id_nivel = (SELECT n.id_nivel FROM nivel n JOIN lenguaje l ON l.id_lenguaj
 -- CODEASCENT - CONTENIDO TYPESCRIPT
 -- 10 MISIONES / 10 LECCIONES / 10 CUESTIONARIOS
 -- ============================================================
---
--- Misión      -> nivel
--- Lección     -> leccion
--- Cuestionario -> reto
--- Respuestas  -> respuesta
---
--- Todo se conecta mediante:
--- lenguaje.nombre = 'TypeScript'
--- nivel.numero_nivel = 1..10
---
--- Se utilizan los procedimientos almacenados existentes.
--- ============================================================
-
 
 DO $$
 DECLARE
@@ -1591,979 +1596,240 @@ DECLARE
     v_id_reto INTEGER;
 BEGIN
 
-    -- ========================================================
     -- MISIÓN 1
-    -- Tipos Primitivos
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 1;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 1 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 1;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 1 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Los tipos primitivos de TypeScript';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Los tipos primitivos de TypeScript';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Los tipos primitivos de TypeScript',
-            'En TypeScript puedes indicar explícitamente qué tipo de dato almacenará una variable. Los tipos primitivos más utilizados son string para texto, number para valores numéricos y boolean para valores verdadero o falso. El tipado permite detectar errores antes de ejecutar el programa. Piensa primero qué tipo de información necesitas almacenar y después expresa esa decisión mediante la sintaxis de TypeScript.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Los tipos primitivos de TypeScript'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Los tipos primitivos de TypeScript', 'En TypeScript puedes indicar explícitamente qué tipo de dato almacenará una variable...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Los tipos primitivos de TypeScript' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Identifica el tipo de dato';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Identifica el tipo de dato';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Identifica el tipo de dato',
-            'Un explorador necesita almacenar el nombre de un jugador. ¿Qué tipo primitivo de TypeScript debe utilizar?',
-            'opcion_multiple',
-            50,
-            'facil'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Identifica el tipo de dato'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Identifica el tipo de dato', 'Un explorador necesita almacenar el nombre de un jugador. ¿Qué tipo primitivo de TypeScript debe utilizar?', 'opcion_multiple', 50, 'facil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Identifica el tipo de dato' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'string'
-    ) THEN
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'string') THEN
         CALL sp_crear_respuesta(v_id_reto, 'string', TRUE);
         CALL sp_crear_respuesta(v_id_reto, 'number', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'boolean', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'void', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 2
-    -- Inferencia de Tipos
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 2;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 2 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 2;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 2 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'La inferencia de tipos';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'La inferencia de tipos';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'La inferencia de tipos',
-            'TypeScript puede determinar automáticamente el tipo de una variable a partir del valor con el que fue inicializada. Esto se conoce como inferencia de tipos. Por ejemplo, cuando una variable recibe un texto, TypeScript puede inferir que se trata de un string sin necesidad de escribir el tipo explícitamente. La inferencia reduce código repetitivo sin eliminar la seguridad del tipado.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'La inferencia de tipos'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'La inferencia de tipos', 'TypeScript puede determinar automáticamente el tipo de una variable a partir del valor...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'La inferencia de tipos' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Predice el tipo inferido';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Predice el tipo inferido';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Predice el tipo inferido',
-            'Observa la declaración const edad = 18. ¿Qué tipo infiere TypeScript para la variable edad?',
-            'opcion_multiple',
-            100,
-            'facil'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Predice el tipo inferido'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Predice el tipo inferido', 'Observa la declaración const edad = 18. ¿Qué tipo infiere TypeScript para la variable edad?', 'opcion_multiple', 100, 'facil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Predice el tipo inferido' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'number'
-    ) THEN
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'number') THEN
         CALL sp_crear_respuesta(v_id_reto, 'number', TRUE);
         CALL sp_crear_respuesta(v_id_reto, 'string', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'boolean', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'any', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 3
-    -- Arreglos y Tuplas
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 3;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 3 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 3;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 3 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Arreglos y tuplas';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Arreglos y tuplas';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Arreglos y tuplas',
-            'Los arreglos permiten almacenar múltiples valores del mismo tipo o de tipos compatibles. En TypeScript puedes declarar un arreglo como string[] o utilizando la sintaxis Array<string>. Las tuplas permiten representar una cantidad y orden específicos de elementos, por ejemplo [string, number]. La diferencia fundamental está en que un arreglo representa una colección flexible, mientras que una tupla define una estructura determinada.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Arreglos y tuplas'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Arreglos y tuplas', 'Los arreglos permiten almacenar múltiples valores del mismo tipo...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Arreglos y tuplas' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Distingue arreglo y tupla';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Distingue arreglo y tupla';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Distingue arreglo y tupla',
-            '¿Cuál declaración representa una tupla que contiene primero un nombre y después una edad?',
-            'opcion_multiple',
-            150,
-            'facil'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Distingue arreglo y tupla'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Distingue arreglo y tupla', '¿Cuál declaración representa una tupla que contiene primero un nombre y después una edad?', 'opcion_multiple', 150, 'facil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Distingue arreglo y tupla' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = '[string, number]'
-    ) THEN
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = '[string, number]') THEN
         CALL sp_crear_respuesta(v_id_reto, '[string, number]', TRUE);
         CALL sp_crear_respuesta(v_id_reto, 'string[]', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'number[]', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'Array<boolean>', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 4
-    -- Interfaces Básicas
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 4;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 4 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 4;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 4 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Interfaces y contratos de objetos';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Interfaces y contratos de objetos';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Interfaces y contratos de objetos',
-            'Una interfaz describe la estructura que debe cumplir un objeto. Permite establecer qué propiedades existen y qué tipos tienen. En lugar de descubrir los errores después de ejecutar el programa, TypeScript puede verificar que un objeto respete el contrato definido por la interfaz. Las interfaces son especialmente útiles cuando diferentes partes de una aplicación comparten la misma estructura de datos.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Interfaces y contratos de objetos'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Interfaces y contratos de objetos', 'Una interfaz describe la estructura que debe cumplir un objeto...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Interfaces y contratos de objetos' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Construye el contrato';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Construye el contrato';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Construye el contrato',
-            'Quieres representar un jugador con un nombre de texto y un nivel numérico. ¿Cuál interfaz define correctamente esa estructura?',
-            'opcion_multiple',
-            200,
-            'medio'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Construye el contrato'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Construye el contrato', 'Quieres representar un jugador con un nombre de texto y un nivel numérico. ¿Cuál interfaz define correctamente esa estructura?', 'opcion_multiple', 200, 'medio');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Construye el contrato' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'interface Jugador { nombre: string; nivel: number; }'
-    ) THEN
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'interface Jugador { nombre: string; nivel: number; }',
-            TRUE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'interface Jugador { nombre: number; nivel: string; }',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'interface Jugador { nombre, nivel }',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'Jugador interface { nombre: string; nivel: number; }',
-            FALSE
-        );
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'interface Jugador { nombre: string; nivel: number; }') THEN
+        CALL sp_crear_respuesta(v_id_reto, 'interface Jugador { nombre: string; nivel: number; }', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'interface Jugador { nombre: number; nivel: string; }', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'interface Jugador { nombre, nivel }', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Jugador interface { nombre: string; nivel: number; }', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 5
-    -- Type Aliases
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 5;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 5 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 5;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 5 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Type aliases y tipos personalizados';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Type aliases y tipos personalizados';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Type aliases y tipos personalizados',
-            'Un type alias permite darle un nombre a una combinación o descripción de tipos. Esto ayuda a expresar conceptos del dominio de una aplicación de manera más clara. También permite crear tipos de unión, donde una variable puede aceptar diferentes alternativas, como type Estado = "activo" | "inactivo". Los aliases permiten reutilizar una definición de tipo sin repetirla.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Type aliases y tipos personalizados'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Type aliases y tipos personalizados', 'Un type alias permite darle un nombre a una combinación o descripción de tipos...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Type aliases y tipos personalizados' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Reconoce un type alias';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Reconoce un type alias';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Reconoce un type alias',
-            '¿Cuál declaración crea un tipo llamado Identificador que puede contener un número o una cadena?',
-            'opcion_multiple',
-            250,
-            'medio'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Reconoce un type alias'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Reconoce un type alias', '¿Cuál declaración crea un tipo llamado Identificador que puede contener un número o una cadena?', 'opcion_multiple', 250, 'medio');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Reconoce un type alias' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'type Identificador = number | string;'
-    ) THEN
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'type Identificador = number | string;',
-            TRUE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'alias Identificador = number | string;',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'type Identificador(number, string);',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'interface Identificador = number | string;',
-            FALSE
-        );
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'type Identificador = number | string;') THEN
+        CALL sp_crear_respuesta(v_id_reto, 'type Identificador = number | string;', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'alias Identificador = number | string;', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'type Identificador(number, string);', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'interface Identificador = number | string;', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 6
-    -- Tipado de Funciones
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 6;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 6 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 6;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 6 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Funciones tipadas';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Funciones tipadas';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Funciones tipadas',
-            'Las funciones también pueden tener tipos en TypeScript. Puedes indicar el tipo de cada parámetro y el tipo del valor que devuelve la función. Por ejemplo, function sumar(a: number, b: number): number define dos parámetros numéricos y establece que el resultado también será un número. Los parámetros opcionales y los valores por defecto permiten construir funciones más flexibles manteniendo la seguridad del tipado.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Funciones tipadas'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Funciones tipadas', 'Las funciones también pueden tener tipos en TypeScript...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Funciones tipadas' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Analiza el tipo de retorno';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Analiza el tipo de retorno';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Analiza el tipo de retorno',
-            'Observa la función function sumar(a: number, b: number): number. ¿Qué representa el último number?',
-            'opcion_multiple',
-            300,
-            'medio'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Analiza el tipo de retorno'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Analiza el tipo de retorno', 'Observa la función function sumar(a: number, b: number): number. ¿Qué representa el último number?', 'opcion_multiple', 300, 'medio');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Analiza el tipo de retorno' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'El tipo del valor que devuelve la función'
-    ) THEN
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'El tipo del valor que devuelve la función',
-            TRUE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'El tipo de la primera variable',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'La cantidad de parámetros',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'El nombre de la función',
-            FALSE
-        );
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'El tipo del valor que devuelve la función') THEN
+        CALL sp_crear_respuesta(v_id_reto, 'El tipo del valor que devuelve la función', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'El tipo de la primera variable', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'La cantidad de parámetros', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'El nombre de la función', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 7
-    -- Enums y Literales
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 7;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 7 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 7;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 7 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Enums y tipos literales';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Enums y tipos literales';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Enums y tipos literales',
-            'Los enums permiten representar un conjunto de valores relacionados bajo un mismo nombre. Los tipos literales permiten restringir una variable a valores concretos. Por ejemplo, type Direccion = "norte" | "sur" | "este" | "oeste" limita las posibilidades a esas opciones. Estas herramientas ayudan a expresar reglas válidas directamente en el sistema de tipos.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Enums y tipos literales'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Enums y tipos literales', 'Los enums permiten representar un conjunto de valores relacionados...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Enums y tipos literales' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Controla las opciones válidas';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Controla las opciones válidas';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Controla las opciones válidas',
-            'Quieres que una variable estado solo pueda contener "activo", "pausado" o "finalizado". ¿Qué declaración expresa correctamente esa restricción?',
-            'opcion_multiple',
-            350,
-            'medio'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Controla las opciones válidas'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Controla las opciones válidas', 'Quieres que una variable estado solo pueda contener "activo", "pausado" o "finalizado". ¿Qué declaración expresa correctamente esa restricción?', 'opcion_multiple', 350, 'medio');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Controla las opciones válidas' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'type Estado = "activo" | "pausado" | "finalizado";'
-    ) THEN
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'type Estado = "activo" | "pausado" | "finalizado";',
-            TRUE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'type Estado = string;',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'type Estado = boolean;',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'type Estado = number;',
-            FALSE
-        );
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'type Estado = "activo" | "pausado" | "finalizado";') THEN
+        CALL sp_crear_respuesta(v_id_reto, 'type Estado = "activo" | "pausado" | "finalizado";', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'type Estado = string;', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'type Estado = boolean;', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'type Estado = number;', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 8
-    -- Clases y Modificadores
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 8;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 8 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 8;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 8 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Clases y modificadores de acceso';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Clases y modificadores de acceso';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Clases y modificadores de acceso',
-            'Las clases permiten agrupar datos y comportamientos dentro de una misma estructura. TypeScript incorpora modificadores como public, private y protected para controlar desde dónde pueden utilizarse las propiedades y métodos. También existe readonly para indicar que una propiedad no debe modificarse después de su inicialización. Estos modificadores ayudan a proteger el estado interno de los objetos.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Clases y modificadores de acceso'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Clases y modificadores de acceso', 'Las clases permiten agrupar datos y comportamientos...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Clases y modificadores de acceso' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Protege el estado interno';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Protege el estado interno';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Protege el estado interno',
-            'Una clase contiene una propiedad que no debe poder modificarse directamente desde fuera de la clase. ¿Qué modificador expresa esta intención?',
-            'opcion_multiple',
-            400,
-            'dificil'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Protege el estado interno'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Protege el estado interno', 'Una clase contiene una propiedad que no debe poder modificarse directamente desde fuera de la clase. ¿Qué modificador expresa esta intención?', 'opcion_multiple', 400, 'dificil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Protege el estado interno' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'private'
-    ) THEN
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'private') THEN
         CALL sp_crear_respuesta(v_id_reto, 'private', TRUE);
         CALL sp_crear_respuesta(v_id_reto, 'public', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'protected', FALSE);
         CALL sp_crear_respuesta(v_id_reto, 'export', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 9
-    -- Genéricos
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 9;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 9 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 9;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 9 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Genéricos para código reutilizable';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Genéricos para código reutilizable';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Genéricos para código reutilizable',
-            'Los genéricos permiten crear funciones, clases o estructuras que trabajan con diferentes tipos sin perder la información del tipado. En lugar de escribir una función diferente para cada tipo, puedes utilizar un parámetro de tipo como T. Por ejemplo, function identidad<T>(valor: T): T recibe un valor de cualquier tipo y devuelve exactamente ese mismo tipo.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Genéricos para código reutilizable'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Genéricos para código reutilizable', 'Los genéricos permiten crear funciones, clases o estructuras...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Genéricos para código reutilizable' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Comprende el parámetro genérico';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Comprende el parámetro genérico';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Comprende el parámetro genérico',
-            'En function identidad<T>(valor: T): T, ¿qué representa T?',
-            'opcion_multiple',
-            450,
-            'dificil'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Comprende el parámetro genérico'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Comprende el parámetro genérico', 'En function identidad<T>(valor: T): T, ¿qué representa T?', 'opcion_multiple', 450, 'dificil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Comprende el parámetro genérico' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'Un parámetro de tipo reutilizable'
-    ) THEN
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'Un parámetro de tipo reutilizable',
-            TRUE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'Una variable numérica',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'El nombre de la función',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'Una palabra reservada de JavaScript',
-            FALSE
-        );
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'Un parámetro de tipo reutilizable') THEN
+        CALL sp_crear_respuesta(v_id_reto, 'Un parámetro de tipo reutilizable', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'Una variable numérica', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'El nombre de la función', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'Una palabra reservada de JavaScript', FALSE);
     END IF;
 
-
-    -- ========================================================
     -- MISIÓN 10
-    -- Narrowing y Type Guards
-    -- ========================================================
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje WHERE LOWER(l.nombre) = LOWER('TypeScript') AND n.numero_nivel = 10;
+    IF v_id_nivel IS NULL THEN RAISE EXCEPTION 'No se encontró el nivel 10 de TypeScript.'; END IF;
 
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    INNER JOIN lenguaje l
-        ON l.id_lenguaje = n.id_lenguaje
-    WHERE LOWER(l.nombre) = LOWER('TypeScript')
-      AND n.numero_nivel = 10;
-
-    IF v_id_nivel IS NULL THEN
-        RAISE EXCEPTION 'No se encontró el nivel 10 de TypeScript.';
-    END IF;
-
-    SELECT id_leccion
-    INTO v_id_leccion
-    FROM leccion
-    WHERE id_nivel = v_id_nivel
-      AND titulo = 'Narrowing y Type Guards';
-
+    SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Narrowing y Type Guards';
     IF v_id_leccion IS NULL THEN
-
-        CALL sp_crear_leccion(
-            v_id_nivel,
-            'Narrowing y Type Guards',
-            'Cuando una variable puede tener más de un tipo, TypeScript necesita información que permita determinar cuál es el tipo concreto en una determinada sección del programa. El narrowing reduce las posibilidades mediante comprobaciones como typeof, instanceof o comprobaciones de propiedades. Los type guards permiten expresar estas comprobaciones de manera reutilizable y segura.',
-            1
-        );
-
-        SELECT id_leccion
-        INTO v_id_leccion
-        FROM leccion
-        WHERE id_nivel = v_id_nivel
-          AND titulo = 'Narrowing y Type Guards'
-        ORDER BY id_leccion DESC
-        LIMIT 1;
-
+        CALL sp_crear_leccion(v_id_nivel, 'Narrowing y Type Guards', 'Cuando una variable puede tener más de un tipo, TypeScript necesita información...', 1);
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel AND titulo = 'Narrowing y Type Guards' ORDER BY id_leccion DESC LIMIT 1;
     END IF;
 
-
-    SELECT id_reto
-    INTO v_id_reto
-    FROM reto
-    WHERE id_leccion = v_id_leccion
-      AND titulo = 'Aplica narrowing con typeof';
-
+    SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Aplica narrowing con typeof';
     IF v_id_reto IS NULL THEN
-
-        CALL sp_crear_reto(
-            v_id_leccion,
-            'Aplica narrowing con typeof',
-            'Una variable puede contener un string o un number. ¿Qué comprobación permite determinar si actualmente contiene un texto?',
-            'opcion_multiple',
-            500,
-            'dificil'
-        );
-
-        SELECT id_reto
-        INTO v_id_reto
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND titulo = 'Aplica narrowing con typeof'
-        ORDER BY id_reto DESC
-        LIMIT 1;
-
+        CALL sp_crear_reto(v_id_leccion, 'Aplica narrowing con typeof', 'Una variable puede contener un string o un number. ¿Qué comprobación permite determinar si actualmente contiene un texto?', 'opcion_multiple', 500, 'dificil');
+        SELECT id_reto INTO v_id_reto FROM reto WHERE id_leccion = v_id_leccion AND titulo = 'Aplica narrowing con typeof' ORDER BY id_reto DESC LIMIT 1;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM respuesta
-        WHERE id_reto = v_id_reto
-          AND contenido = 'typeof valor === "string"'
-    ) THEN
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'typeof valor === "string"',
-            TRUE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'valor.type === "string"',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'typeof valor === string',
-            FALSE
-        );
-
-        CALL sp_crear_respuesta(
-            v_id_reto,
-            'valueof valor === "string"',
-            FALSE
-        );
+    IF NOT EXISTS (SELECT 1 FROM respuesta WHERE id_reto = v_id_reto AND contenido = 'typeof valor === "string"') THEN
+        CALL sp_crear_respuesta(v_id_reto, 'typeof valor === "string"', TRUE);
+        CALL sp_crear_respuesta(v_id_reto, 'valor.type === "string"', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'typeof valor === string', FALSE);
+        CALL sp_crear_respuesta(v_id_reto, 'valueof valor === "string"', FALSE);
     END IF;
 
 END $$;
 
-
--- ============================================================
--- COMPROBACIÓN FINAL
--- ============================================================
-
-SELECT
-    l.nombre AS lenguaje,
-    n.numero_nivel AS mision,
-    n.nombre AS nombre_mision,
-    le.id_leccion,
-    le.titulo AS leccion,
-    r.id_reto,
-    r.titulo AS cuestionario,
-    COUNT(res.id_respuesta) AS cantidad_respuestas,
-    COUNT(*) FILTER (WHERE res.es_correcta = TRUE) AS respuestas_correctas
-FROM lenguaje l
-INNER JOIN nivel n
-    ON n.id_lenguaje = l.id_lenguaje
-LEFT JOIN leccion le
-    ON le.id_nivel = n.id_nivel
-LEFT JOIN reto r
-    ON r.id_leccion = le.id_leccion
-LEFT JOIN respuesta res
-    ON res.id_reto = r.id_reto
-WHERE LOWER(l.nombre) = LOWER('TypeScript')
-GROUP BY
-    l.nombre,
-    n.numero_nivel,
-    n.nombre,
-    le.id_leccion,
-    le.titulo,
-    r.id_reto,
-    r.titulo
-ORDER BY n.numero_nivel;
-
 -- ============================================================
 -- CUESTIONARIOS TYPESCRIPT - CODEASCENT
--- 10 CUESTIONARIOS / 4 RESPUESTAS CADA UNO
 -- ============================================================
 
 DO $$
@@ -2574,540 +1840,423 @@ DECLARE
     v_id_reto INTEGER;
 BEGIN
 
-    -- ========================================================
-    -- OBTENER TYPESCRIPT
-    -- ========================================================
+    SELECT id_lenguaje INTO v_id_lenguaje FROM lenguaje WHERE LOWER(nombre) = 'typescript';
+    IF v_id_lenguaje IS NULL THEN RAISE EXCEPTION 'El lenguaje TypeScript no existe.'; END IF;
 
-    SELECT id_lenguaje
-    INTO v_id_lenguaje
-    FROM lenguaje
-    WHERE LOWER(nombre) = 'typescript';
-
-    IF v_id_lenguaje IS NULL THEN
-        RAISE EXCEPTION 'El lenguaje TypeScript no existe.';
-    END IF;
-
-
-    -- ========================================================
     -- CUESTIONARIO 1 - TIPOS PRIMITIVOS
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 1;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Tipos primitivos',
-            '¿Cuál de los siguientes tipos se utiliza para almacenar texto en TypeScript?',
-            'opcion_multiple',
-            10,
-            'facil'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 1;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Tipos primitivos', '¿Cuál de los siguientes tipos se utiliza para almacenar texto en TypeScript?', 'opcion_multiple', 10, 'facil')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'string', true),
-            (v_id_reto, 'number', false),
-            (v_id_reto, 'boolean', false),
-            (v_id_reto, 'object', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'string', true), (v_id_reto, 'number', false), (v_id_reto, 'boolean', false), (v_id_reto, 'object', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 2 - INFERENCIA
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 2;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Inferencia de tipos',
-            'Si declaramos let edad = 20, ¿qué tipo infiere TypeScript?',
-            'opcion_multiple',
-            15,
-            'facil'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 2;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Inferencia de tipos', 'Si declaramos let edad = 20, ¿qué tipo infiere TypeScript?', 'opcion_multiple', 15, 'facil')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'number', true),
-            (v_id_reto, 'string', false),
-            (v_id_reto, 'boolean', false),
-            (v_id_reto, 'any', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'number', true), (v_id_reto, 'string', false), (v_id_reto, 'boolean', false), (v_id_reto, 'any', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 3 - ARREGLOS Y TUPLAS
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 3;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Arreglos y tuplas',
-            '¿Cuál declaración representa correctamente una tupla [string, number]?',
-            'opcion_multiple',
-            20,
-            'facil'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 3;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Arreglos y tuplas', '¿Cuál declaración representa correctamente una tupla [string, number]?', 'opcion_multiple', 20, 'facil')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, '[string, number]', true),
-            (v_id_reto, '[number, string]', false),
-            (v_id_reto, 'string[]', false),
-            (v_id_reto, 'number[]', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, '[string, number]', true), (v_id_reto, '[number, string]', false), (v_id_reto, 'string[]', false), (v_id_reto, 'number[]', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 4 - INTERFACES
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 4;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Interfaces',
-            '¿Para qué sirve principalmente una interface en TypeScript?',
-            'opcion_multiple',
-            25,
-            'medio'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 4;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Interfaces', '¿Para qué sirve principalmente una interface en TypeScript?', 'opcion_multiple', 25, 'medio')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'Definir la estructura que debe cumplir un objeto', true),
-            (v_id_reto, 'Ejecutar código automáticamente', false),
-            (v_id_reto, 'Crear solamente números', false),
-            (v_id_reto, 'Eliminar tipos', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'Definir la estructura que debe cumplir un objeto', true), (v_id_reto, 'Ejecutar código automáticamente', false), (v_id_reto, 'Crear solamente números', false), (v_id_reto, 'Eliminar tipos', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 5 - TYPE ALIASES
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 5;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Type aliases',
-            '¿Qué palabra clave permite crear un alias de tipo en TypeScript?',
-            'opcion_multiple',
-            30,
-            'medio'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 5;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Type aliases', '¿Qué palabra clave permite crear un alias de tipo en TypeScript?', 'opcion_multiple', 30, 'medio')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'type', true),
-            (v_id_reto, 'alias', false),
-            (v_id_reto, 'typedef', false),
-            (v_id_reto, 'newtype', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'type', true), (v_id_reto, 'alias', false), (v_id_reto, 'typedef', false), (v_id_reto, 'newtype', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 6 - FUNCIONES
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 6;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Funciones tipadas',
-            '¿Dónde se indica el tipo de retorno de una función TypeScript?',
-            'opcion_multiple',
-            35,
-            'medio'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 6;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Funciones tipadas', '¿Dónde se indica el tipo de retorno de una función TypeScript?', 'opcion_multiple', 35, 'medio')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'Después de los paréntesis, usando : tipo', true),
-            (v_id_reto, 'Antes del nombre usando return', false),
-            (v_id_reto, 'Dentro de console.log()', false),
-            (v_id_reto, 'Después de la palabra function solamente', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'Después de los paréntesis, usando : tipo', true), (v_id_reto, 'Antes del nombre usando return', false), (v_id_reto, 'Dentro de console.log()', false), (v_id_reto, 'Después de la palabra function solamente', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 7 - LITERALES
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 7;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Tipos literales',
-            'Si Dificultad = ''facil'' | ''medio'' | ''dificil'', ¿qué valores puede aceptar?',
-            'opcion_multiple',
-            40,
-            'medio'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 7;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Tipos literales', 'Si Dificultad = ''facil'' | ''medio'' | ''dificil'', ¿qué valores puede aceptar?', 'opcion_multiple', 40, 'medio')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'Solamente ''facil'', ''medio'' o ''dificil''', true),
-            (v_id_reto, 'Cualquier string', false),
-            (v_id_reto, 'Solamente números', false),
-            (v_id_reto, 'Cualquier valor', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'Solamente ''facil'', ''medio'' o ''dificil''', true), (v_id_reto, 'Cualquier string', false), (v_id_reto, 'Solamente números', false), (v_id_reto, 'Cualquier valor', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 8 - CLASES
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 8;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Clases',
-            '¿Qué significa que una propiedad de una clase sea private?',
-            'opcion_multiple',
-            45,
-            'dificil'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 8;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Clases', '¿Qué significa que una propiedad de una clase sea private?', 'opcion_multiple', 45, 'dificil')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'Solo puede utilizarse directamente dentro de la clase', true),
-            (v_id_reto, 'Puede utilizarse desde cualquier lugar', false),
-            (v_id_reto, 'Solo acepta números', false),
-            (v_id_reto, 'La propiedad desaparece', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'Solo puede utilizarse directamente dentro de la clase', true), (v_id_reto, 'Puede utilizarse desde cualquier lugar', false), (v_id_reto, 'Solo acepta números', false), (v_id_reto, 'La propiedad desaparece', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 9 - GENÉRICOS
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 9;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Genéricos',
-            '¿Qué representa normalmente T en una función genérica como function mostrar<T>()?',
-            'opcion_multiple',
-            50,
-            'dificil'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 9;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Genéricos', '¿Qué representa normalmente T en una función genérica como function mostrar<T>()?', 'opcion_multiple', 50, 'dificil')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'Un tipo que se determina al utilizar la función', true),
-            (v_id_reto, 'Siempre un string', false),
-            (v_id_reto, 'Siempre un número', false),
-            (v_id_reto, 'Una variable global', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'Un tipo que se determina al utilizar la función', true), (v_id_reto, 'Siempre un string', false), (v_id_reto, 'Siempre un número', false), (v_id_reto, 'Una variable global', false);
     END IF;
 
-
-    -- ========================================================
     -- CUESTIONARIO 10 - NARROWING
-    -- ========================================================
-
-    SELECT n.id_nivel
-    INTO v_id_nivel
-    FROM nivel n
-    WHERE n.id_lenguaje = v_id_lenguaje
-      AND n.numero_nivel = 10;
-
-    SELECT l.id_leccion
-    INTO v_id_leccion
-    FROM leccion l
-    WHERE l.id_nivel = v_id_nivel
-    ORDER BY l.orden
-    LIMIT 1;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM reto
-        WHERE id_leccion = v_id_leccion
-          AND tipo_reto = 'opcion_multiple'
-    ) THEN
-
-        INSERT INTO reto (
-            id_leccion,
-            titulo,
-            descripcion,
-            tipo_reto,
-            xp_recompensa,
-            dificultad
-        )
-        VALUES (
-            v_id_leccion,
-            'Cuestionario: Narrowing',
-            '¿Qué operador puede utilizarse para comprobar si un valor es string o number?',
-            'opcion_multiple',
-            60,
-            'dificil'
-        )
+    SELECT n.id_nivel INTO v_id_nivel FROM nivel n WHERE n.id_lenguaje = v_id_lenguaje AND n.numero_nivel = 10;
+    SELECT l.id_leccion INTO v_id_leccion FROM leccion l WHERE l.id_nivel = v_id_nivel ORDER BY l.orden LIMIT 1;
+    IF NOT EXISTS (SELECT 1 FROM reto WHERE id_leccion = v_id_leccion AND tipo_reto = 'opcion_multiple') THEN
+        INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+        VALUES (v_id_leccion, 'Cuestionario: Narrowing', '¿Qué operador puede utilizarse para comprobar si un valor es string o number?', 'opcion_multiple', 60, 'dificil')
         RETURNING id_reto INTO v_id_reto;
 
-        INSERT INTO respuesta (id_reto, contenido, es_correcta)
-        VALUES
-            (v_id_reto, 'typeof', true),
-            (v_id_reto, 'instance', false),
-            (v_id_reto, 'checktype', false),
-            (v_id_reto, 'istype', false);
-
+        INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES
+            (v_id_reto, 'typeof', true), (v_id_reto, 'instance', false), (v_id_reto, 'checktype', false), (v_id_reto, 'istype', false);
     END IF;
-
 
     RAISE NOTICE 'Los 10 cuestionarios TypeScript fueron creados correctamente.';
+
+END $$;
+
+-- ============================================================
+-- CODEASCENT - CONTENIDO MISIONES DE SQL (10 NIVELES ABP Y PISTAS)
+-- ============================================================
+
+-- Garantiza una leccion real para cada nivel SQL. No se usan IDs fijos porque
+-- pueden cambiar cuando la base se carga sobre datos existentes.
+DO $$
+DECLARE
+    nivel_sql RECORD;
+    titulo_leccion TEXT;
+    contenido_leccion TEXT;
+BEGIN
+    FOR nivel_sql IN
+        SELECT n.id_nivel, n.numero_nivel, n.nombre
+        FROM nivel n
+        INNER JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje
+        WHERE LOWER(TRIM(l.nombre)) = 'sql'
+        ORDER BY n.numero_nivel
+    LOOP
+        IF NOT EXISTS (SELECT 1 FROM leccion WHERE id_nivel = nivel_sql.id_nivel) THEN
+            titulo_leccion := CASE nivel_sql.numero_nivel
+                WHEN 1 THEN 'Fundamentos de consulta SQL'
+                WHEN 2 THEN 'Proyección de columnas'
+                WHEN 3 THEN 'Filtros con WHERE'
+                WHEN 4 THEN 'Ordenamiento y limites'
+                WHEN 5 THEN 'Funciones de agregacion'
+                WHEN 6 THEN 'Agrupamiento de datos'
+                WHEN 7 THEN 'Cruce de tablas con INNER JOIN'
+                WHEN 8 THEN 'Uniones externas con LEFT JOIN'
+                WHEN 9 THEN 'Subconsultas SQL'
+                WHEN 10 THEN 'Manipulacion de datos DML'
+                ELSE nivel_sql.nombre
+            END;
+            contenido_leccion := 'Estudia el concepto del nivel y aplica la sintaxis SQL solicitada en la mision.';
+            CALL sp_crear_leccion(nivel_sql.id_nivel, titulo_leccion, contenido_leccion, 1);
+        END IF;
+    END LOOP;
+END $$;
+
+DO $$
+DECLARE
+    v_id_lenguaje INTEGER;
+    v_id_nivel INTEGER;
+    v_id_leccion INTEGER;
+    v_id_reto INTEGER;
+BEGIN
+
+    SELECT id_lenguaje INTO v_id_lenguaje FROM lenguaje WHERE LOWER(nombre) = 'sql';
+    IF v_id_lenguaje IS NULL THEN RAISE EXCEPTION 'El lenguaje SQL no existe en la base de datos.'; END IF;
+
+    -- MISIÓN 1
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 1;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'Una Base de Datos Relacional agrupa información en tablas, filas y columnas. La ejecución en SQL inicia evaluando la fuente en el FROM y luego proyectando en el SELECT.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Consulta total de catálogo',
+                'Escribe una consulta SQL en la terminal que muestre todos los registros y todas las columnas guardadas en la tabla libros.',
+                'Acabas de incorporarte como administrador de datos en la Biblioteca Municipal. El encargado del catálogo necesita verificar el estado actual de los registros digitales.',
+                'libros (id INT, titulo VARCHAR, autor VARCHAR, año_publicacion INT, stock INT)',
+                '["Para visualizarlos todos, piensa en la tabla como un catálogo completo.", "Recuerda utilizar SELECT combinado con el comodín * y la cláusula FROM.", "El nombre de la tabla es libros.", "SELECT * FROM libros;"]'::jsonb,
+                'codigo', 50, 'facil'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT * FROM libros;', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 2
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 2;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'Para seleccionar múltiples columnas específicas, se enumeran explícitamente separándolas por comas sin dejar comas al final antes del FROM.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Proyección de productos',
+                'Escribe una consulta SQL para extraer únicamente las columnas nombre y precio de todos los registros de la tabla productos.',
+                'La Farmacia Vida Sana va a imprimir una cartela informativa de precios rápida. Por privacidad, solo se deben mostrar el nombre y precio.',
+                'productos (id_producto INT, nombre VARCHAR, costo_proveedor DECIMAL, precio DECIMAL, receta_medica BOOLEAN)',
+                '["Evita el uso del comodín *.", "Escribe SELECT seguido del primer campo, una coma, y el segundo campo.", "Los campos son nombre y precio en la tabla productos.", "SELECT nombre, precio FROM productos;"]'::jsonb,
+                'codigo', 100, 'facil'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT nombre, precio FROM productos;', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 3
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 3;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'La cláusula WHERE se ejecuta inmediatamente después del FROM y antes del SELECT. Las cadenas de texto y fechas llevan comillas simples obligatorias.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Facturas pendientes',
+                'Selecciona todas las columnas de la tabla facturas cuyo campo estado sea exactamente igual a Pendiente.',
+                'El Taller Mecánico Automotriz Exprés está organizando su gestión de cobranzas y necesita un reporte de las facturas no pagadas.',
+                'facturas (id_factura INT, cliente VARCHAR, monto_total DECIMAL, estado VARCHAR)',
+                '["Debes usar una condición de filtrado horizontal.", "Incorpora la cláusula WHERE al final de tu SELECT * FROM facturas.", "La palabra Pendiente debe ir entre comillas simples.", "SELECT * FROM facturas WHERE estado = ''Pendiente'';"]'::jsonb,
+                'codigo', 150, 'facil'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT * FROM facturas WHERE estado = ''Pendiente'';', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 4
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 4;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'Se utiliza ORDER BY con los modificadores ASC (ascendente) o DESC (descendente). LIMIT acota el número máximo de tuplas retornadas.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Salón de la fama TOP 3',
+                'Escribe una consulta para extraer el nombre y el puntaje de la tabla jugadores, ordenados de mayor a menor según su puntaje, limitando a 3 filas.',
+                'El videojuego CyberArena requiere desplegar en su pantalla principal el TOP 3 de jugadores con mejores puntajes.',
+                'jugadores (id_jugador INT, nombre VARCHAR, nivel INT, puntaje INT)',
+                '["Requieres ordenar de forma descendente y cortar en la tercera fila.", "Combina ORDER BY puntaje DESC con la cláusula LIMIT.", "Agrega LIMIT 3 al final.", "SELECT nombre, puntaje FROM jugadores ORDER BY puntaje DESC LIMIT 3;"]'::jsonb,
+                'codigo', 200, 'medio'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT nombre, puntaje FROM jugadores ORDER BY puntaje DESC LIMIT 3;', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 5
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 5;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'COUNT cuenta filas no nulas, SUM suma valores numéricos, AVG obtiene promedios y MIN/MAX identifican extremos.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Auditoría de activos',
+                'Escribe una consulta SQL que devuelva el cálculo de la suma total de la columna precio acumulada en la tabla inventario.',
+                'El departamento financiero del supermercado El Globo necesita conocer la suma total de dinero representada en su inventario.',
+                'inventario (id_producto INT, nombre_producto VARCHAR, categoria VARCHAR, precio DECIMAL)',
+                '["Necesitas reducir las filas de la columna precio a un único valor acumulado.", "Usa la función de agregación SUM.", "Encierra entre paréntesis la columna precio: SUM(precio).", "SELECT SUM(precio) FROM inventario;"]'::jsonb,
+                'codigo', 250, 'medio'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT SUM(precio) FROM inventario;', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 6
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 6;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'Cualquier columna presente en el SELECT que no sea función de agregación debe estar declarada obligatoriamente en el GROUP BY.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Conteo por departamentos',
+                'Selecciona la columna departamento y COUNT(*), agrúpalos por departamento y muestra solo los departamentos con más de 4 empleados.',
+                'Recursos Humanos necesita un informe del conteo de empleados por departamento, excluyendo áreas con 4 o menos trabajadores.',
+                'empleados (id_empleado INT, nombre VARCHAR, departamento VARCHAR, salario DECIMAL)',
+                '["Clasifica por departamento y cuenta integrantes.", "Añade GROUP BY departamento y filtra con HAVING.", "Aplica HAVING COUNT(*) > 4.", "SELECT departamento, COUNT(*) FROM empleados GROUP BY departamento HAVING COUNT(*) > 4;"]'::jsonb,
+                'codigo', 300, 'medio'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT departamento, COUNT(*) FROM empleados GROUP BY departamento HAVING COUNT(*) > 4;', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 7
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 7;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'La cláusula ON define la regla de intersección estricta. Si un registro no coincide en ambas tablas, es descartado.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Listado de inscripciones',
+                'Combina la tabla estudiantes con la tabla cursos mediante INNER JOIN, seleccionando estudiantes.nombre y cursos.nombre_curso donde estudiantes.curso_id = cursos.id.',
+                'La Academia Digital requiere emitir el listado oficial de estudiantes junto con el nombre del curso asignado.',
+                'estudiantes (id INT, nombre VARCHAR, curso_id INT) | cursos (id INT, nombre_curso VARCHAR, creditos INT)',
+                '["Cruza dos tablas para conectar estudiantes y cursos.", "Usa FROM estudiantes INNER JOIN cursos ON condición.", "La condición es estudiantes.curso_id = cursos.id.", "SELECT estudiantes.nombre, cursos.nombre_curso FROM estudiantes INNER JOIN cursos ON estudiantes.curso_id = cursos.id;"]'::jsonb,
+                'codigo', 350, 'dificil'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT estudiantes.nombre, cursos.nombre_curso FROM estudiantes INNER JOIN cursos ON estudiantes.curso_id = cursos.id;', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 8
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 8;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'En un LEFT JOIN, la tabla de la izquierda es dominante. Si no encuentra coincidencia en la derecha, los campos faltantes se rellenan con NULL.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Auditoría de vendedores',
+                'Escribe una consulta SQL que preserve a todos los vendedores de la tabla vendedores usando LEFT JOIN hacia ventas basándose en vendedores.id = ventas.vendedor_id.',
+                'El Director Comercial desea auditar las ventas del mes obligando a que aparezcan todos los vendedores incluso si no tienen ventas.',
+                'vendedores (id INT, nombre VARCHAR, sucursal VARCHAR) | ventas (id INT, vendedor_id INT, monto DECIMAL)',
+                '["Usa una unión externa para mantener vendedores sin ventas.", "Pon vendedores en el FROM y conéctalo con LEFT JOIN ventas.", "La condición de enlace es vendedores.id = ventas.vendedor_id.", "SELECT vendedores.nombre, ventas.id FROM vendedores LEFT JOIN ventas ON vendedores.id = ventas.vendedor_id;"]'::jsonb,
+                'codigo', 400, 'dificil'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT vendedores.nombre, ventas.id FROM vendedores LEFT JOIN ventas ON vendedores.id = ventas.vendedor_id;', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 9
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 9;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'La subconsulta interna se evalúa primero y su valor escalar reemplaza la posición dinámica antes de ejecutar la consulta externa.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Bono por mérito',
+                'Escribe una consulta anidada que proyecte nombre y salario de la tabla empleados con un filtro WHERE salario > alimentado por (SELECT AVG(salario) FROM empleados).',
+                'La empresa otorga un bono especial a los trabajadores cuyo sueldo sea strictly mayor al salario promedio de la compañía.',
+                'empleados (id_empleado INT, nombre VARCHAR, puesto VARCHAR, salario DECIMAL)',
+                '["Escribe una subconsulta interna que calcule el promedio.", "Forma la consulta externa SELECT nombre, salario FROM empleados WHERE salario >.", "Añade la subconsulta entre paréntesis: (SELECT AVG(salario) FROM empleados).", "SELECT nombre, salario FROM empleados WHERE salario > (SELECT AVG(salario) FROM empleados);"]'::jsonb,
+                'codigo', 450, 'dificil'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'SELECT nombre, salario FROM empleados WHERE salario > (SELECT AVG(salario) FROM empleados);', TRUE);
+        END IF;
+    END IF;
+
+    -- MISIÓN 10
+    SELECT id_nivel INTO v_id_nivel FROM nivel WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 10;
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion FROM leccion WHERE id_nivel = v_id_nivel ORDER BY id_leccion LIMIT 1;
+        IF v_id_leccion IS NOT NULL THEN
+            UPDATE leccion SET 
+                manual_tecnico = 'Una instrucción UPDATE sin cláusula WHERE alterará la totalidad de las filas de la tabla de forma indiscriminada.'
+            WHERE id_leccion = v_id_leccion;
+
+            INSERT INTO reto (id_leccion, titulo, descripcion, contexto_abp, esquema_bd, pistas, tipo_reto, xp_recompensa, dificultad)
+            VALUES (
+                v_id_leccion,
+                'Ajuste inflacionario de precios',
+                'Escribe una instrucción UPDATE para la tabla productos asignando precio = precio * 1.10 acotando la operación mediante WHERE categoria = Electrónica.',
+                'La tienda MegaStore requiere ajustar precios aplicando un incremento del 10% exclusivamente a los productos de la categoría Electrónica.',
+                'productos (id_producto INT, nombre VARCHAR, categoria VARCHAR, precio DECIMAL)',
+                '["Usa la sentencia DML UPDATE.", "Aplica la fórmula SET precio = precio * 1.10.", "Delimita la alteración con WHERE categoria = ''Electrónica''.", "UPDATE productos SET precio = precio * 1.10 WHERE categoria = ''Electrónica'';"]'::jsonb,
+                'codigo', 500, 'dificil'
+            ) RETURNING id_reto INTO v_id_reto;
+
+            INSERT INTO respuesta (id_reto, contenido, es_correcta) VALUES (v_id_reto, 'UPDATE productos SET precio = precio * 1.10 WHERE categoria = ''Electrónica'';', TRUE);
+        END IF;
+    END IF;
+
+    RAISE NOTICE 'Las 10 Misiones Gamificadas de SQL fueron vinculadas exitosamente.';
 
 END $$;

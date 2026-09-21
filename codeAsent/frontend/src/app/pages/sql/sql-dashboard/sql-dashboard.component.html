@@ -1,0 +1,115 @@
+<main class="sql-dashboard" id="sql-dashboard-root">
+  <div class="sql-bg-layer" aria-hidden="true">
+    <div class="sql-bg-image"></div>
+    <div class="sql-ambient-glow sql-glow-left"></div>
+    <div class="sql-ambient-glow sql-glow-right"></div>
+    <div class="sql-dust-motes"></div>
+  </div>
+
+  <header class="bunker-header" id="dashboard-header">
+    <div class="bunker-brand">
+      <div class="bunker-logo-stone">
+        <div class="miner-mascot-unit" title="Avatar del jugador">
+          <img class="miner-avatar-img" [src]="obtenerUrlAvatar(player.name || 'default')" alt="Avatar del jugador">
+        </div>
+        <div class="bunker-title-block">
+          <h1 class="bunker-title">SQL LAB</h1>
+          <span class="bunker-subtitle">SECTOR 01: SQL</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bunker-player-hud">
+      <div class="hud-stats-box">
+        <div class="hud-name-row">
+          <span class="hud-name">{{ jugadorCargando ? 'CARGANDO...' : player.name }}</span>
+          <span class="hud-rank">RANGO LVL {{ player.level }}</span>
+        </div>
+        <div class="hud-xp-rail">
+          <div class="hud-xp-fill" [style.width.%]="obtenerPorcentajeXp()"></div>
+        </div>
+        <div class="hud-meta-row">
+          <span>{{ player.currentXp }}/{{ player.nextLevelXp }} XP</span>
+          <span class="hud-watts">⚡ {{ player.energyWatts }}W</span>
+        </div>
+      </div>
+
+      <a class="map-return-button" routerLink="/mapa" aria-label="Regresar al mapa">
+        <i class="bi bi-arrow-left-circle-fill"></i>
+        <span>REGRESAR AL MAPA</span>
+      </a>
+    </div>
+  </header>
+
+  <nav class="bunker-nav-rock" aria-label="Módulos SQL">
+    <ul class="bunker-nav__list">
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="seccionActual === 'panel'" (click)="cambiarSeccion('panel')">
+          <span class="rock-btn__icon"><i class="bi bi-hdd-rack-fill"></i></span>
+          <span class="rock-btn__text">PANEL</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="seccionActual === 'misiones'" (click)="cambiarSeccion('misiones')">
+          <span class="rock-btn__icon"><i class="bi bi-journal-check"></i></span>
+          <span class="rock-btn__text">MISIONES</span>
+          <span class="rock-badge">10</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="seccionActual === 'manual'" (click)="cambiarSeccion('manual')">
+          <span class="rock-btn__icon"><i class="bi bi-book"></i></span>
+          <span class="rock-btn__text">MANUAL</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="seccionActual === 'evaluacion'" (click)="cambiarSeccion('evaluacion')">
+          <span class="rock-btn__icon"><i class="bi bi-patch-question"></i></span>
+          <span class="rock-btn__text">EVALUACIÓN</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="seccionActual === 'consola'" (click)="cambiarSeccion('consola')">
+          <span class="rock-btn__icon"><i class="bi bi-terminal-fill"></i></span>
+          <span class="rock-btn__text">LABORATORIO</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  @if (mensajeFlujo) {
+    <div class="sql-flow-alert" role="status">
+      <i class="bi bi-signpost-split-fill"></i>
+      <span>{{ mensajeFlujo }}</span>
+    </div>
+  }
+
+  <div class="bunker-content-stage">
+    @switch (seccionActual) {
+      @case ('panel') {
+        <app-sql-dashboard-section (cambioDeVista)="cambiarSeccion($event)"></app-sql-dashboard-section>
+      }
+      @case ('manual') {
+        @if (tieneRetoActivo()) {
+          <app-sql-data (volver)="cambiarSeccion('misiones')" (siguiente)="cambiarSeccion('evaluacion')"></app-sql-data>
+        }
+      }
+      @case ('misiones') {
+        <app-sql-processes (retoSeleccionado)="seleccionarReto($event)"></app-sql-processes>
+      }
+      @case ('consola') {
+        @if (tieneRetoActivo()) {
+          <app-sql-terminal (volver)="cambiarSeccion('misiones')" (progresoActualizado)="actualizarXp($event)"></app-sql-terminal>
+        }
+      }
+      @case ('evaluacion') {
+        @if (tieneRetoActivo()) {
+          <app-sql-test (volver)="cambiarSeccion('manual')" (siguiente)="cambiarSeccion('consola')"></app-sql-test>
+        }
+      }
+      @default {
+        <app-sql-dashboard-section (cambioDeVista)="cambiarSeccion($event)"></app-sql-dashboard-section>
+      }
+    }
+  </div>
+</main>

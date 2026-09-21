@@ -39,6 +39,16 @@
 
 .app-shell { max-width: 1200px; margin: 0 auto; padding: 1.25rem 1.25rem 3rem; position: relative; z-index: 1; }
 
+.sql-achievements-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin-bottom: 1.5rem; }
+.sql-achievement { display: flex; align-items: center; gap: .7rem; padding: .9rem; border: 1px solid var(--line-dim); border-radius: 10px; background: rgba(10, 19, 16, .88); opacity: .62; }
+.sql-achievement > i { color: var(--text-dim); font-size: 1.35rem; }
+.sql-achievement div { display: grid; gap: .15rem; flex: 1; }
+.sql-achievement strong { color: var(--text-main); font-size: .8rem; }
+.sql-achievement span { color: var(--text-dim); font-size: .68rem; }
+.sql-achievement b { color: var(--gold); font-size: .72rem; white-space: nowrap; }
+.sql-achievement.is-earned { opacity: 1; border-color: var(--neon-cyan); box-shadow: 0 0 14px rgba(47,224,224,.14); }
+.sql-achievement.is-earned > i { color: var(--neon-cyan); }
+
 /* TOPBAR */
 .topbar {
   display: flex; align-items: center; justify-content: space-between;

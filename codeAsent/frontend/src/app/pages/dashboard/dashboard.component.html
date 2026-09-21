@@ -119,6 +119,17 @@
     </div>
   </div>
 
+  <section class="section-title"><h3>Logros de <span class="accent">SQL</span></h3></section>
+  <section class="sql-achievements-grid">
+    @for (logro of data.perfil?.logrosSql || []; track logro.id_logro) {
+      <article class="sql-achievement" [class.is-earned]="logro.obtenido">
+        <i class="bi" [ngClass]="logro.obtenido ? 'bi-award-fill' : 'bi-lock-fill'"></i>
+        <div><strong>{{ logro.nombre }}</strong><span>{{ logro.requisito }}</span></div>
+        <b>+{{ logro.xp_recompensa }} XP</b>
+      </article>
+    }
+  </section>
+
   <!-- MAPA DE APRENDIZAJE -->
   <div class="section-title">
     <h3>Mapa de <span class="accent">Depuración</span></h3>

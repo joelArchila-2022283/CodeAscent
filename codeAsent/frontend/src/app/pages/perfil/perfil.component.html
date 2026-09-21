@@ -76,6 +76,18 @@
         </div>
       </section>
 
+      <section class="perfil-section sql-reward-section">
+        <div class="section-heading"><div><span class="perfil-kicker">RUTA SQL</span><h2>RECOMPENSAS DEL VALLE</h2></div><span>PROGRESIÓN POR MISIONES</span></div>
+        <div class="sql-reward-grid">
+          @for (logro of data.perfil?.logrosSql || []; track logro.id_logro) {
+            <article class="perfil-card sql-reward" [class.is-earned]="logro.obtenido">
+              <i class="bi" [ngClass]="logro.obtenido ? 'bi-award-fill' : 'bi-lock-fill'"></i>
+              <strong>{{ logro.nombre }}</strong><span>{{ logro.requisito }}</span><b>+{{ logro.xp_recompensa }} XP</b>
+            </article>
+          }
+        </div>
+      </section>
+
       <section class="perfil-section">
         <div class="section-heading"><div><span class="perfil-kicker">LECTURA DE ACTIVIDAD</span><h2>ESTADÍSTICAS</h2></div><span>ÚLTIMOS 7 DÍAS</span></div>
         <div class="analytics-grid">

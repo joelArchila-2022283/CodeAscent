@@ -1,0 +1,55 @@
+<div class="vista-manual-campo">
+  @if (retoActivo; as reto) {
+  <header class="manual-header">
+    <div>
+      <span class="eyebrow"><i class="bi bi-book-half"></i> Manual</span>
+      <h2>Preparación de misión</h2>
+    </div>
+    <div class="manual-header__actions">
+      <button class="btn btn-secondary" (click)="volver.emit()"><i class="bi bi-arrow-left"></i> Panel</button>
+      <button class="btn btn-primary" (click)="siguiente.emit()">Cuestionario <i class="bi bi-arrow-right"></i></button>
+    </div>
+  </header>
+
+  <div class="bloque-contexto">
+    <h3><i class="bi bi-diagram-3-fill"></i> Contexto del entorno</h3>
+    <p>{{ reto.contexto_abp }}</p>
+    <div class="manual-signal"><i class="bi bi-cpu-fill"></i><span>MISIÓN ACTIVA</span><strong>{{ reto.titulo_reto }}</strong><em>+{{ reto.xp_recompensa }} XP</em></div>
+  </div>
+
+  <div class="fases-aprendizaje">
+    <section class="fase-conceptual">
+      <h3><i class="bi bi-lightbulb-fill"></i> 1. Nivel conceptual</h3>
+      <p>{{ reto.manual_tecnico || 'Comprende las entidades afectadas en este proceso y su impacto en el sistema general.' }}</p>
+      @for (ejemplo of reto.ejemplos_visuales || []; track ejemplo.titulo) {
+        <div class="ejemplo-sql"><div><i class="bi bi-braces"></i> {{ ejemplo.titulo }}</div><pre>{{ ejemplo.codigo }}</pre><small>{{ ejemplo.explicacion }}</small></div>
+      }
+    </section>
+
+    <section class="fase-logica">
+      <h3><i class="bi bi-cpu-fill"></i> 2. Nivel lógico</h3>
+      <div class="listado-tablas">
+        @for (tabla of tablasRequeridas; track tabla.nombre_tabla) {
+          <div class="detalle-entidad">
+            <h4><i class="bi bi-table"></i> Entidad: {{ tabla.nombre_tabla }}</h4>
+            <p>{{ tabla.descripcion_tabla }}</p>
+            <ul>
+              @for (columna of tabla.columnas; track columna) {
+                <li>{{ columna }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="fase-sintactica">
+      <h3><i class="bi bi-code-square"></i> 3. Nivel sintáctico</h3>
+      <p>Estructura las palabras reservadas necesarias para la extracción (SELECT, FROM, JOIN, WHERE).</p>
+      <pre class="flujo-sql"><span>SELECT</span> columnas<br><span>FROM</span> tabla<br><span>WHERE</span> condición<br><span>ORDER BY</span> resultado;</pre>
+    </section>
+  </div>
+  } @else {
+    <section class="manual-vacio"><i class="bi bi-signpost-split-fill"></i><h2>Selecciona una misión</h2><p>El manual se abrirá cuando elijas un nivel desbloqueado en la ruta de misiones.</p><button class="btn btn-primary" (click)="volver.emit()">Ver misiones</button></section>
+  }
+</div>

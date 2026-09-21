@@ -12,7 +12,7 @@ import { MapaComponent } from './pages/mapa/mapa.component';
 // Componentes de Cursos y Módulos
 import { HtmlDashboardComponent } from './pages/html/html-dashboard/html-dashboard.component';
 import { CssDashboardComponent } from './pages/css/css-dashboard/css-dashboard.component';
-import { SqlComponent } from './pages/sql/sql.component';
+import { SqlDashboardComponent } from './pages/sql/sql-dashboard/sql-dashboard.component';
 import { TSDashboardComponent } from './pages/TS/TS-dashboard/TS-dashboard.component';
 
 // Páginas de Sistema y Errores
@@ -146,12 +146,12 @@ export const routes: Routes = [
   },
   {
     path: 'sql',
-    component: SqlComponent,
+    component: SqlDashboardComponent,
     canActivate: [authGuard]
   },
   {
     path: 'curso/sql',
-    component: SqlComponent,
+    component: SqlDashboardComponent,
     canActivate: [authGuard]
   },
   {

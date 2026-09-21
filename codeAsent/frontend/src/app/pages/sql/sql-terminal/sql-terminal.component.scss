@@ -1,0 +1,258 @@
+$color-borde: #1a1a1a;
+$color-verde-bosque: #2e5a3c;
+$color-verde-claro: #97d7a3;
+$color-panel: rgba(19, 30, 25, 0.92);
+$color-panel-alt: rgba(30, 46, 36, 0.96);
+$color-texto: #edf4ee;
+$color-texto-suave: #c5d6c9;
+$color-oro: #dcb770;
+
+.entorno-consola {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: $color-texto;
+
+  .encabezado-panel {
+    margin-bottom: 10px;
+
+    .kicker {
+      display: inline-block;
+      color: $color-verde-claro;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    h3 {
+      margin: 0;
+      color: $color-oro;
+      font-weight: 900;
+      font-size: 1.15rem;
+    }
+  }
+
+  .panel-superior {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 18px;
+
+    .planteamiento-mision, .esquema-referencia {
+      background: linear-gradient(180deg, rgba(33, 52, 42, 0.96), rgba(18, 28, 22, 0.96));
+      border: 3px solid $color-borde;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 4px 4px 0px $color-borde, 0 0 18px rgba(151, 215, 163, 0.12);
+      color: $color-texto;
+    }
+
+    .contexto-historico,
+    .meta-final {
+      color: $color-texto-suave;
+      line-height: 1.6;
+      margin: 0 0 10px;
+    }
+
+    .bloque-codigo-esquema {
+      background-color: rgba(243, 238, 223, 0.12);
+      color: $color-texto;
+      padding: 12px;
+      border-radius: 6px;
+      border: 2px solid rgba(151, 215, 163, 0.7);
+      font-weight: bold;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      margin: 0;
+    }
+  }
+
+  .banner-estado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 4.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: 0 0 20px rgba(105, 227, 255, .12);
+    animation: pulse-banner .45s ease, banner-glow 2.2s ease-in-out infinite;
+
+    i { font-size: 1.5rem; }
+    animation: pulse-banner 0.45s ease;
+
+    &.banner-success {
+      background: rgba(90, 175, 99, 0.12);
+      border-color: rgba(90, 175, 99, 0.7);
+      color: #dff9e1;
+    }
+
+    &.banner-warning {
+      background: rgba(220, 183, 112, 0.12);
+      border-color: rgba(220, 183, 112, 0.7);
+      color: #f9ebbf;
+    }
+
+    &.banner-error {
+      background: rgba(185, 74, 74, 0.12);
+      border-color: rgba(185, 74, 74, 0.7);
+      color: #ffd8d8;
+    }
+  }
+
+  .area-desarrollo {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+
+    .editor-codigo,
+    .panel-andamiaje {
+      background: linear-gradient(180deg, rgba(31, 48, 40, 0.94), rgba(18, 27, 23, 0.94));
+      border: 3px solid $color-borde;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 4px 4px 0px $color-borde;
+    }
+
+    .entrada-sql {
+      width: 100%;
+      height: 150px;
+      background: rgba(255, 255, 255, 0.06);
+      color: $color-texto;
+      border: 3px solid rgba(151, 215, 163, 0.75);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: inset 3px 3px 0px rgba(0, 0, 0, 0.2);
+      resize: vertical;
+      box-sizing: border-box;
+
+      &::placeholder {
+        color: rgba(237, 244, 238, 0.7);
+      }
+
+      &:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: $color-verde-claro;
+      }
+    }
+
+    .acciones-terminal {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .boton-ejecutar-codigo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(63, 118, 77, 0.92), rgba(27, 63, 41, 0.95));
+      color: #ffffff;
+      border: 3px solid $color-borde;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 900;
+      box-shadow: 3px 3px 0px $color-borde;
+      cursor: pointer;
+
+      &:hover {
+        background: linear-gradient(180deg, rgba(82, 151, 98, 0.94), rgba(33, 74, 50, 0.96));
+        transform: translate(-1px, -1px);
+        box-shadow: 5px 5px 0px $color-borde;
+      }
+    }
+
+    .panel-andamiaje {
+      .acciones-pistas {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        button {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(255, 255, 255, 0.05);
+          color: $color-texto;
+          border: 2px solid rgba(151, 215, 163, 0.8);
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-weight: 800;
+          text-align: left;
+          cursor: pointer;
+          box-shadow: 2px 2px 0px $color-borde;
+
+          span {
+            display: inline-grid;
+            place-items: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(151, 215, 163, 0.12);
+            color: $color-verde-claro;
+            font-weight: 900;
+          }
+
+          &:hover {
+            background: rgba(151, 215, 163, 0.14);
+          }
+        }
+      }
+
+      .caja-pista {
+        margin-top: 14px;
+        background: rgba(220, 183, 112, 0.1);
+        border: 3px solid rgba(220, 183, 112, 0.9);
+        padding: 12px;
+        border-radius: 8px;
+        color: $color-texto;
+        font-weight: 700;
+        font-size: 0.9rem;
+        box-shadow: 3px 3px 0px $color-borde;
+      }
+    }
+  }
+
+  .retroalimentacion-diagnostica {
+    background: rgba(155, 43, 43, 0.18);
+    border: 3px solid rgba(182, 69, 69, 0.85);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 4px 4px 0px $color-borde;
+
+    h3 {
+      color: #f2a7a7;
+      font-weight: 900;
+      margin-top: 0;
+    }
+
+    .pregunta-guia {
+      color: $color-texto;
+      font-weight: 800;
+      margin: 0;
+    }
+  }
+}
+
+@keyframes pulse-banner {
+  0% {
+    transform: scale(0.98);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes banner-glow {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(2px); }
+}

@@ -1,0 +1,41 @@
+<div class="contenedor-test">
+  <header class="test-header">
+    <div>
+      <span class="eyebrow"><i class="bi bi-patch-question-fill"></i> Cuestionario</span>
+      <h2>Evaluación diagnóstica SQL</h2>
+    </div>
+    <div class="test-header__actions">
+      <button class="btn btn-secondary" (click)="volver.emit()"><i class="bi bi-arrow-left"></i> Manual</button>
+      <button class="btn btn-primary" (click)="siguiente.emit()">Laboratorio <i class="bi bi-arrow-right"></i></button>
+    </div>
+  </header>
+
+  <div class="listado-preguntas">
+    @for (pregunta of preguntas; track pregunta.id_pregunta) {
+      <div class="tarjeta-pregunta">
+        <h3>{{ pregunta.id_pregunta }}. {{ pregunta.enunciado }}</h3>
+        <div class="opciones-respuesta">
+          @for (opcion of pregunta.opciones; track $index) {
+            <button 
+              [class.seleccionada]="respuestasUsuario[pregunta.id_pregunta] === $index"
+              (click)="seleccionarRespuesta(pregunta.id_pregunta, $index)">
+              <span class="option-letter">{{ obtenerLetraRespuesta($index) }}</span>
+              {{ opcion }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="test-footer">
+    <button class="boton-evaluar" (click)="evaluarTest()">Enviar respuestas</button>
+  </div>
+
+  @if (calificacionFinal !== null) {
+    <div class="resultado-evaluacion">
+      <h3>Resultado de la evaluación</h3>
+      <p>Tu puntuación final es: <strong>{{ calificacionFinal }}%</strong></p>
+    </div>
+  }
+</div>

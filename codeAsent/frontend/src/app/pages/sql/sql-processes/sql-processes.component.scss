@@ -1,0 +1,221 @@
+$color-borde: #1a1a1a;
+$color-verde-bosque: #2e5a3c;
+$color-verde-claro: #9ce7b4;
+$color-panel: rgba(24, 36, 30, 0.96);
+$color-texto: #edf4ee;
+$color-texto-suave: #cfe4d4;
+$color-oro: #dcb770;
+
+.vista-misiones {
+  max-width: 920px;
+  margin: 0 auto;
+
+  .cabecera-misiones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .eyebrow {
+      display: inline-block;
+      color: $color-verde-claro;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+
+    h2 {
+      color: $color-oro;
+      font-size: 1.8rem;
+      font-weight: 900;
+      border-bottom: 4px solid rgba(156, 231, 180, 0.9);
+      padding-bottom: 8px;
+      margin-top: 0;
+    }
+
+    .contador-niveles {
+      background: rgba(255, 255, 255, 0.06);
+      border: 2px solid rgba(156, 231, 180, 0.8);
+      border-radius: 999px;
+      padding: 8px 14px;
+      color: $color-texto;
+      font-weight: 900;
+      font-size: 0.82rem;
+    }
+  }
+
+  .cuadricula-retos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .tarjeta-mision {
+    width: min(100%, 720px);
+    background: linear-gradient(180deg, rgba(29, 45, 36, 0.96), rgba(18, 26, 22, 0.98));
+    border: 4px solid $color-borde;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 5px 5px 0px $color-borde, 0 0 18px rgba(156, 231, 180, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: $color-texto;
+    min-height: 200px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+    &.is-locked {
+      opacity: 0.72;
+      filter: grayscale(0.2);
+    }
+
+    &.is-complete {
+      border-color: rgba(156, 231, 180, 0.9);
+      box-shadow: 5px 5px 0px $color-borde, 0 0 18px rgba(156, 231, 180, 0.2);
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: $color-verde-claro;
+    }
+
+    .cabecera-mision {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+
+      .icono-mision {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, rgba(156, 231, 180, 0.18), rgba(30, 49, 39, 0.7));
+        border: 2px solid rgba(156, 231, 180, 0.7);
+        font-size: 1.3rem;
+        color: $color-verde-claro;
+      }
+
+      small {
+        display: block;
+        color: $color-texto-suave;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.68rem;
+        margin-bottom: 6px;
+      }
+
+      h3 {
+        margin: 0;
+        color: $color-texto;
+        font-size: 1.2rem;
+        font-weight: 900;
+      }
+    }
+
+    .cuerpo-mision {
+      margin: 0 0 16px;
+      color: $color-texto-suave;
+      font-size: 0.95rem;
+      font-weight: 600;
+
+      .meta-descripcion {
+        margin: 0 0 12px;
+      }
+
+      .meta-linea {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+
+        .chip {
+          display: inline-flex;
+          font-size: 0.7rem;
+          border-radius: 999px;
+          padding: 6px 10px;
+          border: 1px solid transparent;
+          font-weight: 900;
+        }
+
+        .chip-dificultad {
+          color: $color-oro;
+          background: rgba(220, 183, 112, 0.12);
+          border-color: rgba(220, 183, 112, 0.5);
+        }
+
+        .chip-xp {
+          color: $color-verde-claro;
+          background: rgba(156, 231, 180, 0.12);
+          border-color: rgba(156, 231, 180, 0.5);
+        }
+      }
+    }
+
+    .estadisticas-mision {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 3px solid rgba(156, 231, 180, 0.8);
+      padding-top: 12px;
+      gap: 10px;
+
+      .estado-mision {
+        font-weight: 900;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+
+        &.activo { color: $color-verde-claro; }
+        &.bloqueado { color: #ef9a9a; }
+        &.completado { color: $color-oro; }
+      }
+
+      .boton-iniciar {
+        background: linear-gradient(180deg, rgba(63, 118, 77, 0.94), rgba(28, 64, 42, 0.96));
+        color: #ffffff;
+        border: 3px solid $color-borde;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: 900;
+        box-shadow: 2px 2px 0px $color-borde;
+        cursor: pointer;
+
+        &:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        &:not(:disabled):hover {
+          background: linear-gradient(180deg, rgba(82, 151, 98, 0.94), rgba(35, 75, 50, 0.96));
+          transform: translate(-1px, -1px);
+          box-shadow: 4px 4px 0px $color-borde;
+        }
+      }
+    }
+  }
+}
+
+.mensaje-vacio {
+  color: $color-texto-suave;
+  font-weight: 700;
+  padding: 24px;
+  border: 2px dashed rgba(156, 231, 180, 0.55);
+  border-radius: 10px;
+}
+
+.mensaje-vacio--error {
+  display: grid;
+  gap: .45rem;
+  color: #ffd2b8;
+  border-color: rgba(255, 117, 84, .75);
+  background: rgba(104, 31, 25, .32);
+}
+
+.mensaje-vacio--error i { color: #ff8a63; font-size: 1.5rem; }
