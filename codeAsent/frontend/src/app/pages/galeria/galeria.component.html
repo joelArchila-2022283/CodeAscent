@@ -1,0 +1,53 @@
+<div class="grid-overlay"></div>
+<div class="grain-overlay"></div>
+
+<div class="app-shell">
+    <!-- TOPBAR COMPARTIDA -->
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-logo-animated">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <span class="brand-name title-font">CODE ASCENT</span>
+        </div>
+        
+        <nav class="nav-pills-custom">
+            <a routerLink="/dashboard" class="nav-pill"><i class="bi bi-house-door-fill"></i> Inicio</a>
+            <a routerLink="/mapa" class="nav-pill"><i class="bi bi-diagram-3-fill"></i> Mapa</a>
+            <a routerLink="/galeria" class="nav-pill active"><i class="bi bi-images"></i> Galería</a>
+            <a routerLink="/perfil" class="nav-pill"><i class="bi bi-person-fill"></i> Perfil</a>
+        </nav>
+
+        <div class="topbar-right">
+            <button class="btn-logout" routerLink="/dashboard" title="Volver al Inicio">
+                <i class="bi bi-arrow-left"></i>
+                <span>VOLVER</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- TÍTULO DE SECCIÓN -->
+    <div class="section-title">
+        <h3>Galería de <span class="accent">Recursos</span></h3>
+        <span class="text-dim">03.00</span>
+    </div>
+
+    <!-- GRID DE TARJETAS DE GALERÍA -->
+    <div class="row g-4">
+    <div *ngFor="let item of elementosGaleria" class="col-12 col-md-4">
+        <div class="gallery-card">
+            <div class="gallery-img-container">
+            <img [src]="item.imagen" [alt]="item.titulo" class="gallery-img">
+            <span class="gallery-badge">{{ item.categoria }}</span>
+        </div>
+        <div class="gallery-content">
+            <h4 class="title-font">{{ item.titulo }}</h4>
+            <p>{{ item.descripcion }}</p>
+            <a [href]="item.enracesExterno" target="_blank" rel="noopener noreferrer" class="gallery-cta">
+                EXPLORAR RECURSO <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
