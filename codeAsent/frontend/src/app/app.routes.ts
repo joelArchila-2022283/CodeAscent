@@ -33,6 +33,7 @@ import { ComicComponent7 } from './pages/comics/comic_7/comic.component';
 import { ComicComponent8 } from './pages/comics/comic_8/comic.component';
 import { ComicComponent9 } from './pages/comics/comic_9/comic.component';
 import { ComicComponent10 } from './pages/comics/comic_10/comic.component';
+import { ComicComponent11 } from './pages/comics/comic_11/comic.component';
 
 //Ruta de galeria de comics
 import { GaleriaComponent } from './pages/galeria/galeria.component';
@@ -101,6 +102,11 @@ export const routes: Routes = [
   {
     path: 'comic/10',
     component: ComicComponent10,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/11',
+    component: ComicComponent11,
     canActivate: [authGuard]
   },
 

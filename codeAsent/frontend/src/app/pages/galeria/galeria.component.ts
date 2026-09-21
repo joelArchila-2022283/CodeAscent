@@ -19,26 +19,89 @@ interface ElementoGaleria {
 })
 export class GaleriaComponent {
     elementosGaleria: ElementoGaleria[] = [
-    {
-        titulo: 'Introduccion',
-        descripcion: 'La vida de alguien que cree ser obsoleto',
-        imagen: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80',
-        categoria: 'Parte 1',
-        enracesExterno: '/comic/1'
-    },
-    {
-        titulo: 'Repositorio de Malware',
-        descripcion: 'Análisis detallado de códigos maliciosos de tinta y métodos de contención.',
-        imagen: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80',
-        categoria: 'SEGURIDAD',
-        enracesExterno: 'https://stackoverflow.com'
-    },
-    {
-        titulo: 'Simulador de Nodos',
-        descripcion: 'Herramienta externa de pruebas de estrés para verificar la estabilidad del servidor.',
-        imagen: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80',
-        categoria: 'HERRAMIENTA',
-        enracesExterno: 'https://angular.io'
-    }
+        {
+            titulo: 'Introduccion',
+            descripcion: 'La vida de alguien que cree ser obsoleto',
+            imagen: 'assets/images/comics/comic-01.jpeg',
+            categoria: 'Parte 1',
+            enracesExterno: '/comic/1'
+        },
+        {
+            titulo: 'Ataque',
+            descripcion: 'Inicio de la invasion',
+            imagen: 'assets/images/comics/comic-02.jpeg',
+            categoria: 'Parte 1',
+            enracesExterno: '/comic/2'
+        },
+        {
+            titulo: 'Inicio de la aventura',
+            descripcion: 'Adentrandos en el bosque',
+            imagen: 'assets/images/comics/comic-03.jpeg',
+            categoria: 'Parte 1',
+            enracesExterno: '/comic/3'
+        },
+        {
+            titulo: 'Encontrando el poder',
+            descripcion: 'Un libro lleno de conocimiento',
+            imagen: 'assets/images/comics/comic-04.jpeg',
+            categoria: 'Parte 1',
+            enracesExterno: '/comic/4'
+        },
+        {
+            titulo: 'La gema brillante',
+            descripcion: 'Un poder hambriento',
+            imagen: 'assets/images/comics/comic-05.jpeg',
+            categoria: 'Parte 2',
+            enracesExterno: '/comic/5'
+        },
+        {
+            titulo: 'La aldea abandonada',
+            descripcion: 'Primer paso de vuelta a casa',
+            imagen: 'assets/images/comics/comic-06.jpeg',
+            categoria: 'Parte 2',
+            enracesExterno: '/comic/6'
+        },
+        {
+            titulo: 'El malware',
+            descripcion: 'El villano se muestra',
+            imagen: 'assets/images/comics/comic-07.jpeg',
+            categoria: 'Parte 2',
+            enracesExterno: '/comic/7'
+        },
+        {
+            titulo: 'Tu poder siempre fue tuyo',
+            descripcion: 'Tu poder no lo alberga un libro...',
+            imagen: 'assets/images/comics/comic-08.jpeg',
+            categoria: 'Parte 3',
+            enracesExterno: '/comic/8'
+        },
+        {
+            titulo: 'Antivirus',
+            descripcion: 'Tu programacion no define si ganas',
+            imagen: 'assets/images/comics/comic-09.jpeg',
+            categoria: 'Parte 3',
+            enracesExterno: '/comic/9'
+        },
+        {
+            titulo: 'Rompe tu programacion',
+            descripcion: 'El malware fue derrotado',
+            imagen: 'assets/images/comics/comic-10.jpeg',
+            categoria: 'Parte 3',
+            enracesExterno: '/comic/10'
+        },
+        {
+            titulo: 'Pelea final',
+            descripcion: 'El heroe se enfrenta al malware',
+            imagen: 'assets/images/comics/comic-11.jpeg',
+            categoria: 'Parte 3',
+            enracesExterno: '/comic/10'
+        },
+        {
+            titulo: 'Rompe tu programacion',
+            descripcion: 'El malware fue derrotado',
+            imagen: 'assets/images/comics/comic-10.jpeg',
+            categoria: 'Parte 3',
+            enracesExterno: '/comic/11'
+        }
     ];
 }
