@@ -51,7 +51,7 @@ export class ModeloIntento {
 
     static async crear(
         datosIntento: IIntento
-    ): Promise<boolean> {
+    ): Promise<IIntento> {
 
         const {
             id_usuario,
@@ -74,7 +74,15 @@ export class ModeloIntento {
 
         );
 
-        return true;
+        const resultado = await pool.query<IIntentoRow>(
+            `SELECT * FROM intento
+             WHERE id_usuario = $1 AND id_reto = $2
+             ORDER BY fecha_intento DESC, id_intento DESC
+             LIMIT 1`,
+            [id_usuario, id_reto]
+        );
+
+        return resultado.rows[0] ?? datosIntento;
     }
 
     static async actualizar(

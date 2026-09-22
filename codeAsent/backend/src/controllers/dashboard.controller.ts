@@ -59,31 +59,36 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       SELECT
         l.id_lenguaje,
         l.nombre,
+        l.slug,
         l.descripcion,
-        COALESCE(p.porcentaje, 0)::float AS porcentaje,
-        COALESCE(p.xp_actual, 0)::int AS xp_actual,
-        COALESCE(p.id_nivel_actual, 0)::int AS nivel_actual,
+        COALESCE(uxp.xp, 0)::int AS xp_actual,
+        COALESCE((
+          SELECT MAX(nivel.numero_nivel)
+          FROM nivel nivel
+          WHERE nivel.id_lenguaje = l.id_lenguaje
+            AND (
+              SELECT COALESCE(SUM(anterior.xp_requerida), 0)
+              FROM nivel anterior
+              WHERE anterior.id_lenguaje = l.id_lenguaje
+                AND anterior.numero_nivel <= nivel.numero_nivel
+            ) <= COALESCE(uxp.xp, 0)
+        ), 1)::int AS nivel_actual,
+        LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2))::float AS porcentaje,
         COUNT(DISTINCT n.id_nivel)::int AS total_niveles
       FROM lenguaje l
-      LEFT JOIN progreso p
-        ON p.id_lenguaje = l.id_lenguaje AND p.id_usuario = $1
+      LEFT JOIN usuario_xp uxp
+        ON uxp.id_lenguaje = l.id_lenguaje AND uxp.user_id = $1
       LEFT JOIN nivel n ON n.id_lenguaje = l.id_lenguaje AND n.estado = TRUE
       WHERE l.estado = TRUE
-      GROUP BY l.id_lenguaje, l.nombre, l.descripcion, p.porcentaje, p.xp_actual, p.id_nivel_actual
-      ORDER BY CASE LOWER(l.nombre)
-        WHEN 'html' THEN 1
-        WHEN 'css' THEN 2
-        WHEN 'sql' THEN 3
-        WHEN 'typescript' THEN 4
-        ELSE 5
-      END
+      GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp
+      ORDER BY l.id_lenguaje
     `, [idUsuario]);
 
     const resEstadisticas = await pool.query(`
       SELECT
         (SELECT COUNT(*)::int FROM nivel_usuario WHERE id_usuario = $1 AND completado = TRUE) AS niveles_completados,
         (SELECT COUNT(DISTINCT id_reto)::int FROM intento WHERE id_usuario = $1 AND correcto = TRUE) AS retos_superados,
-        (SELECT COALESCE(SUM(xp_actual), 0)::int FROM progreso WHERE id_usuario = $1) AS xp_total,
+        (SELECT COALESCE(SUM(xp), 0)::int FROM usuario_xp WHERE user_id = $1) AS xp_total,
         (SELECT COUNT(*)::int FROM intento WHERE id_usuario = $1) AS intentos_totales,
         (SELECT COUNT(*)::int FROM intento WHERE id_usuario = $1 AND correcto = TRUE) AS intentos_correctos
     `, [idUsuario]);
@@ -98,11 +103,14 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
     `, [idUsuario]);
 
     const resLogrosPerfil = await pool.query(`
-      SELECT l.id_logro, l.nombre, l.descripcion, ul.fecha_obtenido
-      FROM usuario_logro ul
-      INNER JOIN logro l ON l.id_logro = ul.id_logro
-      WHERE ul.id_usuario = $1
-      ORDER BY ul.fecha_obtenido DESC
+      SELECT l.id_logro, l.nombre, COALESCE(l.titulo, l.nombre) AS titulo,
+             l.descripcion, l.dificultad, l.id_lenguaje,
+             (ul.id_usuario_logro IS NOT NULL) AS obtenido,
+             ul.fecha_obtenido
+      FROM logro l
+      LEFT JOIN usuario_logro ul
+        ON ul.id_logro = l.id_logro AND ul.id_usuario = $1
+      ORDER BY l.dificultad, l.id_logro
     `, [idUsuario]);
 
     const estadisticas = resEstadisticas.rows[0] || {};
