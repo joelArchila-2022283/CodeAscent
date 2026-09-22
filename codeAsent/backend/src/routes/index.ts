@@ -15,6 +15,11 @@ import rutasDashboard from './dashboard.routes';
 import rutasSql from './sql.routes';
 
 import rutasCss from './css.routes';
+import rutasLanguage from './language.routes';
+import rutasMissionProgress from './progress.routes';
+import rutasLab from './lab.routes';
+import rutasQuiz from './quiz.routes';
+import rutasGamification from './gamification.routes';
 const enrutadorPrincipal = Router();
 
 enrutadorPrincipal.use('/usuarios', rutasUsuario);
@@ -34,5 +39,10 @@ enrutadorPrincipal.use('/dashboard', rutasDashboard);
 enrutadorPrincipal.use('/sql', rutasSql);
 
 enrutadorPrincipal.use('/css', rutasCss);
+enrutadorPrincipal.use('/languages', rutasLanguage);
+enrutadorPrincipal.use('/missions', rutasMissionProgress);
+enrutadorPrincipal.use('/missions', rutasLab);
+enrutadorPrincipal.use('/missions', rutasQuiz);
+enrutadorPrincipal.use('/', rutasGamification);
 
 export default enrutadorPrincipal;
