@@ -1,62 +1,61 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
+import { IMission } from '../../../core/models/language.model';
 
-import {
-    TsDataService,
-    TodasLasLeccionesTS
-} from '../../../services/ts-data.service';
+export interface ManualParsedTS {
+  conceptual: string;
+  logico: string;
+  sintactico: string;
+}
 
 @Component({
-    selector: 'app-ts-data',
-    standalone: true,
-    imports: [CommonModule],
-    templateUrl: './TS-data.component.html',
-    styleUrl: './TS-data.component.scss'
+  selector: 'app-ts-data',
+  standalone: true,
+  templateUrl: './TS-data.component.html',
+  styleUrl: './TS-data.component.scss'
 })
-export class TSDataComponent implements OnInit {
+export class TSDataComponent implements OnChanges {
+  @Input() mission: IMission | null = null;
+  @Output() back = new EventEmitter<void>();
+  @Output() next = new EventEmitter<void>();
 
-    @Output() back = new EventEmitter<void>();
+  manual = signal<ManualParsedTS>({
+    conceptual: 'Selecciona una misión para cargar el manual.',
+    logico: '...',
+    sintactico: '...'
+  });
 
-    private tsDataService = inject(TsDataService);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mission']) {
+      this.procesarLeccion();
+    }
+  }
 
-    cargando = signal<boolean>(true);
-    errorCarga = signal<string | null>(null);
-
-    lecciones = signal<TodasLasLeccionesTS[]>([]);
-
-    ngOnInit(): void {
-        this.cargarDatos();
+  private procesarLeccion(): void {
+    const contenido = this.mission?.contenido ?? '';
+    if (!contenido) {
+      this.manual.set({
+        conceptual: 'Selecciona una misión para cargar el manual.',
+        logico: '...',
+        sintactico: '...'
+      });
+      return;
     }
 
-    cargarDatos(): void {
-        this.cargando.set(true);
-        this.errorCarga.set(null);
+    const extraer = (inicio: string, fin?: string): string => {
+      const inicioIndex = contenido.toUpperCase().indexOf(inicio);
+      if (inicioIndex === -1) return '';
+      const inicioContenido = inicioIndex + inicio.length;
+      const finIndex = fin
+        ? contenido.toUpperCase().indexOf(fin, inicioContenido)
+        : -1;
+      return contenido
+        .substring(inicioContenido, finIndex === -1 ? contenido.length : finIndex)
+        .trim();
+    };
 
-        this.tsDataService.obtenerTodasLasLecciones().subscribe({
-            next: (datos) => {
-                this.lecciones.set(datos);
-                this.cargando.set(false);
-            },
-
-            error: (err) => {
-                console.error(
-                    'Error al cargar las lecciones TypeScript:',
-                    err
-                );
-
-                this.errorCarga.set(
-                    'No se pudieron cargar las lecciones de TypeScript.'
-                );
-
-                this.cargando.set(false);
-            }
-        });
-    }
-
-    cantidadLecciones(): number {
-        return this.lecciones().reduce(
-            (total, grupo) => total + grupo.lecciones.length,
-            0
-        );
-    }
+    const conceptual = extraer('NIVEL CONCEPTUAL:', 'NIVEL LOGICO:') || contenido;
+    const logico = extraer('NIVEL LOGICO:', 'NIVEL SINTACTICO:') || contenido;
+    const sintactico = extraer('NIVEL SINTACTICO:', 'PROBLEMA ABP:') || contenido;
+    this.manual.set({ conceptual, logico, sintactico });
+  }
 }
