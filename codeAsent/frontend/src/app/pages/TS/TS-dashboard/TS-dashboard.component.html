@@ -53,9 +53,7 @@
 
         <div class="hud-xp-rail">
 
-          <div class="hud-xp-fill" [style.width.%]="
-              (player.currentXp / player.nextLevelXp) * 100
-            "></div>
+          <div class="hud-xp-fill" [style.width.%]="obtenerPorcentajeXp()"></div>
 
         </div>
 
@@ -110,28 +108,6 @@
 
       </li>
 
-      <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'lesson'" (click)="navigateTo('lesson')"><span class="rock-btn__icon"><i class="bi bi-lightbulb"></i></span><span class="rock-btn__text">LECCIÓN</span></button></li>
-
-
-      <li>
-
-        <button class="rock-btn" [class.rock-btn--active]="
-            activeSection() === 'data'
-          " (click)="navigateTo('data')">
-
-          <span class="rock-btn__icon">
-            <i class="bi bi-file-earmark-binary"></i>
-          </span>
-
-          <span class="rock-btn__text">
-            MANUAL
-          </span>
-
-        </button>
-
-      </li>
-
-
       <li>
 
         <button class="rock-btn" [class.rock-btn--active]="
@@ -154,6 +130,20 @@
 
       </li>
 
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'data'" (click)="navigateTo('data')">
+          <span class="rock-btn__icon"><i class="bi bi-book"></i></span>
+          <span class="rock-btn__text">MANUAL</span>
+        </button>
+      </li>
+
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'lesson'" (click)="navigateTo('lesson')">
+          <span class="rock-btn__icon"><i class="bi bi-lightbulb"></i></span>
+          <span class="rock-btn__text">LECCIÓN</span>
+        </button>
+      </li>
+
 
       <li>
 
@@ -166,7 +156,7 @@
           </span>
 
           <span class="rock-btn__text">
-            TERMINAL
+            LABORATORIO
           </span>
 
         </button>
@@ -181,7 +171,7 @@
           " (click)="navigateTo('test')">
 
           <span class="rock-btn__icon">
-            <i class="bi bi-floppy-fill"></i>
+            <i class="bi bi-patch-question"></i>
           </span>
 
           <span class="rock-btn__text">
@@ -210,12 +200,12 @@
 
     @case ('data') {
 
-    <app-ts-data (back)="navigateTo('dashboard')" />
+    <app-ts-data [mission]="retoSeleccionado()" (back)="navigateTo('processes')" (next)="avanzarALeccion()" />
 
     }
 
     @case ('lesson') {
-    <section class="ts-section"><header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN</span><h2>Lección de la misión</h2><p>Comprende el tipo, el dato y el comportamiento que debes comprobar antes de ejecutar TypeScript.</p></header><div class="concept-box"><h3>Orientación</h3><p>Divide el problema en entradas, transformación y salida. Después verifica en la terminal que el tipado protege esa decisión y que el resultado coincide con la misión.</p></div><button class="html-next" (click)="navigateTo('terminal')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></section>
+    <section class="ts-section"><header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN</span><h2>{{ retoSeleccionado()?.titulo || 'Lección de la misión' }}</h2><p>Comprende el tipo, el dato y el comportamiento que debes comprobar antes de ejecutar TypeScript.</p></header><div class="concept-box"><h3>Orientación</h3><p>{{ retoSeleccionado()?.contenido || 'Divide el problema en entradas, transformación y salida. Después verifica en la terminal que el tipado protege esa decisión y que el resultado coincide con la misión.' }}</p></div><button class="html-next" [disabled]="!retoSeleccionado()" (click)="avanzarATerminal()">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></section>
     }
 
 
@@ -228,14 +218,14 @@
 
     @case ('terminal') {
 
-    <app-ts-terminal [retoSeleccionado]="retoSeleccionado()" (back)="volverDeTerminal()" />
+    <app-ts-terminal [retoSeleccionado]="retoSeleccionado()" (missionCompleted)="navigateTo('test')" (back)="navigateTo('lesson')" />
 
     }
 
 
     @case ('test') {
 
-    <app-ts-test (back)="navigateTo('dashboard')" />
+    <app-ts-test [mission]="retoSeleccionado()" (back)="navigateTo('terminal')" (next)="volverAProcesos()" />
 
     }
 
