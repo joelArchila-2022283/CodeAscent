@@ -61,9 +61,14 @@ export class SqlEstadoService {
   }
 
   obtenerNivelesDesdeBackend(): Observable<RetoSql[]> {
-    return this.http.get<{ status: string; data: any[] }>(`${this.apiUrl}/niveles`).pipe(
-      map(({ data }) => {
-        const niveles = (data ?? []).map((nivel: any) => {
+    return this.http.get<{ status: string; data?: any[] | { data?: any[] }; niveles?: any[] }>(`${this.apiUrl}/niveles`).pipe(
+      map((respuesta) => {
+        const datos = Array.isArray(respuesta.data)
+          ? respuesta.data
+          : Array.isArray(respuesta.niveles)
+            ? respuesta.niveles
+            : (respuesta.data && Array.isArray(respuesta.data.data) ? respuesta.data.data : []);
+        const niveles = datos.map((nivel: any) => {
           const retoPrincipal = Array.isArray(nivel.retos) && nivel.retos.length > 0 ? nivel.retos[0] : {};
           const numeroNivel = Number(nivel.numero_nivel ?? nivel.id_nivel ?? 1);
           const estado = (nivel.estado_progreso ?? 'bloqueada') as 'completada' | 'en_progreso' | 'bloqueada';
