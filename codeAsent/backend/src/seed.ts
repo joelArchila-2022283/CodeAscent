@@ -320,10 +320,30 @@ async function runSeed() {
             ]
           );
           const idReto = reto.rows[0].id_reto;
+        }
+
+        const quizRetos = await client.query<{ id_reto: number }>(
+          `SELECT id_reto FROM reto
+           WHERE id_leccion = $1 AND tipo_reto = 'opcion_multiple'
+           ORDER BY id_reto LIMIT 3`,
+          [id_leccion]
+        );
+        for (const [indice, quizReto] of quizRetos.rows.entries()) {
+          const pregunta = preguntas[indice];
+          const opciones = [pregunta.correcta, pregunta.incorrecta1, pregunta.incorrecta2];
+          const posicionCorrecta = (indice + 1) % 3;
+          const correcta = opciones.splice(0, 1)[0];
+          opciones.splice(posicionCorrecta, 0, correcta);
+
+          await client.query('DELETE FROM respuesta WHERE id_reto = $1', [quizReto.id_reto]);
           await client.query(
             `INSERT INTO respuesta (id_reto, contenido, es_correcta)
-             VALUES ($1, $2, TRUE), ($1, $3, FALSE), ($1, $4, FALSE)`,
-            [idReto, pregunta.correcta, pregunta.incorrecta1, pregunta.incorrecta2]
+             VALUES ($1, $2, $5), ($1, $3, $6), ($1, $4, $7)`,
+            [
+              quizReto.id_reto,
+              opciones[0], opciones[1], opciones[2],
+              posicionCorrecta === 0, posicionCorrecta === 1, posicionCorrecta === 2
+            ]
           );
         }
       }

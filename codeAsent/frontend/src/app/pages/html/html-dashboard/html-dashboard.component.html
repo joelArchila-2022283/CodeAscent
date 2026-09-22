@@ -69,15 +69,15 @@
         </button>
       </li>
       <li>
-        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')">
-          <span class="rock-btn__icon"><i class="bi bi-patch-question"></i></span>
-          <span class="rock-btn__text">CUESTIONARIO</span>
-        </button>
-      </li>
-      <li>
         <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'terminal'" (click)="navigateTo('terminal')">
           <span class="rock-btn__icon"><i class="bi bi-terminal-fill"></i></span>
           <span class="rock-btn__text">LABORATORIO</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')">
+          <span class="rock-btn__icon"><i class="bi bi-patch-question"></i></span>
+          <span class="rock-btn__text">CUESTIONARIO</span>
         </button>
       </li>
     </ul>
