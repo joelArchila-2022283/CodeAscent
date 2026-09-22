@@ -1,17 +1,36 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  inject,
+  signal
+} from '@angular/core';
 
-import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
-import { TsDataService } from '../../../services/ts-data.service';
-import { RetoService } from '../../../services/ts-reto.service';
-import { IReto } from '../../../interfaces/reto.interface';
+import { catchError, map, of } from 'rxjs';
 
-interface PreguntaTS {
-  reto: IReto;
-  opciones: string[];
-  correctIndex: number;
+import { environment } from '../../../../environments/environment';
+
+import { IMission } from '../../../core/models/language.model';
+
+import { MissionProgressService } from '../../../core/services/mission-progress.service';
+
+interface TSQuizAnswer {
+  id_respuesta: number;
+  texto_respuesta: string;
+  es_correcta: boolean;
+}
+
+interface TSQuizQuestion {
+  id_reto: number;
+  enunciado: string;
+  xp_recompensa?: number;
+  respuestas: TSQuizAnswer[];
 }
 
 @Component({
@@ -21,253 +40,225 @@ interface PreguntaTS {
   templateUrl: './TS-test.component.html',
   styleUrl: './TS-test.component.scss'
 })
-export class TSTestComponent implements OnInit {
+export class TSTestComponent
+  implements OnChanges {
 
-  @Output() back = new EventEmitter<void>();
+  @Input()
+  mission: IMission | null = null;
 
-  private tsDataService = inject(TsDataService);
-  private retoService = inject(RetoService);
+  @Output()
+  back = new EventEmitter<void>();
 
-  cargando = signal(true);
-  errorCarga = signal<string | null>(null);
+  @Output()
+  next = new EventEmitter<void>();
 
-  preguntas = signal<PreguntaTS[]>([]);
-  preguntaActual = signal(0);
+  @Output()
+  quizCompleted =
+    new EventEmitter<void>();
 
-  selected = signal<number | null>(null);
-  answered = signal(false);
+  private readonly http =
+    inject(HttpClient);
 
-  question = signal('');
-  options = signal<string[]>([]);
-  correctIndex = signal(0);
-  totalPreguntas = signal(0);
-  xpRecompensa = signal(0);
+  private readonly missionProgressService =
+    inject(MissionProgressService);
 
-  private retoActual: IReto | null = null;
+  private readonly apiUrl =
+    environment.apiUrl;
 
-  ngOnInit(): void {
-    this.cargarPreguntas();
+  preguntas =
+    signal<TSQuizQuestion[]>([]);
+
+  preguntaActual =
+    signal(0);
+
+  seleccionada =
+    signal<number | null>(null);
+
+  respondida =
+    signal(false);
+
+  esCorrecta =
+    signal(false);
+
+  cargando =
+    signal(false);
+
+  finalizado =
+    signal(false);
+
+  xpGanado =
+    signal(0);
+
+  errorCarga =
+    signal<string | null>(null);
+
+  ngOnChanges(
+    changes: SimpleChanges
+  ): void {
+
+    if (
+      changes['mission'] &&
+      this.mission?.id_leccion
+    ) {
+
+      this.cargarCuestionario(
+        this.mission.id_leccion
+      );
+    }
   }
 
-  cargarPreguntas(): void {
+  private cargarCuestionario(
+    idLeccion: number
+  ): void {
+
     this.cargando.set(true);
+
     this.errorCarga.set(null);
 
-    this.tsDataService.obtenerTodasLasLecciones().subscribe({
-      next: (grupos) => {
+    this.finalizado.set(false);
 
-        const idsLeccion = grupos
-          .flatMap(grupo => grupo.lecciones)
-          .map(leccion => leccion.id_leccion)
-          .filter((id): id is number => !!id);
+    this.preguntaActual.set(0);
 
-        if (idsLeccion.length === 0) {
-          this.preguntas.set([]);
-          this.totalPreguntas.set(0);
-          this.cargando.set(false);
-          return;
-        }
+    this.seleccionada.set(null);
 
-        this.retoService
-          .obtenerRetosDeLecciones(idsLeccion)
-          .subscribe({
-            next: (retos) => {
+    this.respondida.set(false);
 
-              const cuestionarios = retos.filter(
-                reto => reto.tipo_reto === 'opcion_multiple'
-              );
+    this.esCorrecta.set(false);
 
-              if (cuestionarios.length === 0) {
-                this.preguntas.set([]);
-                this.totalPreguntas.set(0);
-                this.cargando.set(false);
-                return;
-              }
+    this.xpGanado.set(0);
 
-              const peticiones = cuestionarios.map(reto =>
-                this.retoService
-                  .obtenerRespuestasDeReto(reto.id_reto!)
-                  .pipe(
-                    map(respuestas => {
+    this.http
+      .get<{ data: TSQuizQuestion[] }>(
+        `${this.apiUrl}/missions/${idLeccion}/quiz`
+      )
+      .pipe(
 
-                      const correctIndex =
-                        respuestas.findIndex(
-                          respuesta => respuesta.es_correcta
-                        );
+        map(response =>
+          (response?.data ?? []).slice(0, 3)
+        ),
 
-                      return {
-                        reto,
-                        opciones: respuestas.map(
-                          respuesta => respuesta.contenido
-                        ),
-                        correctIndex:
-                          correctIndex >= 0
-                            ? correctIndex
-                            : 0
-                      };
-                    })
-                  )
-              );
+        catchError(error => {
 
-              forkJoin(peticiones).subscribe({
-                next: (preguntas) => {
+          console.error(
+            'Error al cargar el cuestionario TypeScript:',
+            error
+          );
 
-                  this.preguntas.set(preguntas);
-                  this.totalPreguntas.set(preguntas.length);
+          this.errorCarga.set(
+            'No se pudieron cargar los cuestionarios.'
+          );
 
-                  this.mostrarPregunta(0);
+          return of([]);
+        })
+      )
+      .subscribe(preguntas => {
 
-                  this.cargando.set(false);
-                },
+        this.preguntas.set(
+          preguntas.map(pregunta => ({
+            ...pregunta,
 
-                error: (err) => {
-
-                  console.error(
-                    'Error al cargar las respuestas:',
-                    err
-                  );
-
-                  this.errorCarga.set(
-                    'No se pudieron cargar los cuestionarios.'
-                  );
-
-                  this.cargando.set(false);
-                }
-              });
-            },
-
-            error: (err) => {
-
-              console.error(
-                'Error al cargar los cuestionarios:',
-                err
-              );
-
-              this.errorCarga.set(
-                'No se pudieron cargar los cuestionarios.'
-              );
-
-              this.cargando.set(false);
-            }
-          });
-      },
-
-      error: (err) => {
-
-        console.error(
-          'Error al cargar las lecciones:',
-          err
-        );
-
-        this.errorCarga.set(
-          'No se pudieron cargar los cuestionarios.'
+            respuestas: this.barajar(
+              (pregunta.respuestas ?? []).map(respuesta => ({
+                ...respuesta,
+                es_correcta:
+                  respuesta.es_correcta === true ||
+                  String(respuesta.es_correcta).toLowerCase() === 'true'
+              }))
+            )
+          }))
         );
 
         this.cargando.set(false);
-      }
-    });
-  }
-
-  mostrarPregunta(index: number): void {
-
-    const preguntas = this.preguntas();
-
-    if (!preguntas[index]) {
-      return;
-    }
-
-    const pregunta = preguntas[index];
-
-    this.preguntaActual.set(index);
-
-    this.retoActual = pregunta.reto;
-
-    this.question.set(
-      pregunta.reto.descripcion ||
-      pregunta.reto.titulo
-    );
-
-    this.options.set(
-      pregunta.opciones
-    );
-
-    this.correctIndex.set(
-      pregunta.correctIndex
-    );
-
-    this.xpRecompensa.set(
-      pregunta.reto.xp_recompensa ?? 0
-    );
-
-    this.selected.set(null);
-    this.answered.set(false);
-  }
-
-  siguientePregunta(): void {
-
-    if (!this.answered()) {
-      return;
-    }
-
-    const siguiente =
-      this.preguntaActual() + 1;
-
-    if (
-      siguiente >=
-      this.preguntas().length
-    ) {
-      return;
-    }
-
-    this.mostrarPregunta(siguiente);
-  }
-
-  choose(index: number): void {
-
-    /*
-     * Si ya respondió correctamente,
-     * no permitimos volver a seleccionar.
-     */
-    if (
-      this.answered() &&
-      this.selected() === this.correctIndex()
-    ) {
-      return;
-    }
-
-    this.selected.set(index);
-
-    const esCorrecta =
-      index === this.correctIndex();
-
-    /*
-     * answered solamente se activa
-     * cuando la respuesta es correcta.
-     *
-     * Si falla:
-     * - puede volver a intentar
-     * - no puede pasar a la siguiente pregunta
-     */
-    this.answered.set(esCorrecta);
-
-    if (!this.retoActual?.id_reto) {
-      return;
-    }
-
-    this.retoService
-      .registrarIntento({
-        id_reto: this.retoActual.id_reto,
-        respuesta_usuario: this.options()[index] ?? null,
-        correcto: esCorrecta,
-        xp_obtenida: 0
-      })
-      .subscribe({
-        error: (err) => {
-          console.error(
-            'Error al registrar intento:',
-            err
-          );
-        }
       });
+  }
+
+  private barajar<T>(elementos: T[]): T[] {
+    const resultado = [...elementos];
+    for (let indice = resultado.length - 1; indice > 0; indice -= 1) {
+      const aleatorio = Math.floor(Math.random() * (indice + 1));
+      [resultado[indice], resultado[aleatorio]] = [resultado[aleatorio], resultado[indice]];
+    }
+    return resultado;
+  }
+
+  pregunta():
+    TSQuizQuestion | null {
+
+    return (
+      this.preguntas()[
+        this.preguntaActual()
+      ] ?? null
+    );
+  }
+
+  responder(
+    indice: number,
+    correcta: boolean
+  ): void {
+
+    if (
+      this.respondida() ||
+      !this.pregunta()
+    ) {
+      return;
+    }
+
+    this.seleccionada.set(indice);
+
+    this.esCorrecta.set(correcta);
+
+    this.respondida.set(true);
+
+  }
+
+  reintentar(): void {
+
+    this.seleccionada.set(null);
+
+    this.respondida.set(false);
+
+    this.esCorrecta.set(false);
+  }
+
+  siguiente(): void {
+
+    if (
+      !this.respondida() ||
+      !this.esCorrecta()
+    ) {
+      return;
+    }
+
+    if (
+      this.preguntaActual() >=
+      this.preguntas().length - 1
+    ) {
+
+      if (!this.mission?.id_leccion) return;
+
+      this.missionProgressService.completeMission(
+        this.mission.id_leccion,
+        this.preguntas().length,
+        this.preguntas().length
+      ).subscribe({
+        next: response => {
+          this.xpGanado.set(Number(response?.data?.xp_awarded ?? 0));
+          this.finalizado.set(true);
+        },
+        error: error => console.error('Error al completar la misión TypeScript:', error)
+      });
+
+      return;
+    }
+
+    this.preguntaActual.update(
+      indice => indice + 1
+    );
+
+    this.seleccionada.set(null);
+
+    this.respondida.set(false);
+
+    this.esCorrecta.set(false);
   }
 }
