@@ -110,6 +110,8 @@
 
       </li>
 
+      <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'lesson'" (click)="navigateTo('lesson')"><span class="rock-btn__icon"><i class="bi bi-lightbulb"></i></span><span class="rock-btn__text">LECCIÓN</span></button></li>
+
 
       <li>
 
@@ -122,7 +124,7 @@
           </span>
 
           <span class="rock-btn__text">
-            DATA
+            MANUAL
           </span>
 
         </button>
@@ -141,7 +143,7 @@
           </span>
 
           <span class="rock-btn__text">
-            PROCESSES
+            MISIONES
           </span>
 
           <span class="rock-badge">
@@ -183,7 +185,7 @@
           </span>
 
           <span class="rock-btn__text">
-            TEST
+            CUESTIONARIO
           </span>
 
         </button>
@@ -210,6 +212,10 @@
 
     <app-ts-data (back)="navigateTo('dashboard')" />
 
+    }
+
+    @case ('lesson') {
+    <section class="ts-section"><header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN</span><h2>Lección de la misión</h2><p>Comprende el tipo, el dato y el comportamiento que debes comprobar antes de ejecutar TypeScript.</p></header><div class="concept-box"><h3>Orientación</h3><p>Divide el problema en entradas, transformación y salida. Después verifica en la terminal que el tipado protege esa decisión y que el resultado coincide con la misión.</p></div><button class="html-next" (click)="navigateTo('terminal')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></section>
     }
 
 

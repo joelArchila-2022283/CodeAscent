@@ -15,6 +15,7 @@ import { obtenerUrlAvatar } from '../../../utils/avatar.util';
 export type CSSSection =
   | 'dashboard'
   | 'data'
+  | 'lesson'
   | 'processes'
   | 'terminal'
   | 'test';
@@ -93,6 +94,11 @@ export class CssDashboardComponent implements OnInit {
 
   navigateTo(section: CSSSection): void {
     this.activeSection.set(section);
+  }
+
+  terminalCompletado(): void {
+    this.recargarProgreso();
+    this.navigateTo('test');
   }
 
   openPractice(level: number): void {

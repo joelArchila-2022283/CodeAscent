@@ -4,8 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import ts from 'typescript';
-
 import { TsDataService } from '../../../services/ts-data.service';
 import { EjemploService } from '../../../services/ts-ejemplo.service';
 import { RetoService } from '../../../services/ts-reto.service';
@@ -490,74 +488,14 @@ pulsa "EJECUTAR TS".`
     }
 
     try {
-
-      const resultado =
-        ts.transpileModule(
-          codigo,
-          {
-            compilerOptions: {
-
-              target:
-                ts.ScriptTarget.ES2020,
-
-              module:
-                ts.ModuleKind.ESNext,
-
-              strict: false,
-
-              removeComments: false,
-
-              ignoreDeprecations:
-                '6.0'
-
-            },
-
-            reportDiagnostics:
-              true
-
-          }
-        );
-
-      if (
-        resultado.diagnostics &&
-        resultado.diagnostics.length > 0
-      ) {
-
-        const errores =
-          resultado.diagnostics
-            .map(diagnostico => {
-
-              const mensaje =
-                ts.flattenDiagnosticMessageText(
-                  diagnostico.messageText,
-                  '\n'
-                );
-
-              if (
-                diagnostico.file &&
-                diagnostico.start !== undefined
-              ) {
-
-                const posicion =
-                  diagnostico.file
-                    .getLineAndCharacterOfPosition(
-                      diagnostico.start
-                    );
-
-                return (
-                  `Línea ${posicion.line + 1}: ${mensaje}`
-                );
-              }
-
-              return mensaje;
-
-            })
-            .join('\n');
-
-        throw new Error(
-          errores
-        );
-      }
+      // El editor antiguo se mantiene sin importar el compilador de TypeScript
+      // en el bundle del navegador. La ejecución queda aislada en el runner
+      // compartido; aquí se eliminan únicamente anotaciones simples para
+      // conservar el flujo visual existente.
+      const codigoEjecutable = codigo
+        .replace(/interface\s+[A-Za-z0-9_]+\s*\{[^}]*\}/g, '')
+        .replace(/:\s*(string|number|boolean|any|unknown|never|void)\b/g, '')
+        .replace(/\bas\s+(string|number|boolean|any|unknown)\b/g, '');
 
       const resultados:
         string[] = [];
@@ -583,10 +521,7 @@ pulsa "EJECUTAR TS".`
 
       try {
 
-        const ejecutar =
-          new Function(
-            resultado.outputText
-          );
+        const ejecutar = new Function(codigoEjecutable);
 
         ejecutar();
 

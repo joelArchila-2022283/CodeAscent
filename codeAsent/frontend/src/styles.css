@@ -1,15 +1,26 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
-/* --- PUNTEROS RETRO WEBP (TRANSPARENTES) --- */
+:root {
+  --rock-dark: #0c0908;
+  --rock-base: #1c1512;
+  --rock-panel: #261e19;
+  --rock-border: #42342c;
+  --amber-fire: #ff9100;
+  --amber-glow: #ffb700;
+  --cyan-screen: #00e5ff;
+  --purple-disk: #b55afe;
+  --text-html: #e6ded6;
+  --text-dim: #9a8a80;
+}
 
-/* 1. Guante Retro para Navegación General */
+/* ... rest of original file ... */
 html, 
 body {
   cursor: url('assets/images/pointer.png') 0 0, auto !important;
+  background-color: var(--rock-dark);
 }
 
-/* 2. Guante Retro para Botones y Elementos Interactivos */
 button, 
 a, 
 input[type="checkbox"], 
@@ -20,7 +31,6 @@ input[type="checkbox"],
   cursor: url('assets/images/pointer.png') 0 0, pointer !important;
 }
 
-/* 3. Plumilla para Campos de Entrada de Texto */
 input[type="email"],
 input[type="password"],
 input[type="text"] {

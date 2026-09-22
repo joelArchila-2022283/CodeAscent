@@ -1,39 +1,54 @@
 <section class="html-section test-section">
   <header>
-    <span class="section-kicker"><i class="bi bi-cpu-fill"></i> BIOS-TST / CALIBRACIÓN</span>
-    <h2>FASE DE PREDICCIÓN</h2>
-    <p>Demuestra tu comprensión antes de escribir código.</p>
+    <span class="section-kicker"><i class="bi bi-patch-question-fill"></i> CUESTIONARIO HTML</span>
+    <h2>DEMUESTRA LO APRENDIDO</h2>
+    <p>Responde las preguntas de la misión. Cada respuesta correcta otorga su XP una sola vez.</p>
   </header>
-  
-  <div class="test-panel">
-    <div class="html-orb"><i class="bi bi-lightning-charge-fill"></i></div>
-    
-    <h3>{{ retoPrediccion?.descripcion || 'Selecciona una misión primero para cargar el cuestionario.' }}</h3>
-    
-    <div class="options" *ngIf="retoPrediccion?.respuestas">
-      <button *ngFor="let option of retoPrediccion.respuestas; let i = index" 
-              [class.selected]="selected() === i" 
-              [class.correct]="answered() && option.es_correcta && selected() === i" 
-              [class.incorrect]="answered() && !option.es_correcta && selected() === i"
-              (click)="choose(i, option.es_correcta)">
-        <span>{{ ['A','B','C','D'][i] }}</span>
-        {{ option.contenido }}
-        <i *ngIf="answered() && option.es_correcta" class="bi bi-check-circle-fill"></i>
-      </button>
-    </div>
 
-    @if (answered()) { 
-      <p class="answer-note" [class.good]="isCorrect()">
-        <i class="bi" [class.bi-check-circle-fill]="isCorrect()" [class.bi-exclamation-triangle-fill]="!isCorrect()"></i> 
-        {{ isCorrect() ? '¡Excelente predicción! Has comprendido el comportamiento.' : 'Respuesta incorrecta. Analiza la estructura nuevamente.' }}
-      </p> 
-    }
-  </div>
-  
+  @if (cargando()) {
+    <div class="test-panel"><h3>Cargando preguntas...</h3></div>
+  } @else if (!preguntas().length) {
+    <div class="test-panel"><h3>No hay preguntas disponibles para esta misión.</h3></div>
+  } @else if (finalizado()) {
+    <div class="test-panel">
+      <div class="html-orb"><i class="bi bi-trophy-fill"></i></div>
+      <h3>Cuestionario completado</h3>
+      <p class="answer-note good">XP obtenido en este intento: {{ xpGanado() }}</p>
+    </div>
+  } @else {
+    <div class="test-progress">Pregunta {{ preguntaActual() + 1 }} de {{ preguntas().length }}</div>
+    <div class="test-panel">
+      <div class="html-orb"><i class="bi bi-question-lg"></i></div>
+      <h3>{{ pregunta()?.enunciado }}</h3>
+      <div class="options">
+        @for (opcion of pregunta()?.respuestas ?? []; track opcion.id_respuesta; let i = $index) {
+          <button
+            [class.selected]="seleccionada() === i"
+            [class.correct]="respondida() && opcion.es_correcta"
+            [class.incorrect]="respondida() && seleccionada() === i && !opcion.es_correcta"
+            (click)="responder(i, opcion.es_correcta)">
+            <span>{{ ['A', 'B', 'C', 'D'][i] }}</span>
+            {{ opcion.texto_respuesta }}
+            @if (respondida() && opcion.es_correcta) { <i class="bi bi-check-circle-fill"></i> }
+          </button>
+        }
+      </div>
+      @if (respondida()) {
+        <p class="answer-note" [class.good]="esCorrecta()">
+          {{ esCorrecta() ? 'Respuesta correcta. XP registrado.' : 'Respuesta incorrecta. Inténtalo de nuevo.' }}
+        </p>
+      }
+    </div>
+  }
+
   <div class="action-buttons" style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
     <button class="html-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER AL MANUAL</button>
-    <button class="html-next" *ngIf="isCorrect()" (click)="next.emit()" style="padding: 0.7rem 1.2rem; border-radius: 8px; font: 1rem 'Bangers', cursive; cursor: pointer; color: #0c0908; background: #00e676; border: 2px solid #00b359;">
-      IR AL LABORATORIO <i class="bi bi-arrow-right"></i>
-    </button>
+    @if (respondida() && !esCorrecta()) {
+      <button class="html-next" (click)="reintentar()">INTENTAR DE NUEVO</button>
+    } @else if (respondida() && esCorrecta()) {
+      <button class="html-next" (click)="siguiente()">{{ preguntaActual() === preguntas().length - 1 ? 'FINALIZAR' : 'SIGUIENTE' }} <i class="bi bi-arrow-right"></i></button>
+    } @else if (finalizado()) {
+      <button class="html-next" (click)="next.emit()">VOLVER AL DASHBOARD</button>
+    }
   </div>
 </section>

@@ -56,6 +56,12 @@
         </button>
       </li>
       <li>
+        <button type="button" class="rock-btn rock-btn--lesson" [class.rock-btn--active]="seccionActiva() === 'leccion'" (click)="cambiarSeccion('leccion')">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+          <span class="rock-btn__text">LECCIÓN</span>
+        </button>
+      </li>
+      <li>
         <button type="button" class="rock-btn rock-btn--manual" [class.rock-btn--active]="seccionActiva() === 'manual'" (click)="cambiarSeccion('manual')" [attr.aria-current]="seccionActiva() === 'manual' ? 'page' : null">
           <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-journal-code"></i></span>
           <span class="rock-btn__text">MANUAL TÉCNICO</span>
@@ -107,6 +113,9 @@
     }
     @if (seccionActiva() === 'manual') {
       <app-manual-tecnico-sql [nivelActivo]="nivelActivo()"></app-manual-tecnico-sql>
+    }
+    @if (seccionActiva() === 'leccion') {
+      <section class="sql-section"><header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN</span><h2>Lección de la misión</h2><p>Comprende las tablas, relaciones y resultado esperado antes de escribir la consulta.</p></header><div class="concept-box"><h3>Orientación</h3><p>Identifica primero qué datos entran, qué relación debes recorrer y qué resultado debe devolver la consulta. Después comprueba la respuesta en la consola.</p></div><button class="html-next" (click)="cambiarSeccion('consola')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></section>
     }
     @if (seccionActiva() === 'misiones') {
       <app-misiones-sql [niveles]="niveles()" [nivelActivo]="nivelActivo()" (navegarA)="cambiarSeccion($event)"></app-misiones-sql>

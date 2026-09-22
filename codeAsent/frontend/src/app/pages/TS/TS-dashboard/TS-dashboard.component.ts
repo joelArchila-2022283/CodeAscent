@@ -12,7 +12,7 @@ import { obtenerUrlAvatar } from '../../../utils/avatar.util';
 import { IMisionTS } from '../../../interfaces/usuario.interface';
 import { IReto } from '../../../interfaces/reto.interface';
 
-export type TSSection = 'dashboard' | 'data' | 'processes' | 'terminal' | 'test';
+export type TSSection = 'dashboard' | 'data' | 'lesson' | 'processes' | 'terminal' | 'test';
 type MascotState = 'idle' | 'happy' | 'thinking' | 'shocked';
 
 @Component({
@@ -79,6 +79,7 @@ export class TSDashboardComponent implements OnInit {
     const dialogos: Record<TSSection, string> = {
       dashboard: 'Panel TS principal listo.',
       data: 'Los registros TypeScript están listos.',
+      lesson: 'Lee la lección antes de entrar a la consola.',
       processes: 'Procesos TypeScript listos para ejecutar.',
       terminal: 'La consola CRT está lista para ejecutar TypeScript.',
       test: 'La prueba de TypeScript está lista.'
