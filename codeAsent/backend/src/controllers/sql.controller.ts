@@ -21,6 +21,12 @@ export const obtenerNivelesSql = async (req: Request, res: Response): Promise<vo
     `);
 
     await pool.query(`
+      UPDATE lenguaje
+      SET estado = TRUE
+      WHERE LOWER(TRIM(nombre)) = 'sql'
+    `);
+
+    await pool.query(`
       INSERT INTO nivel (id_lenguaje, nombre, numero_nivel, descripcion, xp_requerida, estado)
       SELECT l.id_lenguaje, datos.nombre, datos.numero_nivel, datos.descripcion, datos.xp_requerida, TRUE
       FROM lenguaje l
@@ -43,6 +49,14 @@ export const obtenerNivelesSql = async (req: Request, res: Response): Promise<vo
             AND n.numero_nivel = datos.numero_nivel
         )
     `);
+
+      await pool.query(`
+        UPDATE nivel n
+        SET estado = TRUE
+        FROM lenguaje l
+        WHERE l.id_lenguaje = n.id_lenguaje
+          AND LOWER(TRIM(l.nombre)) = 'sql'
+      `);
 
       await pool.query(`
         INSERT INTO leccion (id_nivel, titulo, contenido, orden, estado)
