@@ -93,6 +93,10 @@ async function runSeed() {
           CONSTRAINT chk_reached_step CHECK (reached_step IN ('manual', 'lesson', 'terminal', 'quiz'))
       );
     `);
+    await client.query(`
+      ALTER TABLE mission_progress
+      ADD COLUMN IF NOT EXISTS terminal_code TEXT;
+    `);
 
     // 3. Tabla usuario_xp
     console.log('3. Creando tabla usuario_xp...');

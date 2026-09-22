@@ -10,7 +10,7 @@ router.get('/:missionId/progress', async (req, res) => {
     const missionId = Number(req.params.missionId);
     const resultado = await pool.query(
         `SELECT user_id, mission_id, reached_step, completed, prediccion_correcta,
-                pistas_usadas, first_try_perfect, updated_at
+                pistas_usadas, first_try_perfect, terminal_code, updated_at
          FROM mission_progress WHERE user_id = $1 AND mission_id = $2`,
         [req.usuario!.id_usuario, missionId]
     );
@@ -58,13 +58,34 @@ router.post('/:missionId/terminal-stats', async (req, res) => {
     const resultado = await pool.query(
         `UPDATE mission_progress
             SET prediccion_correcta = prediccion_correcta OR $3::boolean,
-                pistas_usadas = LEAST(5, GREATEST(pistas_usadas, $4::integer)),
+                pistas_usadas = LEAST(4, GREATEST(pistas_usadas, $4::integer)),
+                terminal_code = COALESCE($5::text, terminal_code),
+                reached_step = CASE
+                    WHEN array_position(ARRAY['manual','lesson','terminal','quiz'], reached_step)
+                       < array_position(ARRAY['manual','lesson','terminal','quiz'], 'terminal')
+                    THEN 'terminal' ELSE reached_step END,
                 updated_at = CURRENT_TIMESTAMP
           WHERE user_id = $1 AND mission_id = $2 AND completed = FALSE
           RETURNING *`,
-        [req.usuario!.id_usuario, Number(req.params.missionId), Boolean(req.body.prediccion_correcta), Number(req.body.pistas_usadas ?? 0)]
+        [req.usuario!.id_usuario, Number(req.params.missionId), Boolean(req.body.prediccion_correcta), Number(req.body.pistas_usadas ?? 0), req.body.codigo ?? null]
     );
     if (!resultado.rows[0]) return res.status(404).json({ status: 'error', message: 'Progreso no encontrado o misión completada.' });
+    res.json({ status: 'success', data: resultado.rows[0] });
+});
+
+router.post('/:missionId/terminal-draft', async (req, res) => {
+    const missionId = Number(req.params.missionId);
+    const resultado = await pool.query(
+        `INSERT INTO mission_progress (user_id, mission_id, terminal_code)
+         SELECT $1, $2, $3
+         WHERE EXISTS (SELECT 1 FROM leccion WHERE id_leccion = $2)
+         ON CONFLICT (user_id, mission_id) DO UPDATE
+           SET terminal_code = EXCLUDED.terminal_code,
+               updated_at = CURRENT_TIMESTAMP
+         RETURNING *`,
+        [req.usuario!.id_usuario, missionId, String(req.body.codigo ?? '')]
+    );
+    if (!resultado.rows[0]) return res.status(404).json({ status: 'error', message: 'Misión no encontrada.' });
     res.json({ status: 'success', data: resultado.rows[0] });
 });
 

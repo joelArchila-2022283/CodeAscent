@@ -72,8 +72,17 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
               WHERE anterior.id_lenguaje = l.id_lenguaje
                 AND anterior.numero_nivel <= nivel.numero_nivel
             ) <= COALESCE(uxp.xp, 0)
-        ), 1)::int AS nivel_actual,
-        LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2))::float AS porcentaje,
+         ), 1)::int AS nivel_actual,
+         COALESCE((
+           SELECT MIN(acumulado)
+           FROM (
+             SELECT SUM(siguiente.xp_requerida) OVER (ORDER BY siguiente.numero_nivel) AS acumulado
+             FROM nivel siguiente
+             WHERE siguiente.id_lenguaje = l.id_lenguaje AND siguiente.estado = TRUE
+           ) umbrales
+           WHERE acumulado > COALESCE(uxp.xp, 0)
+         ), 0)::int AS xp_siguiente_nivel,
+         LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2))::float AS porcentaje,
         COUNT(DISTINCT n.id_nivel)::int AS total_niveles
       FROM lenguaje l
       LEFT JOIN usuario_xp uxp
