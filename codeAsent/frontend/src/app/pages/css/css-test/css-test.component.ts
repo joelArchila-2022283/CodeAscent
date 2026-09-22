@@ -1,14 +1,17 @@
 import {
   Component,
   EventEmitter,
-  Output,
+  Input,
+  OnChanges,
   OnInit,
+  Output,
+  SimpleChanges,
   inject,
   signal
 } from '@angular/core';
 
-import { CssDataService } from '../../../services/css-data.service';
-import { NivelCss, RetoCss } from '../../../interfaces/css.interface';
+import { CssDataService, CssMision, CssQuizQuestion } from '../../../services/css-data.service';
+import { RetoService } from '../../../services/ts-reto.service';
 
 @Component({
   selector: 'app-css-test',
@@ -16,79 +19,110 @@ import { NivelCss, RetoCss } from '../../../interfaces/css.interface';
   templateUrl: './css-test.component.html',
   styleUrl: './css-test.component.scss'
 })
-export class CssTestComponent implements OnInit {
+export class CssTestComponent implements OnInit, OnChanges {
 
+  @Input() mission: CssMision | null = null;
   @Output() back = new EventEmitter<void>();
+  @Output() completed = new EventEmitter<void>();
 
   private cssData = inject(CssDataService);
+  private retoService = inject(RetoService);
 
-  levels: NivelCss[] = [];
-
+  preguntas = signal<CssQuizQuestion[]>([]);
   index = signal(0);
   selected = signal<number | null>(null);
   score = signal(0);
   finished = signal(false);
+  xpGanado = signal(0);
 
   loading = signal(true);
   error = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.cssData.obtenerNivelesPedagogicos().subscribe({
-      next: (niveles: NivelCss[]) => {
-        console.log('TEST - Niveles recibidos:', niveles);
+    this.cargarCuestionario();
+  }
 
-        this.levels = (niveles ?? []).filter(
-          (nivel) => this.quiz(nivel) !== null
-        );
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mission'] && !changes['mission'].firstChange) {
+      this.cargarCuestionario();
+    }
+  }
 
-        this.loading.set(false);
+  private cargarCuestionario(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.finished.set(false);
+    this.score.set(0);
+    this.index.set(0);
+    this.selected.set(null);
+    this.xpGanado.set(0);
 
-        if (this.levels.length === 0) {
-          this.error.set(
-            'No se encontraron cuestionarios CSS en los niveles recibidos.'
-          );
+    const idLeccion = this.mission?.leccion?.id_leccion;
+
+        if (!idLeccion) {
+          this.preguntas.set([]);
+          this.loading.set(false);
+          this.error.set('No se encontró una lección asociada a este nivel CSS.');
+          return;
         }
-      },
-      error: (err) => {
-        console.error('TEST - Error al cargar cuestionarios:', err);
-        this.loading.set(false);
-        this.error.set(
-          'No se pudieron cargar los cuestionarios CSS.'
-        );
-      }
-    });
+
+        this.cssData.obtenerCuestionario(idLeccion).subscribe({
+          next: (preguntas) => {
+            this.preguntas.set((preguntas ?? []).slice(0, 3));
+            this.loading.set(false);
+            if (this.preguntas().length === 0) {
+              this.error.set('No hay preguntas disponibles para esta misión CSS.');
+            }
+          },
+          error: () => {
+            this.loading.set(false);
+            this.error.set('No se pudieron cargar las preguntas del cuestionario CSS.');
+          }
+        });
   }
 
-  current(): NivelCss | null {
-    return this.levels[this.index()] ?? null;
-  }
-
-  quiz(level: NivelCss | null = this.current()): RetoCss | null {
-    return level?.retos?.find(
-      (reto) => reto.tipo_reto === 'opcion_multiple'
-    ) ?? null;
+  pregunta(): CssQuizQuestion | null {
+    return this.preguntas()[this.index()] ?? null;
   }
 
   answer(i: number): void {
-    const pregunta = this.quiz();
+    const pregunta = this.pregunta();
 
-    if (!pregunta || this.selected() !== null) {
+    if (!pregunta || (this.selected() !== null && pregunta.respuestas[this.selected()!]?.es_correcta)) {
       return;
     }
 
+    const respuesta = pregunta.respuestas[i];
     this.selected.set(i);
 
-    if (pregunta.respuestas?.[i]?.es_correcta) {
+    if (respuesta?.es_correcta) {
       this.score.update((puntos) => puntos + 1);
     }
+
+    this.retoService.registrarIntentoConXp({
+      id_reto: pregunta.id_reto,
+      respuesta_usuario: respuesta?.texto_respuesta ?? null,
+      correcto: Boolean(respuesta?.es_correcta)
+    }).subscribe((xp) => {
+      this.xpGanado.update((valor) => valor + xp);
+    });
   }
 
   next(): void {
-    if (this.index() < this.levels.length - 1) {
+    if (!this.pregunta() || !this.pregunta()!.respuestas[this.selected()!]?.es_correcta) return;
+    if (this.index() < this.preguntas().length - 1) {
       this.index.update((i) => i + 1);
       this.selected.set(null);
     } else {
-      this.finished.set(true);
+      const idLeccion = this.mission?.leccion?.id_leccion;
+      if (idLeccion) {
+        this.cssData.completarCuestionario(idLeccion).subscribe({
+          next: () => { this.finished.set(true); this.completed.emit(); },
+          error: () => this.finished.set(true)
+        });
+      } else {
+        this.finished.set(true);
+      }
     }
   }
 
@@ -97,5 +131,7 @@ export class CssTestComponent implements OnInit {
     this.selected.set(null);
     this.score.set(0);
     this.finished.set(false);
+    this.xpGanado.set(0);
+    this.cargarCuestionario();
   }
 }

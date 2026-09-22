@@ -9,7 +9,7 @@ import { CssTerminalComponent } from '../css-terminal/css-terminal.component';
 import { CssTestComponent } from '../css-test/css-test.component';
 
 import { DashboardService } from '../../../services/dashboard.service';
-import { CssDataService } from '../../../services/css-data.service';
+import { CssDataService, CssMision } from '../../../services/css-data.service';
 import { obtenerUrlAvatar } from '../../../utils/avatar.util';
 
 export type CSSSection =
@@ -41,7 +41,7 @@ export class CssDashboardComponent implements OnInit {
   private readonly cssDataService = inject(CssDataService);
 
   activeSection = signal<CSSSection>('dashboard');
-  selectedPedagogyLevel = signal(1);
+  selectedMission = signal<CssMision | null>(null);
 
   player = {
     name: '',
@@ -97,13 +97,16 @@ export class CssDashboardComponent implements OnInit {
   }
 
   terminalCompletado(): void {
-    this.recargarProgreso();
     this.navigateTo('test');
   }
 
-  openPractice(level: number): void {
-    this.selectedPedagogyLevel.set(level);
-    this.activeSection.set('terminal');
+  cuestionarioCompletado(): void {
+    this.recargarProgreso();
+  }
+
+  seleccionarMision(mision: CssMision): void {
+    this.selectedMission.set(mision);
+    this.navigateTo('data');
   }
 
   obtenerUrlAvatar(nombre: string | undefined): string {

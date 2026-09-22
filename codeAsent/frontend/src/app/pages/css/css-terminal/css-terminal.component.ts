@@ -11,7 +11,7 @@ import {
   signal
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CssDataService } from '../../../services/css-data.service';
+import { CssDataService, CssHint, CssMision } from '../../../services/css-data.service';
 import { NivelCss, RetoCss } from '../../../interfaces/css.interface';
 
 @Component({
@@ -22,9 +22,9 @@ import { NivelCss, RetoCss } from '../../../interfaces/css.interface';
   styleUrl: './css-terminal.component.scss'
 })
 export class CssTerminalComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() selectedLevel = 1;
+  @Input() mission: CssMision | null = null;
   @Output() back = new EventEmitter<void>();
-  @Output() progressUpdated = new EventEmitter<void>();
+  @Output() continueToQuiz = new EventEmitter<void>();
 
   private cssData = inject(CssDataService);
 
@@ -37,15 +37,36 @@ export class CssTerminalComponent implements OnInit, OnChanges, OnDestroy {
   error = signal<string | null>(null);
   consoleText = signal('> Cargando misiones CSS desde PostgreSQL...');
   code = '';
+  hints = signal<CssHint[]>([]);
+  visibleHints = signal(0);
 
   ngOnInit(): void {
-    this.cargarNiveles();
+    this.loading.set(false);
+    this.loadMission();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedLevel'] && !changes['selectedLevel'].firstChange && this.levels.length > 0) {
-      this.load(this.selectedLevel);
+    if (changes['mission']) this.loadMission();
+  }
+
+  private loadMission(): void {
+    if (this.mission) {
+      this.levels = [this.mission.nivel];
+      this.taskIndex.set(0);
+      this.code = '';
+      this.success.set(null);
+      this.hints.set([]);
+      this.visibleHints.set(0);
+      this.consoleText.set(`> Nivel ${this.mission.nivel.numero_nivel}: ${this.mission.nivel.nombre}\n> Misión CSS preparada.`);
+      if (this.mission.leccion?.id_leccion) {
+        this.cssData.obtenerPistas(this.mission.leccion.id_leccion).subscribe(hints => this.hints.set(hints));
+      }
     }
+  }
+
+  mostrarPista(): void {
+    this.visibleHints.update(valor => Math.min(valor + 1, this.hints().length));
+    this.consoleText.set(`> Pista ${this.visibleHints()} consultada. Revisa el objetivo sin copiar la solución.`);
   }
 
   ngOnDestroy(): void {
@@ -67,10 +88,10 @@ export class CssTerminalComponent implements OnInit, OnChanges, OnDestroy {
           return;
         }
 
-        this.load(this.selectedLevel);
+        this.load(this.levels[0]?.numero_nivel ?? 1);
         this.consoleText.set(
           `> ${this.levels.length} niveles CSS cargados desde PostgreSQL.\n` +
-          `> Misión ${this.selectedLevel} preparada.`
+          `> Misión CSS preparada.`
         );
       },
       error: (error) => {
@@ -158,13 +179,11 @@ export class CssTerminalComponent implements OnInit, OnChanges, OnDestroy {
           );
         } else {
           this.consoleText.set(
-            '> MISIÓN COMPLETADA.\n' +
-            `> +${resultado.xp_obtenida} XP guardados en PostgreSQL.\n` +
-            '> Siguiente nivel desbloqueado.'
+            '> MISIÓN CSS VALIDADA.\n' +
+            '> La terminal no otorga XP. Continúa con el cuestionario.'
           );
         }
 
-        this.progressUpdated.emit();
       },
       error: error => {
         console.error('Error registrando intento CSS:', error);
@@ -173,6 +192,10 @@ export class CssTerminalComponent implements OnInit, OnChanges, OnDestroy {
         this.consoleText.set('> ERROR: No se pudo guardar el intento en PostgreSQL.');
       }
     });
+  }
+
+  irAlCuestionario(): void {
+    if (this.success()) this.continueToQuiz.emit();
   }
 
   reset(): void {

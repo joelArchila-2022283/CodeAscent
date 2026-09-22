@@ -1,17 +1,31 @@
-import { Component, EventEmitter, Output, OnInit, signal, inject } from '@angular/core';
-import { CssDataService } from '../../../services/css-data.service';
-import { NivelCss } from '../../../interfaces/css.interface';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, signal, inject } from '@angular/core';
+import { CssDataService, CssMision } from '../../../services/css-data.service';
 
 @Component({ selector:'app-css-data', standalone:true, templateUrl:'./css-data.component.html', styleUrl:'./css-data.component.scss' })
-export class CssDataComponent implements OnInit {
+export class CssDataComponent implements OnInit, OnChanges {
+  @Input() mission: CssMision | null = null;
   @Output() back = new EventEmitter<void>();
-  @Output() practice = new EventEmitter<number>();
+  @Output() next = new EventEmitter<void>();
+
   private cssData = inject(CssDataService);
-  levels: NivelCss[] = [];
-  activeLevel = signal(1);
   loading = signal(true);
   error = signal('');
-  ngOnInit(): void { this.cssData.obtenerNivelesPedagogicos().subscribe({ next: levels => { this.levels=levels; if(levels.length) this.activeLevel.set(levels[0].numero_nivel); this.loading.set(false); }, error: () => { this.error.set('No se pudieron cargar los niveles CSS desde la base de datos.'); this.loading.set(false); } }); }
-  select(id:number){ this.activeLevel.set(id); }
-  current(): NivelCss | null { return this.levels.find((l: NivelCss)=>l.numero_nivel===this.activeLevel()) ?? this.levels[0] ?? null; }
+
+  ngOnInit(): void {
+    if (this.mission) {
+        this.loading.set(false);
+        return;
+    }
+    this.cssData.obtenerMisionesCss().subscribe({
+      next: () => this.loading.set(false),
+      error: () => {
+        this.error.set('No se pudieron cargar los niveles CSS desde la base de datos.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mission']) this.loading.set(!this.mission);
+  }
 }

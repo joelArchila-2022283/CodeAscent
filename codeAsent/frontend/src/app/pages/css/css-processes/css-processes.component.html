@@ -17,9 +17,8 @@
   </h2>
 
   <p class="lead">
-    Las misiones se cargan desde PostgreSQL.
+    Cada misión conserva su lección, reto CSS y cuestionario hasta el final del recorrido.
   </p>
-
 
   @if (loading()) {
 
@@ -36,6 +35,7 @@
   } @else {
 
     @for (level of levels; track level.id_nivel) {
+      @let mision = misionPorNivel(level);
 
       <article class="mission">
 
@@ -46,7 +46,6 @@
               : level.numero_nivel
           }}
         </div>
-
 
         <div class="mission-info">
 
@@ -77,15 +76,23 @@
             XP
           </small>
 
+          @if (!mision?.desbloqueada) {
+            <small class="state-message">Bloqueada: completa la misión anterior.</small>
+          } @else if (mision?.completada) {
+            <small class="state-message">Completada.</small>
+          }
+
         </div>
 
-
-        <button
-          type="button"
-          (click)="iniciarMision(level)"
-        >
-          INICIAR MISIÓN
-        </button>
+         <button
+           type="button"
+           class="mission-action"
+           [disabled]="!mision?.desbloqueada || !mision?.reto"
+           (click)="iniciarMision(level)"
+         >
+           @if (!mision?.desbloqueada) { <i class="bi bi-lock-fill" aria-hidden="true"></i> BLOQUEADA }
+           @else { {{ mision?.completada ? 'REVISAR' : 'INICIAR MISIÓN' }} }
+         </button>
 
       </article>
 
