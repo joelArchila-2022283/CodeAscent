@@ -9,6 +9,7 @@ import { HtmlTerminalComponent } from '../html-terminal/html-terminal.component'
 import { HtmlTestComponent } from '../html-test/html-test.component';
 import { HtmlDashboardSectionComponent } from './html-dashboard-section.component';
 import { IReto } from '../../../interfaces/reto.interface';
+import { MissionProgressService } from '../../../core/services/mission-progress.service';
 
 export type HTMLSection = 'dashboard' | 'data' | 'lesson' | 'processes' | 'terminal' | 'test';
 
@@ -21,13 +22,14 @@ export type HTMLSection = 'dashboard' | 'data' | 'lesson' | 'processes' | 'termi
 })
 export class HtmlDashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
+  private readonly missionProgressService = inject(MissionProgressService);
 
   activeSection = signal<HTMLSection>('dashboard');
   player = {
     name: '',
     level: 1,
     currentXp: 0,
-    nextLevelXp: 500,
+    nextLevelXp: 100,
     energyWatts: 86
   };
 
@@ -37,6 +39,7 @@ export class HtmlDashboardComponent implements OnInit {
   
   retoSeleccionado = signal<IReto | null>(null);
   leccionActual = signal<string>('');
+  terminalLista = signal(false);
 
   ngOnInit(): void {
     this.dashboardService.obtenerDatosDashboard().subscribe({
@@ -44,10 +47,10 @@ export class HtmlDashboardComponent implements OnInit {
         if (data?.usuario?.nombre) {
           this.player.name = data.usuario.nombre;
         }
-        const progreso = data?.progreso;
-        this.player.currentXp = Math.max(0, Number(progreso?.xp_actual ?? 0));
-        this.player.level = Math.max(1, Number(progreso?.id_nivel_actual ?? 1));
-        this.player.nextLevelXp = Math.max(1, Number(data?.progreso?.id_nivel_actual ? 500 : 50));
+        const perfilHtml = data?.perfil?.lenguajes?.find(lenguaje => lenguaje.nombre?.toLowerCase() === 'html');
+        this.player.currentXp = Math.max(0, Number(perfilHtml?.xp_actual ?? data?.progreso?.xp_actual ?? 0));
+        this.player.level = Math.max(1, Number(perfilHtml?.nivel_actual ?? 1));
+        this.player.nextLevelXp = Math.max(1, Number(perfilHtml?.xp_siguiente_nivel ?? this.player.currentXp + 100));
         this.jugadorCargando.set(false);
       },
       error: err => {
@@ -79,15 +82,30 @@ export class HtmlDashboardComponent implements OnInit {
   seleccionarReto(reto: any): void {
     this.retoSeleccionado.set(reto);
     this.leccionActual.set(reto.leccionContenido || ''); 
+    this.terminalLista.set(false);
     this.navigateTo('data');
   }
 
-  terminalCompletado(): void {
-    this.navigateTo('test');
+  terminalCompletado(xp: number): void {
+    this.terminalLista.set(true);
+    this.sumarExperiencia(xp);
+  }
+
+  irAlCuestionario(): void {
+    const idLeccion = this.retoSeleccionado()?.id_leccion;
+    if (!idLeccion || !this.terminalLista()) return;
+    this.missionProgressService.updateProgress(idLeccion, 'quiz').subscribe({
+      next: () => this.navigateTo('test'),
+      error: error => console.error('No se pudo desbloquear el cuestionario:', error)
+    });
   }
 
   sumarExperiencia(xp: number): void {
     this.player.currentXp = Math.max(0, this.player.currentXp + Math.max(0, Number(xp) || 0));
+    while (this.player.currentXp >= this.player.nextLevelXp) {
+      this.player.level += 1;
+      this.player.nextLevelXp += this.player.level * 100;
+    }
   }
 
   obtenerPorcentajeXp(): number {

@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RetoService } from '../../../services/ts-reto.service';
+import { switchMap } from 'rxjs';
+import { MissionProgressService } from '../../../core/services/mission-progress.service';
 import { IReto } from '../../../interfaces/reto.interface';
 
 interface ReglaHtml {
@@ -22,20 +23,21 @@ interface RequisitoHtml {
 }
 
 @Component({ selector: 'app-html-terminal', standalone: true, imports: [FormsModule], templateUrl: './html-terminal.component.html', styleUrl: './html-terminal.component.scss' })
-export class HtmlTerminalComponent implements OnChanges {
+export class HtmlTerminalComponent implements OnChanges, OnDestroy {
   @Input() retoSeleccionado: IReto | null = null;
   @Output() back = new EventEmitter<void>();
   @Output() missionCompleted = new EventEmitter<number>();
-  private readonly retoService = inject(RetoService);
+  private readonly missionProgressService = inject(MissionProgressService);
 
   code = signal('<!DOCTYPE html>\n<html>\n<head><title>Mi página</title></head>\n<body><h1>Hola, HTML</h1><p>Mi primera expedición web.</p></body>\n</html>');
   saved = signal(false);
   resultado = signal<string | null>(null);
   ejecucionExitosa = signal(false);
   pistasSolicitadas = signal(0);
-  estrellasRestantes = signal(3);
+  estrellasRestantes = signal(4);
   diagnostico = signal<DiagnosticoHtml[]>([]);
   cargando = signal(false);
+  private guardadoPendiente: ReturnType<typeof setTimeout> | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['retoSeleccionado'] || !this.retoSeleccionado) return;
@@ -44,9 +46,17 @@ export class HtmlTerminalComponent implements OnChanges {
     this.resultado.set(null);
     this.ejecucionExitosa.set(false);
     this.pistasSolicitadas.set(0);
-    this.estrellasRestantes.set(3);
+    this.estrellasRestantes.set(4);
     this.diagnostico.set([]);
     this.cargando.set(false);
+    this.missionProgressService.getProgress(this.retoSeleccionado.id_leccion).subscribe(progreso => {
+      if (progreso.data.terminal_code) this.code.set(progreso.data.terminal_code);
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.guardadoPendiente) clearTimeout(this.guardadoPendiente);
+    this.guardarBorrador();
   }
 
   solicitarPista(): void {
@@ -91,14 +101,17 @@ export class HtmlTerminalComponent implements OnChanges {
     this.diagnostico.set(valido ? [] : this.obtenerDiagnostico(this.code()));
 
     if (valido && this.retoSeleccionado?.id_reto) {
-      this.retoService.registrarIntento({
-        id_reto: this.retoSeleccionado.id_reto,
-        respuesta_usuario: this.code(),
-        correcto: true,
-        xp_obtenida: 0
-      }).subscribe({
-        next: registrado => {
-          if (registrado) this.missionCompleted.emit(this.retoSeleccionado?.xp_recompensa ?? 0);
+      this.missionProgressService.updateProgress(this.retoSeleccionado.id_leccion, 'lesson').pipe(
+        switchMap(() => this.missionProgressService.updateProgress(this.retoSeleccionado!.id_leccion, 'terminal')),
+        switchMap(() => this.missionProgressService.updateTerminalStats(this.retoSeleccionado!.id_leccion, {
+              prediccion_correcta: true,
+              pistas_usadas: this.pistasSolicitadas(),
+              codigo: this.code()
+            })),
+        switchMap(() => this.missionProgressService.completeMission(this.retoSeleccionado!.id_leccion, 1, 1, 'terminal'))
+      ).subscribe({
+        next: respuesta => {
+          this.missionCompleted.emit(Number(respuesta?.data?.xp_awarded ?? 0));
           this.cargando.set(false);
         },
         error: () => this.cargando.set(false)
@@ -112,6 +125,13 @@ export class HtmlTerminalComponent implements OnChanges {
     this.code.set(codigo);
     this.diagnostico.set([]);
     this.ejecucionExitosa.set(false);
+    if (this.guardadoPendiente) clearTimeout(this.guardadoPendiente);
+    this.guardadoPendiente = setTimeout(() => this.guardarBorrador(), 400);
+  }
+
+  private guardarBorrador(): void {
+    if (!this.retoSeleccionado?.id_leccion) return;
+    this.missionProgressService.saveTerminalDraft(this.retoSeleccionado.id_leccion, this.code()).subscribe();
   }
 
   obtenerRequisitos(): RequisitoHtml[] {

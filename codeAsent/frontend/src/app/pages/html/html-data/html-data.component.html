@@ -15,27 +15,41 @@
       <div class="concept-box">
         <h3 class="box-subtitle"><i class="bi bi-gear-fill"></i> Nivel Lógico</h3>
         <p>{{ manual().logico }}</p>
+        <div class="level-note level-note--logic"><strong>Lectura del explorador</strong><span>Piensa en el contenido como un árbol: cada elemento debe tener una función y una relación clara con su contenedor.</span></div>
       </div>
 
       <div class="concept-box">
         <h3 class="box-subtitle"><i class="bi bi-code-slash"></i> Nivel Sintáctico</h3>
         <pre><code>{{ manual().sintactico }}</code></pre>
+        <div class="level-note level-note--syntax"><strong>Regla del terminal</strong><span>Abre y cierra las etiquetas, respeta la jerarquía y añade atributos solo cuando describan una necesidad real.</span></div>
       </div>
     </div>
 
     <div class="manual-graphic">
-      <div class="graphic-placeholder">
-        <i class="bi bi-diagram-3"></i>
-        <span>Representación Estructural</span>
-        <div class="wireframe-box">
-          <div class="w-head"></div>
-          <div class="w-body">
-            <div class="w-element"></div>
-            <div class="w-element short"></div>
+      <div class="graphic-guide">
+        <div class="graphic-guide__title"><i class="bi bi-diagram-3"></i><span>MAPA DE CONSTRUCCIÓN HTML</span></div>
+        <p class="graphic-guide__intro">HTML organiza el significado de una página antes de decidir su apariencia. Sigue las ramas para saber dónde colocar cada idea.</p>
+        <div class="html-tree" aria-label="Estructura visual de un documento HTML">
+          <div class="tree-node tree-node--root"><code>&lt;html&gt;</code><span>documento completo</span></div>
+          <div class="tree-branch">
+            <div class="tree-node tree-node--head"><code>&lt;head&gt;</code><span>metadatos y título</span></div>
+            <div class="tree-node tree-node--body"><code>&lt;body&gt;</code><span>contenido visible</span></div>
+          </div>
+          <div class="tree-branch tree-branch--content">
+            <div class="tree-node"><code>&lt;h1&gt;</code><span>jerarquía</span></div>
+            <div class="tree-node"><code>&lt;p&gt;</code><span>información</span></div>
+            <div class="tree-node"><code>&lt;a&gt;</code><span>acción</span></div>
           </div>
         </div>
+        <div class="graphic-legend"><span><b>1</b> estructura</span><span><b>2</b> intención</span><span><b>3</b> sintaxis</span></div>
+        <div class="map-callout"><i class="bi bi-lightning-charge-fill"></i><span>En la terminal no copies el mapa: úsalo para justificar por qué cada etiqueta pertenece a ese lugar.</span></div>
       </div>
     </div>
+  </div>
+
+  <div class="manual-method">
+    <div class="concept-box method-card"><h3 class="box-subtitle"><i class="bi bi-signpost-split-fill"></i> Ruta de aprendizaje</h3><ol><li>Observa qué necesita comunicar la página.</li><li>Elige el elemento HTML que representa esa intención.</li><li>Escribe la etiqueta y sus atributos con orden.</li><li>Comprueba el resultado en la terminal.</li></ol></div>
+    <div class="concept-box method-card"><h3 class="box-subtitle"><i class="bi bi-search"></i> Antes de continuar</h3><p>Una solución correcta no es la que solo se ve bien: es la que tiene una estructura comprensible, etiquetas adecuadas y cumple todos los requisitos de la misión.</p></div>
   </div>
 
   <div class="action-buttons">

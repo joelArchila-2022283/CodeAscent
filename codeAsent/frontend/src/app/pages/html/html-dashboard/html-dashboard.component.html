@@ -23,14 +23,14 @@
       <div class="hud-stats-box">
         <div class="hud-name-row">
           <span class="hud-name">{{ jugadorCargando() ? 'CARGANDO...' : player.name }}</span>
-          <span class="hud-rank">RANGO LVL {{ player.level }}</span>
+          <span class="hud-rank">RANGO LVL {{ player.level }} <i class="bi bi-chevron-up"></i></span>
         </div>
         <div class="hud-xp-rail">
           <div class="hud-xp-fill" [style.width.%]="obtenerPorcentajeXp()"></div>
         </div>
         <div class="hud-meta-row">
           <span>{{ player.currentXp }}/{{ player.nextLevelXp }} XP</span>
-          <span class="hud-watts">⚡ {{ player.energyWatts }}W</span>
+          <span class="hud-next-level">SIGUIENTE NIVEL: {{ player.nextLevelXp - player.currentXp }} XP</span>
         </div>
       </div>
 
@@ -92,17 +92,26 @@
         <app-html-data [leccionRaw]="leccionActual()" (back)="navigateTo('processes')" (next)="navigateTo('lesson')" />
       }
       @case ('lesson') {
-        <section class="html-section data-section">
-          <header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN DE MISIÓN</span><h2>{{ retoSeleccionado()?.titulo || 'Selecciona una misión' }}</h2><p>Relaciona la explicación del manual con el resultado que debes conseguir.</p></header>
-          <div class="manual-content"><div class="concept-box"><h3 class="box-subtitle">¿Qué debes observar?</h3><p>{{ leccionActual() || 'La lección se carga junto con la misión seleccionada. Identifica la estructura, el propósito y la sintaxis antes de programar.' }}</p></div></div>
-          <div class="action-buttons"><button class="html-back" (click)="navigateTo('data')">VOLVER AL MANUAL</button><button class="html-next" (click)="navigateTo('terminal')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></div>
+        <section class="html-section data-section lesson-view">
+          <header class="lesson-view__header"><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN DE MISIÓN</span><h2>{{ retoSeleccionado()?.titulo || 'Selecciona una misión' }}</h2><p>Relaciona la explicación del manual con el resultado que debes conseguir.</p></header>
+          <div class="manual-content lesson-view__content">
+            <div class="concept-box"><h3 class="box-subtitle"><i class="bi bi-bullseye"></i> Objetivo</h3><p>{{ leccionActual() || 'Comprende qué problema resuelve la misión y qué resultado debe producir tu documento HTML.' }}</p></div>
+            <div class="concept-box"><h3 class="box-subtitle"><i class="bi bi-eye-fill"></i> Observa antes de escribir</h3><p>Separa la intención del código: primero decide qué contenido necesita la página, después elige la etiqueta que lo describe y finalmente revisa sus atributos.</p></div>
+            <div class="lesson-checklist"><span><i class="bi bi-check2-circle"></i> ¿Qué elemento representa la idea?</span><span><i class="bi bi-check2-circle"></i> ¿La estructura tiene un orden lógico?</span><span><i class="bi bi-check2-circle"></i> ¿Puedes comprobarlo en la terminal?</span></div>
+          </div>
+          <div class="action-buttons lesson-view__actions"><button class="html-back" (click)="navigateTo('data')"><i class="bi bi-arrow-left"></i> VOLVER AL MANUAL</button><button class="html-next" (click)="navigateTo('terminal')">ABRIR TERMINAL <i class="bi bi-terminal-fill"></i></button></div>
         </section>
       }
       @case ('processes') {
         <app-html-processes (missionSelected)="seleccionarReto($event)" (back)="navigateTo('dashboard')" />
       }
       @case ('terminal') {
-        <app-html-terminal [retoSeleccionado]="retoSeleccionado()" (missionCompleted)="terminalCompletado()" (back)="navigateTo('dashboard')" />
+        <app-html-terminal [retoSeleccionado]="retoSeleccionado()" (missionCompleted)="terminalCompletado($event)" (back)="navigateTo('dashboard')" />
+        @if (terminalLista()) {
+          <div class="action-buttons">
+            <button class="html-next" (click)="irAlCuestionario()">IR AL CUESTIONARIO <i class="bi bi-arrow-right"></i></button>
+          </div>
+        }
       }
       @case ('test') {
         <app-html-test [retoPrediccion]="retoSeleccionado()" (back)="navigateTo('data')" (next)="navigateTo('dashboard')" (xpAwarded)="sumarExperiencia($event)" />
