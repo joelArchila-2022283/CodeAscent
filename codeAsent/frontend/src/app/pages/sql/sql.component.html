@@ -56,9 +56,10 @@
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn rock-btn--lesson" [class.rock-btn--active]="seccionActiva() === 'leccion'" (click)="cambiarSeccion('leccion')">
-          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
-          <span class="rock-btn__text">LECCIÓN</span>
+        <button type="button" class="rock-btn rock-btn--missions" [class.rock-btn--active]="seccionActiva() === 'misiones'" (click)="cambiarSeccion('misiones')" [attr.aria-current]="seccionActiva() === 'misiones' ? 'page' : null">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-bullseye"></i></span>
+          <span class="rock-btn__text">MISIONES</span>
+          <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
@@ -69,10 +70,9 @@
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn rock-btn--missions" [class.rock-btn--active]="seccionActiva() === 'misiones'" (click)="cambiarSeccion('misiones')" [attr.aria-current]="seccionActiva() === 'misiones' ? 'page' : null">
-          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-bullseye"></i></span>
-          <span class="rock-btn__text">MISIONES</span>
-          <span class="rock-btn__pulse" aria-hidden="true"></span>
+        <button type="button" class="rock-btn rock-btn--lesson" [class.rock-btn--active]="seccionActiva() === 'leccion'" (click)="cambiarSeccion('leccion')">
+          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+          <span class="rock-btn__text">LECCIÓN</span>
         </button>
       </li>
       <li>
@@ -124,7 +124,7 @@
       <app-consola-sql [nivelActivo]="nivelActivo()"></app-consola-sql>
     }
     @if (seccionActiva() === 'cuestionario') {
-      <app-cuestionarios-sql [nivelActivo]="nivelActivo()"></app-cuestionarios-sql>
+      <app-cuestionarios-sql [nivelActivo]="nivelActivo()" (xpAwarded)="sumarXp($event)"></app-cuestionarios-sql>
     }
   </main>
 </main>

@@ -42,7 +42,12 @@
             <i class="bi bi-check2-circle" aria-hidden="true"></i> VERIFICAR RESPUESTA
           </button>
         }
-        @if (respuestaVerificada()) {
+        @if (respuestaVerificada() && opcionSeleccionada() !== preguntas[indicePreguntaActual()].indiceCorrecto) {
+          <button type="button" class="boton-siguiente" (click)="reintentar()">
+            INTENTAR DE NUEVO <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+          </button>
+        }
+        @if (respuestaVerificada() && opcionSeleccionada() === preguntas[indicePreguntaActual()].indiceCorrecto) {
           <button type="button" class="boton-siguiente" (click)="siguientePregunta()">
             SIGUIENTE PREGUNTA <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </button>
@@ -57,6 +62,7 @@
       <span class="quiz-eyebrow">INFORME DEL REACTOR</span>
       <h2>DIAGNÓSTICO FINALIZADO</h2>
       <p>Puntuación obtenida: <strong>{{ puntuacion() }} / {{ preguntas.length }}</strong></p>
+      <p>XP obtenido: <strong>{{ xpGanado() }}</strong></p>
       <div class="resultado-linea" aria-hidden="true"></div>
     </div>
   }

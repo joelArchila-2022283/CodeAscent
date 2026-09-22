@@ -108,4 +108,12 @@ export class SqlComponent implements OnInit {
   cambiarSeccion(nuevaSeccion: SeccionSql | 'leccion'): void {
     this.seccionActiva.set(nuevaSeccion);
   }
+
+  sumarXp(xp: number): void {
+    if (xp <= 0) return;
+    this.datosJugador.update(jugador => ({
+      ...jugador,
+      experienciaActual: jugador.experienciaActual + xp
+    }));
+  }
 }
