@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-
 import {
   Component,
   EventEmitter,
@@ -9,10 +8,8 @@ import {
   signal
 } from '@angular/core';
 
-import { TsDataService } from '../../../services/ts-data.service';
-import { RetoService } from '../../../services/ts-reto.service';
-
-import { IReto } from '../../../interfaces/reto.interface';
+import { LanguageService } from '../../../core/services/language.service';
+import { IMission } from '../../../core/models/language.model';
 
 interface MissionView {
   id: number;
@@ -20,8 +17,7 @@ interface MissionView {
   title: string;
   detail: string;
   reward: string;
-  icon: string;
-  reto: IReto;
+  mission: IMission;
 }
 
 @Component({
@@ -37,165 +33,65 @@ export class TSProcessesComponent implements OnInit {
   back = new EventEmitter<void>();
 
   @Output()
-  missionSelected = new EventEmitter<IReto>();
+  missionSelected = new EventEmitter<IMission>();
 
-  private tsDataService = inject(TsDataService);
-  private retoService = inject(RetoService);
+  private readonly languageService = inject(LanguageService);
 
-  cargando = signal<boolean>(true);
+  cargando = signal(true);
 
   errorCarga = signal<string | null>(null);
 
   missions = signal<MissionView[]>([]);
-
-  completed = signal<number[]>([]);
 
   ngOnInit(): void {
     this.cargarMisiones();
   }
 
   cargarMisiones(): void {
-
     this.cargando.set(true);
     this.errorCarga.set(null);
 
-    this.tsDataService
-      .obtenerTodasLasLecciones()
-      .subscribe({
+    this.languageService.obtenerMisionesPorSlug('typescript').subscribe({
+      next: response => {
+        this.missions.set(
+          (response.data ?? []).map((mission, index) => ({
+            id: mission.id_leccion,
+            code: `TS-${String(index + 1).padStart(2, '0')}`,
+            title: mission.titulo,
+            detail:
+              mission.contenido ||
+              'Completa esta misión de TypeScript.',
+            reward: `MISIÓN ${index + 1}`,
+            mission
+          }))
+        );
 
-        next: grupos => {
+        this.cargando.set(false);
+      },
 
-          const idsLeccion = grupos
-            .flatMap(grupo => grupo.lecciones)
-            .map(leccion => leccion.id_leccion)
-            .filter(
-              (id): id is number =>
-                id !== undefined &&
-                id !== null
-            );
+      error: error => {
+        console.error(
+          'Error al cargar las misiones TypeScript:',
+          error
+        );
 
-          if (idsLeccion.length === 0) {
+        this.errorCarga.set(
+          'No se pudieron cargar las misiones TypeScript.'
+        );
 
-            this.missions.set([]);
-            this.cargando.set(false);
-
-            return;
-          }
-
-          this.retoService
-            .obtenerRetosDeLecciones(idsLeccion)
-            .subscribe({
-
-              next: retos => {
-
-                const misiones = retos
-                  .sort(
-                    (a, b) =>
-                      (a.id_reto ?? 0) -
-                      (b.id_reto ?? 0)
-                  );
-
-                this.missions.set(
-                  misiones.map(
-                    (reto, index) => ({
-
-                      id: reto.id_reto!,
-
-                      code:
-                        `TS-${String(index + 1).padStart(2, '0')}`,
-
-                      title:
-                        reto.titulo,
-
-                      detail:
-                        reto.descripcion ||
-                        'Completa esta misión de TypeScript.',
-
-                      reward:
-                        `+${reto.xp_recompensa ?? 0} XP`,
-
-                      icon:
-                        'bi-cpu',
-
-                      reto: reto
-
-                    })
-                  )
-                );
-
-                this.cargarCompletadas();
-
-                this.cargando.set(false);
-              },
-
-              error: err => {
-
-                console.error(
-                  'Error al cargar los retos:',
-                  err
-                );
-
-                this.errorCarga.set(
-                  'No se pudieron cargar las misiones TypeScript.'
-                );
-
-                this.cargando.set(false);
-              }
-            });
-        },
-
-        error: err => {
-
-          console.error(
-            'Error al cargar las lecciones:',
-            err
-          );
-
-          this.errorCarga.set(
-            'No se pudieron cargar las misiones TypeScript.'
-          );
-
-          this.cargando.set(false);
-        }
-      });
+        this.cargando.set(false);
+      }
+    });
   }
 
-  private cargarCompletadas(): void {
-
-    this.retoService
-      .obtenerRetosCompletados()
-      .subscribe({
-
-        next: ids => {
-
-          this.completed.set(
-            Array.from(ids)
-          );
-        },
-
-        error: err => {
-
-          console.error(
-            'Error al cargar misiones completadas:',
-            err
-          );
-        }
-      });
-  }
-
-  seleccionarMision(
-    mission: MissionView
-  ): void {
-
+  seleccionarMision(mission: MissionView): void {
     if (
-      this.completed()
-        .includes(mission.id)
+      mission.mission.estado === 'locked' ||
+      mission.mission.estado === 'completed'
     ) {
       return;
     }
 
-    this.missionSelected.emit(
-      mission.reto
-    );
+    this.missionSelected.emit(mission.mission);
   }
 }

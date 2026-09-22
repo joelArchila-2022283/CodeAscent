@@ -1,116 +1,69 @@
 <section class="ts-section process-section">
+  <header>
+    <span class="section-kicker">
+      <i class="bi bi-tools"></i>
+      MISIONES ACTIVAS
+    </span>
 
-    <header>
+    <h2>SELECCIÓN DE MISIÓN</h2>
 
-        <span class="section-kicker">
+    <p>
+      Completa cada misión TypeScript para abrir nuevas cámaras de conocimiento.
+    </p>
+  </header>
 
-            <i class="bi bi-tools"></i>
+  <p *ngIf="cargando()">
+    Cargando misiones...
+  </p>
 
-            COLA DE CANTERA / 03 DIRECTIVAS
+  <p *ngIf="errorCarga()" role="alert">
+    {{ errorCarga() }}
+  </p>
 
+  <div class="mission-list">
+
+    <button
+      class="mission"
+      *ngFor="let mission of missions()"
+      type="button"
+      (click)="seleccionarMision(mission)"
+    >
+
+      <span class="mission-icon">
+        <i class="bi bi-door-open"></i>
+      </span>
+
+      <span class="mission-copy">
+
+        <small>
+          {{ mission.code }}
+        </small>
+
+        <strong>
+          {{ mission.title }}
+        </strong>
+
+        <span>
+          {{ mission.detail }}
         </span>
 
-        <h2>
-            PROCESOS TYPESCRIPT ACTIVOS
-        </h2>
+      </span>
 
-        <p>
-            Completa cada misión para abrir nuevas cámaras de conocimiento TypeScript.
-        </p>
-
-    </header>
-
-
-    <div *ngIf="cargando()" class="text-center py-4">
-
-        <div class="spinner-border text-info" role="status"></div>
-
-        <p class="mt-2">
-            Cargando procesos...
-        </p>
-
-    </div>
-
-
-    <p *ngIf="!cargando() && errorCarga()">
-        {{ errorCarga() }}
-    </p>
-
-
-    <p *ngIf="
-      !cargando() &&
-      !errorCarga() &&
-      missions().length === 0
-    ">
-        No hay procesos registrados todavía para este nivel.
-    </p>
-
-
-    <div class="mission-list" *ngIf="
-      !cargando() &&
-      !errorCarga() &&
-      missions().length > 0
-    ">
-
-        <button class="mission" *ngFor="let mission of missions()" [class.done]="
-        completed().includes(mission.id)
-      " [disabled]="
-        completed().includes(mission.id)
-      " (click)="
-        seleccionarMision(mission)
-      " type="button">
-
-            <span class="mission-icon">
-
-                <i class="bi" [class]="mission.icon"></i>
-
-            </span>
-
-
-            <span class="mission-copy">
-
-                <small>
-                    {{ mission.code }}
-                </small>
-
-                <strong>
-                    {{ mission.title }}
-                </strong>
-
-                <span>
-                    {{ mission.detail }}
-                </span>
-
-            </span>
-
-
-            <span class="mission-reward">
-
-                {{
-                completed().includes(mission.id)
-                ? 'LISTO'
-                : mission.reward
-                }}
-
-                <i class="bi" [class.bi-check-circle-fill]="
-            completed().includes(mission.id)
-          " [class.bi-play-circle-fill]="
-            !completed().includes(mission.id)
-          "></i>
-
-            </span>
-
-        </button>
-
-    </div>
-
-
-    <button class="ts-back" type="button" (click)="back.emit()">
-
-        <i class="bi bi-arrow-left"></i>
-
-        VOLVER AL PANEL
+      <span class="mission-reward">
+        MISIÓN {{ mission.id }}
+      </span>
 
     </button>
+
+  </div>
+
+  <button
+    class="ts-back"
+    type="button"
+    (click)="back.emit()"
+  >
+    <i class="bi bi-arrow-left"></i>
+    VOLVER AL PANEL
+  </button>
 
 </section>
