@@ -225,7 +225,7 @@
 
     @case ('test') {
 
-    <app-ts-test [mission]="retoSeleccionado()" (back)="navigateTo('terminal')" (next)="volverAProcesos()" />
+    <app-ts-test [mission]="retoSeleccionado()" (back)="navigateTo('terminal')" (next)="volverAProcesos()" (xpAwarded)="sumarExperiencia($event)" />
 
     }
 

@@ -99,7 +99,13 @@ $text-dim: #8998ad;
   min-height: 100vh;
   width: 100%;
   padding: 1.5rem;
-  background-color: $rock-dark;
+  background-image:
+    linear-gradient(rgba(8, 11, 18, .72), rgba(8, 11, 18, .82)),
+    url('/assets/images/ts-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: $text-html;
   font-family: 'Baloo 2', sans-serif;
   position: relative;
@@ -140,6 +146,7 @@ $text-dim: #8998ad;
   z-index: 2;
   opacity: .25;
 }
+
 header,
 nav,
 .bunker-content-stage {
