@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NivelSql, SeccionSql, JugadorSql } from '../../interfaces/sql.interface';
+import { NivelSql, SeccionSql, JugadorSql, RetoNivelSql } from '../../interfaces/sql.interface';
 import { PanelSqlComponent } from './panel-sql/panel-sql.component';
 import { ManualTecnicoSqlComponent } from './manual-tecnico-sql/manual-tecnico-sql.component';
 import { MisionesSqlComponent } from './misiones-sql/misiones-sql.component';
@@ -35,8 +35,11 @@ export class SqlComponent implements OnInit {
   errorJugador = signal<string | null>(null);
   niveles = signal<NivelSql[]>([]);
   nivelActivo = signal<NivelSql | null>(null);
-  cargandoNiveles = signal(true);
-  errorNiveles = signal<string | null>(null);
+
+  retoSeleccionado = signal<RetoNivelSql | null>(null);
+  leccionActual = signal<string>('');
+
+  seccionesConMision: Array<SeccionSql | 'leccion'> = ['manual', 'leccion', 'consola', 'cuestionario'];
 
   datosJugador = signal<JugadorSql>({
     nombreJugador: '',
@@ -90,23 +93,45 @@ export class SqlComponent implements OnInit {
       next: (niveles) => {
         this.niveles.set(niveles);
         this.nivelActivo.set(niveles[0] ?? null);
-        this.cargandoNiveles.set(false);
+        this.datosJugador.update(jugador => ({
+          ...jugador,
+          nivelProgreso: niveles[0]?.numero_nivel ?? jugador.nivelProgreso
+        }));
       },
-      error: () => {
-        this.errorNiveles.set('No se pudieron cargar los niveles SQL.');
-        this.cargandoNiveles.set(false);
-      }
+      error: () => this.errorJugador.set('No se pudieron cargar los niveles SQL.')
     });
   }
 
-  seleccionarNivel(evento: Event): void {
-    const numeroNivel = Number((evento.target as HTMLSelectElement).value);
-    const nivel = this.niveles().find(item => item.numero_nivel === numeroNivel);
-    if (nivel) this.nivelActivo.set(nivel);
+  cambiarSeccion(nuevaSeccion: SeccionSql | 'leccion'): void {
+    if (this.seccionesConMision.includes(nuevaSeccion) && this.retoSeleccionado() === null) {
+      this.seccionActiva.set('misiones');
+      this.mascotDialogue.set('Primero elige una misión para activar esa estación, Cadete.');
+      return;
+    }
+    this.seccionActiva.set(nuevaSeccion);
+    const dialogos: Record<string, string> = {
+      panel: 'El Valle de Transistores está operativo. Elige tu estación.',
+      misiones: 'Selecciona una misión para activar la red de datos.',
+      manual: 'Estudia el Manual Técnico antes de operar la terminal.',
+      leccion: 'Lee la lección y relaciona el concepto con la misión.',
+      consola: 'La terminal de cobre está lista para tus consultas.',
+      cuestionario: 'Demuestra lo aprendido en la prueba de calibración.'
+    };
+    this.mascotDialogue.set(dialogos[nuevaSeccion] ?? this.mascotDialogue());
   }
 
-  cambiarSeccion(nuevaSeccion: SeccionSql | 'leccion'): void {
-    this.seccionActiva.set(nuevaSeccion);
+  seleccionarReto(reto: RetoNivelSql): void {
+    this.retoSeleccionado.set(reto);
+    this.leccionActual.set((reto as any).leccionContenido || '');
+    const nivelMision = this.niveles().find(nivel => nivel.retos.some(item => item.id_reto === reto.id_reto));
+    if (nivelMision && this.nivelActivo()?.id_nivel !== nivelMision.id_nivel) {
+      this.nivelActivo.set(nivelMision);
+    }
+    this.cambiarSeccion('manual');
+  }
+
+  consolaCompletada(): void {
+    this.cambiarSeccion('cuestionario');
   }
 
   sumarXp(xp: number): void {

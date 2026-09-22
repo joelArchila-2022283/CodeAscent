@@ -1,39 +1,78 @@
-<div class="contenedor-manual-sql">
-  <aside class="menu-lateral">
-    <h3>📜 PERGAMINOS TÉCNICOS</h3>
-    <ul>
-      @for (lec of lecciones; track lec.id; let i = $index) {
-        <li 
-          [class.activo]="indiceLeccionSeleccionada() === i"
-          (click)="seleccionarLeccion(i)">
-          <span class="codigo-badge">{{ lec.codigoIdentificador }}</span>
-          <span>{{ lec.titulo }}</span>
-        </li>
-      }
-    </ul>
-  </aside>
+<section class="sql-section manual-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-book-half"></i> ARCH-SQL / LECTURA</span>
+    <h2>MANUAL TÉCNICO</h2>
+    <p>Analiza la teoría, comprende la lógica y estudia la sintaxis de las consultas.</p>
+  </header>
 
-  <article class="hoja-pergamino">
-    <header class="encabezado-hoja">
-      <span class="badge-hoja">{{ lecciones[indiceLeccionSeleccionada()].codigoIdentificador }}</span>
-      <h2>{{ lecciones[indiceLeccionSeleccionada()].titulo }}</h2>
-      <p class="subtitulo">{{ lecciones[indiceLeccionSeleccionada()].subtitulo }}</p>
-    </header>
-
-    <div class="contenido-hoja">
-      <p class="texto-conceptual">{{ lecciones[indiceLeccionSeleccionada()].explicacionConceptual }}</p>
-
-      <div class="bloque-codigo">
-        <div class="encabezado-codigo">ESQUEMA DE CONSULTA SQL</div>
-        <pre><code>{{ lecciones[indiceLeccionSeleccionada()].ejemploConsulta }}</code></pre>
+  <div class="manual-grid">
+    <div class="manual-content">
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-lightbulb-fill"></i> Nivel Conceptual</h3>
+        <p>{{ manual().conceptual }}</p>
       </div>
 
-      <h4>PUNTOS CLAVE DE APRENDIZAJE:</h4>
-      <ul>
-        @for (punto of lecciones[indiceLeccionSeleccionada()].puntosClave; track punto) {
-          <li>⚡ {{ punto }}</li>
-        }
-      </ul>
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-diagram-3-fill"></i> Nivel Lógico</h3>
+        <p>{{ manual().logico }}</p>
+      </div>
+
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-code-slash"></i> Nivel Sintáctico</h3>
+        <pre><code>{{ manual().sintactico }}</code></pre>
+      </div>
     </div>
-  </article>
-</div>
+
+    <div class="manual-graphic">
+      <div class="graphic-placeholder">
+        <i class="bi bi-diagram-3-fill"></i>
+        <span>Circuito de Consulta</span>
+
+        <div class="query-circuit">
+          <div class="circuit-chip copper">
+            <i class="bi bi-hdd-fill"></i>
+            <strong>FROM</strong>
+            <small>origen de datos</small>
+          </div>
+          <i class="bi bi-arrow-right circuit-wire"></i>
+          <div class="circuit-chip green">
+            <i class="bi bi-funnel-fill"></i>
+            <strong>WHERE</strong>
+            <small>filtro de filas</small>
+          </div>
+          <i class="bi bi-arrow-right circuit-wire"></i>
+          <div class="circuit-chip cyan">
+            <i class="bi bi-table"></i>
+            <strong>SELECT</strong>
+            <small>proyección de columnas</small>
+          </div>
+        </div>
+
+        <div class="query-example">
+          <span class="example-label"><i class="bi bi-terminal-fill"></i> Sintaxis de esta misión</span>
+          <pre><code>{{ manual().sintactico }}</code></pre>
+        </div>
+
+        <div class="schema-box">
+          <div class="schema-table">
+            <div class="schema-head"></div>
+            <div class="schema-row"></div>
+            <div class="schema-row short"></div>
+            <div class="schema-row"></div>
+          </div>
+          <div class="schema-link" aria-hidden="true"><i class="bi bi-arrow-return-right"></i></div>
+          <div class="schema-table">
+            <div class="schema-head"></div>
+            <div class="schema-row short"></div>
+            <div class="schema-row"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="sql-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> ELEGIR OTRA MISIÓN</button>
+    <button class="sql-next" (click)="next.emit()">IR A LA LECCIÓN <i class="bi bi-arrow-right"></i></button>
+  </div>
+</section>

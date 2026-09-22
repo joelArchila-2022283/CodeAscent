@@ -12,6 +12,8 @@ $purple-disk: #b55afe;
 $text-html: #e6ded6;
 $text-dim: #9a8a80;
 $copper-transistor: #D97724;
+$pergamino: #d9ead8;
+$tinta: #102019;
 
 @keyframes torchFlicker {
   0% { opacity: .7; transform: scale(1) translate(0,0); }
@@ -413,6 +415,120 @@ header, nav, .bunker-content-stage {
 
 .bunker-content-stage {
   animation: rockRumble .5s ease-out 1;
+}
+
+/* --- SECCIÓN ESTILO MANUAL HTML (paleta SQL adaptada) --- */
+.sql-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: rockRumble .45s ease-out 1;
+
+  header { margin-bottom: 1.5rem; }
+
+  .section-kicker {
+    color: $cyan-screen;
+    font: 700 .72rem monospace;
+    letter-spacing: .14em;
+  }
+
+  h2 {
+    margin: .35rem 0;
+    color: $amber-fire;
+    font-size: 2.1rem;
+    letter-spacing: .05em;
+  }
+
+  header p { color: $text-dim; }
+
+  .sql-concept-box {
+    background: linear-gradient(145deg, rgba(24, 47, 38, .94), rgba(11, 25, 21, .94));
+    border: 2px solid #416b51;
+    border-radius: 10px;
+    padding: 1.3rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 5px 5px 0px #07130d;
+
+    .sql-box-subtitle {
+      color: $amber-fire;
+      margin-top: 0;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'Bangers', cursive;
+      letter-spacing: .04em;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.55;
+      color: $pergamino;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .leccion-mision {
+    .leccion-metas {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 2px dashed #416b51;
+    }
+
+    .sql-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .35rem .8rem;
+      border-radius: 20px;
+      background: rgba(217, 164, 65, .15);
+      border: 2px solid $copper-transistor;
+      color: $amber-glow;
+      font-family: 'Bangers', cursive;
+      letter-spacing: .05em;
+    }
+  }
+
+  .sql-back, .sql-next {
+    padding: .7rem 1.2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    transition: all .2s;
+  }
+
+  .sql-back {
+    color: $amber-glow;
+    background: rgba(24, 47, 38, .9);
+    border: 2px solid $copper-transistor;
+    font-family: 'Bangers', cursive;
+    letter-spacing: .05em;
+
+    &:hover { background: rgba(38, 74, 60, .9); transform: translateY(-2px); }
+  }
+
+  .sql-next {
+    color: $tinta;
+    background: $amber-fire;
+    border: 2px solid #b9861f;
+    font-family: 'Bangers', cursive;
+    letter-spacing: .05em;
+
+    &:hover {
+      filter: brightness(1.08);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(217, 164, 65, .4);
+    }
+  }
 }
 
 .nivel-selector {

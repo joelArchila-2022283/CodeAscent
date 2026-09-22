@@ -19,6 +19,56 @@ $tinta-oscura: #102019;
   50% { transform: translateY(-6px) rotate(2deg); }
 }
 
+.sql-section { animation: sqlReveal .45s ease both; }
+
+header { margin-bottom: 1.5rem; }
+
+.section-kicker {
+  color: #00e5ff;
+  font: 700 .72rem monospace;
+  letter-spacing: .14em;
+}
+
+h2 {
+  margin: .35rem 0;
+  color: $cobre-transistor;
+  font: 2.1rem 'Bangers', cursive;
+  letter-spacing: .05em;
+  text-shadow: 2px 2px 0px $tinta-oscura;
+}
+
+header p { color: #9a8a80; }
+
+.action-buttons {
+  display: flex;
+  margin-top: 1.2rem;
+}
+
+.sql-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .7rem 1.2rem;
+  border-radius: 8px;
+  color: $cobre-transistor;
+  background: rgba(24, 47, 38, .9);
+  border: 2px solid $cobre-transistor;
+  font-family: 'Bangers', cursive;
+  letter-spacing: .05em;
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+
+  &:hover {
+    background: rgba(38, 74, 60, .9);
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes sqlReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
 .contenedor-quiz-sql {
   position: relative;
   isolation: isolate;

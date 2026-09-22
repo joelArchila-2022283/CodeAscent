@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, signal, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NivelSql } from '../../../interfaces/sql.interface';
+import { NivelSql, RetoNivelSql } from '../../../interfaces/sql.interface';
 import { RetoService } from '../../../services/ts-reto.service';
 
 interface PreguntaSql {
@@ -19,7 +19,10 @@ interface PreguntaSql {
   styleUrls: ['./cuestionarios-sql.component.scss']
 })
 export class CuestionariosSqlComponent implements OnChanges {
+  @Input() retoPrediccion: RetoNivelSql | null = null;
   @Input() nivelActivo: NivelSql | null = null;
+  @Output() back = new EventEmitter<void>();
+  @Output() next = new EventEmitter<void>();
   @Output() xpAwarded = new EventEmitter<number>();
   private readonly retoService = inject(RetoService);
   indicePreguntaActual = signal<number>(0);
@@ -47,12 +50,15 @@ export class CuestionariosSqlComponent implements OnChanges {
   ];
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!changes['nivelActivo'] || !this.nivelActivo) return;
-    const retos = this.nivelActivo.retos.filter(reto => reto.tipo_reto === 'opcion_multiple' && reto.respuestas.length > 0);
+    if (!changes['nivelActivo'] && !changes['retoPrediccion']) return;
+    const fuente = this.nivelActivo ?? null;
+    if (!fuente) return;
+
+    const retos = fuente.retos.filter(reto => reto.tipo_reto === 'opcion_multiple' && reto.respuestas.length > 0);
     if (retos.length === 0) {
       this.preguntas = [{
-        id: this.nivelActivo.id_nivel,
-        pregunta: `¿Qué concepto debes aplicar en el nivel «${this.nivelActivo.nombre}»?`,
+        id: fuente.id_nivel,
+        pregunta: `¿Qué concepto debes aplicar en el nivel «${fuente.nombre}»?`,
         opciones: ['Analizar el problema', 'Ignorar la descripción', 'Repetir sin pensar', 'Usar cualquier comando'],
         indiceCorrecto: 0,
         explicacionFormativa: 'Primero comprende el problema y después traduce esa idea a una consulta SQL.'
@@ -63,7 +69,7 @@ export class CuestionariosSqlComponent implements OnChanges {
         pregunta: reto.descripcion,
         opciones: reto.respuestas.map(respuesta => respuesta.contenido),
         indiceCorrecto: Math.max(0, reto.respuestas.findIndex(respuesta => respuesta.es_correcta)),
-        explicacionFormativa: `Revisa el concepto «${this.nivelActivo!.nombre}» y explica por qué esa respuesta resuelve el problema.`
+        explicacionFormativa: `Revisa el concepto «${fuente.nombre}» y explica por qué esa respuesta resuelve el problema.`
       }));
     }
     this.indicePreguntaActual.set(0);

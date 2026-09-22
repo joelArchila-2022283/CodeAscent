@@ -92,39 +92,84 @@
     </ul>
   </nav>
 
-  <section class="nivel-selector" aria-label="Nivel SQL activo">
-    <div class="nivel-selector__icon" aria-hidden="true"><i class="bi bi-diagram-3-fill"></i></div>
-    <div class="nivel-selector__copy">
-      <span class="nivel-selector__eyebrow">RUTA DE APRENDIZAJE</span>
-      <strong>{{ nivelActivo() ? 'Nivel ' + nivelActivo()!.numero_nivel + ': ' + nivelActivo()!.nombre : 'Cargando niveles...' }}</strong>
-      <small>{{ nivelActivo()?.descripcion || errorNiveles() || 'Problema, pensamiento, intento y retroalimentación.' }}</small>
-    </div>
-    <select [value]="nivelActivo()?.numero_nivel ?? ''" (change)="seleccionarNivel($event)" [disabled]="cargandoNiveles() || niveles().length === 0">
-      @for (nivel of niveles(); track nivel.id_nivel) {
-        <option [value]="nivel.numero_nivel">NIVEL {{ nivel.numero_nivel }}</option>
-      }
-    </select>
-  </section>
-
   <!-- Contenedor del módulo activo -->
   <main class="bunker-content-stage">
-    @if (seccionActiva() === 'panel') {
-      <app-panel-sql (navegarA)="cambiarSeccion($event)"></app-panel-sql>
-    }
-    @if (seccionActiva() === 'manual') {
-      <app-manual-tecnico-sql [nivelActivo]="nivelActivo()"></app-manual-tecnico-sql>
-    }
-    @if (seccionActiva() === 'leccion') {
-      <section class="sql-section"><header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN</span><h2>Lección de la misión</h2><p>Comprende las tablas, relaciones y resultado esperado antes de escribir la consulta.</p></header><div class="concept-box"><h3>Orientación</h3><p>Identifica primero qué datos entran, qué relación debes recorrer y qué resultado debe devolver la consulta. Después comprueba la respuesta en la consola.</p></div><button class="html-next" (click)="cambiarSeccion('consola')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></section>
-    }
-    @if (seccionActiva() === 'misiones') {
-      <app-misiones-sql [niveles]="niveles()" [nivelActivo]="nivelActivo()" (navegarA)="cambiarSeccion($event)"></app-misiones-sql>
-    }
-    @if (seccionActiva() === 'consola') {
-      <app-consola-sql [nivelActivo]="nivelActivo()"></app-consola-sql>
-    }
-    @if (seccionActiva() === 'cuestionario') {
-      <app-cuestionarios-sql [nivelActivo]="nivelActivo()" (xpAwarded)="sumarXp($event)"></app-cuestionarios-sql>
+    @switch (seccionActiva()) {
+      @case ('panel') {
+        <app-panel-sql (navegarA)="cambiarSeccion($event)"></app-panel-sql>
+      }
+      @case ('misiones') {
+        <app-misiones-sql
+          [niveles]="niveles()"
+          [nivelActivo]="nivelActivo()"
+          (missionSelected)="seleccionarReto($event)"
+          (back)="cambiarSeccion('panel')">
+        </app-misiones-sql>
+      }
+      @case ('manual') {
+        <app-manual-tecnico-sql
+          [leccionRaw]="leccionActual()"
+          (back)="cambiarSeccion('misiones')"
+          (next)="cambiarSeccion('leccion')">
+        </app-manual-tecnico-sql>
+      }
+      @case ('leccion') {
+        <section class="sql-section">
+          <header>
+            <span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN DE MISIÓN</span>
+            <h2>{{ retoSeleccionado()?.titulo || 'Selecciona una misión' }}</h2>
+            <p>Analiza el manual, identifica qué datos entran y qué resultado debe devolver la consulta.</p>
+          </header>
+
+          @if (retoSeleccionado()) {
+            <div class="leccion-mision">
+              <div class="sql-concept-box">
+                <h3 class="sql-box-subtitle"><i class="bi bi-crosshair"></i> Objetivo de la misión</h3>
+                <p>{{ retoSeleccionado()?.descripcion }}</p>
+                <p class="leccion-metas">
+                  <span class="sql-tag"><i class="bi bi-star-fill"></i> Recompensa: {{ retoSeleccionado()?.xp_recompensa }} XP</span>
+                </p>
+              </div>
+
+              <div class="sql-concept-box">
+                <h3 class="sql-box-subtitle"><i class="bi bi-broadcast-pin"></i> Orientación de la misión</h3>
+                <p>{{ leccionActual() || 'La lección se carga junto con la misión seleccionada. Comprende la estructura de tablas y relaciones antes de escribir la consulta en la terminal.' }}</p>
+              </div>
+
+              <div class="sql-concept-box">
+                <h3 class="sql-box-subtitle"><i class="bi bi-tools"></i> Qué harás en la terminal</h3>
+                <p>Conecta los datos en el orden que indica el manual: primero la tabla de origen, después los filtros opcionales y por último las columnas que deseas proyectar. La consola valida tu sentencia, la ejecuta sobre el esquema real y te devuelve la tabla de resultados.</p>
+              </div>
+            </div>
+          } @else {
+            <div class="sql-concept-box">
+              <h3 class="sql-box-subtitle"><i class="bi bi-exclamation-triangle"></i> Aún no hay misión activa</h3>
+              <p>Vuelve a la vista de MISIONES y selecciona la misión que quieres resolver para cargar su lección.</p>
+            </div>
+          }
+
+          <div class="action-buttons">
+            <button class="sql-back" (click)="cambiarSeccion('manual')"><i class="bi bi-arrow-left"></i> VOLVER AL MANUAL</button>
+            <button class="sql-next" (click)="cambiarSeccion('consola')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button>
+          </div>
+        </section>
+      }
+      @case ('consola') {
+        <app-consola-sql
+          [retoSeleccionado]="retoSeleccionado()"
+          (back)="cambiarSeccion('misiones')"
+          (missionCompleted)="consolaCompletada()">
+        </app-consola-sql>
+      }
+      @case ('cuestionario') {
+        <app-cuestionarios-sql
+          [retoPrediccion]="retoSeleccionado()"
+          [nivelActivo]="nivelActivo()"
+          (back)="cambiarSeccion('manual')"
+          (next)="cambiarSeccion('panel')"
+          (xpAwarded)="sumarXp($event)">
+        </app-cuestionarios-sql>
+      }
     }
   </main>
 </main>

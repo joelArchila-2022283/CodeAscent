@@ -3,75 +3,138 @@
 $cobre-transistor: #d9a441;
 $pergamino-vintage: #d9ead8;
 $tinta-oscura: #102019;
+$valley-green: #8ed6a3;
+$cyan-screen: #00e5ff;
+$text-html: #e6ded6;
+$text-dim: #9a8a80;
 
-.contenedor-misiones {
-  h2 {
-    font-family: 'Bangers', cursive;
+.sql-section {
+  animation: sqlReveal .45s ease both;
+}
+
+header { margin-bottom: 1.5rem; }
+
+.section-kicker {
+  color: $cyan-screen;
+  font: 700 .72rem monospace;
+  letter-spacing: .14em;
+}
+
+h2 {
+  margin: .35rem 0;
+  color: $cobre-transistor;
+  font: 2.1rem 'Bangers', cursive;
+  letter-spacing: .05em;
+  text-shadow: 2px 2px 0px $tinta-oscura;
+}
+
+header p { color: $text-dim; }
+
+.mission-list {
+  display: grid;
+  gap: .8rem;
+  margin-bottom: 1.5rem;
+}
+
+.mission {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  text-align: left;
+  color: $text-html;
+  background: linear-gradient(145deg, rgba(24, 47, 38, .94), rgba(11, 25, 21, .94));
+  border: 2px solid #416b51;
+  border-radius: 10px;
+  box-shadow: 4px 4px 0px $tinta-oscura;
+  cursor: pointer;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+
+  &:hover {
+    border-color: $cobre-transistor;
+    transform: translateX(5px);
+    box-shadow: 5px 5px 0px $tinta-oscura, 0 0 14px rgba(217, 164, 65, .25);
+  }
+
+  &.done {
+    border-color: $valley-green;
+  }
+
+  &.locked {
+    opacity: .55;
+    cursor: not-allowed;
+
+    &:hover { transform: none; border-color: #416b51; }
+  }
+}
+
+.mission-icon {
+  display: grid;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  flex: none;
+  border-radius: 8px;
+  background: rgba(16, 32, 25, .9);
+  color: $cobre-transistor;
+  font-size: 1.3rem;
+  border: 1px solid rgba(217, 164, 65, .35);
+}
+
+.mission-copy {
+  display: grid;
+  gap: .2rem;
+  flex: 1;
+  min-width: 0;
+
+  small {
+    color: $cyan-screen;
+    font: .7rem monospace;
+    letter-spacing: .1em;
+  }
+
+  strong {
+    font: 1.3rem 'Bangers', cursive;
+    letter-spacing: .04em;
     color: $pergamino-vintage;
-    font-size: 2rem;
-    text-shadow: 2px 2px 0px $tinta-oscura;
   }
 
-  .grid-misiones {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.2rem;
+  span {
+    color: $text-dim;
+    font-size: .84rem;
   }
+}
 
-  .tarjeta-mision {
-    background: linear-gradient(145deg, rgba(24, 47, 38, .95), rgba(11, 25, 21, .95));
-    border: 2px solid #416b51;
-    border-radius: 12px;
-    padding: 1.2rem;
-    box-shadow: 5px 5px 0px $tinta-oscura;
+.mission-reward {
+  color: $cobre-transistor;
+  font: 700 .72rem monospace;
+  white-space: nowrap;
+}
 
-    .cabecera-mision {
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      font-size: 0.85rem;
-      margin-bottom: 0.5rem;
+.done .mission-reward { color: $valley-green; }
 
-      .codigo {
-        color: $cobre-transistor;
-      }
-    }
+.sql-back {
+  padding: .7rem 1rem;
+  color: $cobre-transistor;
+  background: rgba(24, 47, 38, .9);
+  border: 2px solid $cobre-transistor;
+  border-radius: 8px;
+  font: 1rem 'Bangers', cursive;
+  letter-spacing: .05em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  transition: background .2s, transform .2s;
 
-    h3 {
-      font-family: 'Bangers', cursive;
-      margin: 0 0 0.4rem;
-      color: $pergamino-vintage;
-    }
-
-    p {
-      font-size: 0.95rem;
-      margin-bottom: 1rem;
-      color: #b8cdbb;
-    }
-
-    .pie-mision {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      .recompensa {
-        font-weight: bold;
-        color: $cobre-transistor;
-      }
-
-      .boton-cumplir {
-        background: $cobre-transistor;
-        color: $pergamino-vintage;
-        border: 2px solid $tinta-oscura;
-        border-radius: 6px;
-        padding: 0.4rem 0.8rem;
-        font-family: 'Bangers', cursive;
-        cursor: pointer;
-
-        &:hover {
-          background: color.adjust($cobre-transistor, $lightness: 5%);
-        }
-      }
-    }
+  &:hover {
+    background: color.adjust(rgba(24, 47, 38, .9), $lightness: 4%);
+    transform: translateY(-2px);
   }
+}
+
+@keyframes sqlReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }

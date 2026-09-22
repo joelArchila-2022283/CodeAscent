@@ -1,15 +1,10 @@
-import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NivelSql } from '../../../interfaces/sql.interface';
 
-interface LeccionSql {
-  id: string;
-  codigoIdentificador: string;
-  titulo: string;
-  subtitulo: string;
-  explicacionConceptual: string;
-  ejemploConsulta: string;
-  puntosClave: string[];
+export interface ManualParsedSql {
+  conceptual: string;
+  logico: string;
+  sintactico: string;
 }
 
 @Component({
@@ -20,57 +15,38 @@ interface LeccionSql {
   styleUrls: ['./manual-tecnico-sql.component.scss']
 })
 export class ManualTecnicoSqlComponent implements OnChanges {
-  @Input() nivelActivo: NivelSql | null = null;
-  indiceLeccionSeleccionada = signal<number>(0);
+  @Input() leccionRaw: string = '';
+  @Output() back = new EventEmitter<void>();
+  @Output() next = new EventEmitter<void>();
 
-  lecciones: LeccionSql[] = [
-    {
-      id: 'sql-doc-01',
-      codigoIdentificador: 'SQL-DOC-01',
-      titulo: 'Anatomía de una Consulta SELECT',
-      subtitulo: 'La tubería básica de extracción de información',
-      explicacionConceptual: 'En las bases de datos relacionales, una consulta SELECT permite extraer filamentos específicos de datos sin alterar la estructura original de las tablas.',
-      ejemploConsulta: `SELECT id_transistor, voltaje, estado\nFROM registro_valle\nWHERE estado = 'ACTIVO';`,
-      puntosClave: [
-        'SELECT: Especifica qué columnas o datos deseas extraer.',
-        'FROM: Señala la tabla donde se encuentran almacenados los registros.',
-        'WHERE: Aplica un filtro lógico para seleccionar filas específicas.'
-      ]
-    },
-    {
-      id: 'sql-doc-02',
-      codigoIdentificador: 'SQL-DOC-02',
-      titulo: 'Filtrado con Condicionales (WHERE)',
-      subtitulo: 'Aislamiento de señales y prevención de fallos',
-      explicacionConceptual: 'Utiliza comparadores (<, >, =, !=) y conectores booleanos (AND, OR) para refinar los criterios de búsqueda.',
-      ejemploConsulta: `SELECT nombre_arbol, cantidad_cables\nFROM bosque_transistores\nWHERE cantidad_cables >= 10 AND tipo = 'COBRE';`,
-      puntosClave: [
-        'Operadores de Comparación: Determinan si un valor cumple la regla.',
-        'AND / OR: Combinan múltiples reglas en un solo circuito de búsqueda.'
-      ]
-    }
-  ];
-
-  seleccionarLeccion(indice: number): void {
-    this.indiceLeccionSeleccionada.set(indice);
-  }
+  manual = signal<ManualParsedSql>({
+    conceptual: 'Selecciona una misión para cargar el manual técnico.',
+    logico: '...',
+    sintactico: '...'
+  });
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!changes['nivelActivo'] || !this.nivelActivo) return;
-
-    const leccionesDb = this.nivelActivo.lecciones.map(leccion => ({
-      id: `nivel-${this.nivelActivo!.id_nivel}-leccion-${leccion.id_leccion}`,
-      codigoIdentificador: `SQL-N${this.nivelActivo!.numero_nivel}-L${leccion.orden}`,
-      titulo: leccion.titulo,
-      subtitulo: this.nivelActivo!.nombre,
-      explicacionConceptual: leccion.contenido,
-      ejemploConsulta: leccion.ejemplos[0]?.codigo || 'SELECT * FROM tabla_objetivo;',
-      puntosClave: leccion.ejemplos.map(ejemplo => ejemplo.explicacion || ejemplo.titulo || 'Analiza el ejemplo antes de ejecutarlo.')
-    }));
-
-    if (leccionesDb.length > 0) {
-      this.lecciones = leccionesDb;
-      this.indiceLeccionSeleccionada.set(0);
+    if (changes['leccionRaw']) {
+      this.procesarLeccion();
     }
+  }
+
+  procesarLeccion(): void {
+    if (!this.leccionRaw) return;
+
+    const extraer = (inicio: string, fin?: string) => {
+      const idxInicio = this.leccionRaw.indexOf(inicio);
+      if (idxInicio === -1) return '';
+      const start = idxInicio + inicio.length;
+      if (!fin) return this.leccionRaw.substring(start).trim();
+      const idxFin = this.leccionRaw.indexOf(fin, start);
+      return idxFin === -1 ? this.leccionRaw.substring(start).trim() : this.leccionRaw.substring(start, idxFin).trim();
+    };
+
+    this.manual.set({
+      conceptual: extraer('NIVEL CONCEPTUAL:', 'NIVEL LOGICO:') || this.leccionRaw,
+      logico: extraer('NIVEL LOGICO:', 'NIVEL SINTACTICO:') || 'Analiza cómo se conectan las tablas, las claves y los filtros que resuelven el problema.',
+      sintactico: extraer('NIVEL SINTACTICO:', 'PROBLEMA ABP:') || 'Escribe la consulta SQL en la terminal y comprueba el resultado esperado.'
+    });
   }
 }
