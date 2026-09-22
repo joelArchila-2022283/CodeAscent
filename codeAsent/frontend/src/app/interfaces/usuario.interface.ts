@@ -46,7 +46,16 @@ export interface PerfilData {
     precision: number;
   };
   actividadSemanal: Array<{ fecha: string; xp: number }>;
-  logros: Array<{ id_logro: number; nombre: string; descripcion?: string; fecha_obtenido: string }>;
+  logros: Array<{
+    id_logro: number;
+    nombre: string;
+    titulo?: string;
+    descripcion?: string;
+    dificultad?: string;
+    id_lenguaje?: number | null;
+    obtenido?: boolean;
+    fecha_obtenido?: string;
+  }>;
 }
 
 export interface IRespuestaMisionTS {
