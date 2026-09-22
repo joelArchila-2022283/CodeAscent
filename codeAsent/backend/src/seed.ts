@@ -1,6 +1,25 @@
 import { pool } from './config/conexion';
 
-const preguntasPorMision = (slug: string, titulo: string) => [
+const preguntasPorMision = (slug: string, titulo: string) => slug === 'css' ? [
+  {
+    pregunta: `¿Qué selector o propiedad CSS es central en la misión «${titulo}»?`,
+    correcta: `La regla CSS que selecciona el elemento objetivo y aplica la propiedad solicitada en «${titulo}».`,
+    incorrecta1: 'Una etiqueta HTML nueva que sustituye la hoja de estilos.',
+    incorrecta2: 'Un valor aleatorio que no guarda relación con el elemento objetivo.'
+  },
+  {
+    pregunta: `¿Qué debes comprobar al resolver «${titulo}»?`,
+    correcta: 'Que el selector alcance el elemento correcto y que la propiedad produzca el cambio visual esperado.',
+    incorrecta1: 'Que la regla tenga muchas declaraciones aunque no cambie el resultado.',
+    incorrecta2: 'Que el navegador ignore los estilos anteriores.'
+  },
+  {
+    pregunta: `¿Cómo se escribe correctamente una solución para «${titulo}»?`,
+    correcta: 'Con un selector CSS, llaves y declaraciones formadas por propiedad, dos puntos, valor y punto y coma.',
+    incorrecta1: 'Con etiquetas HTML dentro de una declaración CSS.',
+    incorrecta2: 'Con valores sin propiedad ni selector.'
+  }
+] : [
   {
     pregunta: `¿Cuál es la idea central que se debe comprender en ${titulo}?`,
     correcta: `Aplicar ${titulo} para expresar una estructura o comportamiento con significado.`,

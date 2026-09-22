@@ -5,11 +5,13 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { RetoService } from './ts-reto.service';
 import { ILenguaje } from '../interfaces/lenguaje.interface';
 import { INivel } from '../interfaces/nivel.interface';
 import { IProgreso } from '../interfaces/progreso.interface';
 import { ILeccion } from '../interfaces/leccion.interface';
-import { NivelCss } from '../interfaces/css.interface';
+import { LeccionCss, NivelCss } from '../interfaces/css.interface';
+import { IReto } from '../interfaces/reto.interface';
 
 const NOMBRE_LENGUAJE_CSS = 'css';
 
@@ -39,6 +41,27 @@ export interface ResultadoIntentoCss {
   progreso: IProgreso | null;
 }
 
+export interface CssMision {
+  nivel: NivelCss;
+  leccion: LeccionCss | null;
+  reto: IReto | null;
+  completada: boolean;
+  desbloqueada: boolean;
+}
+
+export interface CssQuizQuestion {
+  id_reto: number;
+  enunciado: string;
+  xp_recompensa: number;
+  respuestas: Array<{
+    id_respuesta: number;
+    texto_respuesta: string;
+    es_correcta: boolean;
+  }>;
+}
+
+export interface CssHint { id_pista: number; orden: number; texto: string; }
+
 interface RespuestaIntentoCss {
   status: string;
   data: ResultadoIntentoCss;
@@ -48,6 +71,7 @@ interface RespuestaIntentoCss {
 export class CssDataService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
+  private retoService = inject(RetoService);
   private apiUrl = environment.apiUrl;
 
   obtenerContexto(): Observable<ContextoCSS> {
@@ -111,6 +135,54 @@ export class CssDataService {
     );
   }
 
+  obtenerMisionesCss(): Observable<CssMision[]> {
+    return forkJoin({
+      niveles: this.obtenerNivelesPedagogicos(),
+      completadas: this.retoService.obtenerRetosCompletados()
+    }).pipe(
+      map(({ niveles, completadas }) => {
+          const ordenados = [...niveles].sort((a, b) => a.numero_nivel - b.numero_nivel);
+          return ordenados.map((nivel, index) => {
+            const leccion = nivel.lecciones?.[0] ?? null;
+            const reto = nivel.retos?.find(item => item.tipo_reto === 'codigo') ?? null;
+            const cuestionarios = nivel.retos?.filter(item => item.tipo_reto === 'opcion_multiple') ?? [];
+            const completada = cuestionarios.length > 0 && cuestionarios.every(item => item.id_reto !== undefined && completadas.has(item.id_reto));
+            const anterior = ordenados[index - 1];
+            const anteriorCuestionarios = anterior?.retos?.filter(item => item.tipo_reto === 'opcion_multiple') ?? [];
+            const anteriorCompletada = anteriorCuestionarios.length > 0 && anteriorCuestionarios.every(item => item.id_reto !== undefined && completadas.has(item.id_reto));
+            return {
+              nivel,
+              leccion,
+              reto,
+              completada,
+              desbloqueada: index === 0 || anteriorCompletada
+            } satisfies CssMision;
+          });
+      })
+    );
+  }
+
+  obtenerCuestionario(idLeccion: number): Observable<CssQuizQuestion[]> {
+    return this.http.get<{ status: string; data: CssQuizQuestion[] }>(
+      `${this.apiUrl}/missions/${idLeccion}/quiz`
+    ).pipe(
+      map(respuesta => respuesta.data ?? []),
+      catchError(() => of([]))
+    );
+  }
+
+  obtenerPistas(idLeccion: number): Observable<CssHint[]> {
+    return this.http.get<{ status: string; data: { pistas?: CssHint[] } }>(
+      `${this.apiUrl}/missions/${idLeccion}/lab`
+    ).pipe(
+      map(respuesta => respuesta.data?.pistas ?? []),
+      catchError(() => of([]))
+    );
+  }
+
+  completarCuestionario(idLeccion: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/css/lecciones/${idLeccion}/completar-cuestionario`, {});
+  }
 
   registrarIntentoCss(idReto: number, codigo: string): Observable<ResultadoIntentoCss> {
     return this.http.post<RespuestaIntentoCss>(
