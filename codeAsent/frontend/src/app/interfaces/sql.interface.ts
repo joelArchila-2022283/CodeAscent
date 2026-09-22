@@ -73,14 +73,3 @@ export interface DesafioConsolaSql {
   retroalimentacionExito: string;
   explicacionErrorSintaxis: string;
 }
-
-export interface MisionSql {
-  idMision: string;
-  codigoIdentificador: string;
-  tituloMision: string;
-  descripcionMision: string;
-  recompensaExperiencia: number;
-  estadoMision: 'bloqueada' | 'en_progreso' | 'completada';
-  seccionDestino: SeccionSql;
-  requisitoDesbloqueo: string;
-}
