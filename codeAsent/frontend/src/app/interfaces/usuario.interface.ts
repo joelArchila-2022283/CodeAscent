@@ -34,6 +34,7 @@ export interface PerfilLenguaje {
   porcentaje: number;
   xp_actual: number;
   nivel_actual: number;
+  xp_siguiente_nivel?: number;
   total_niveles: number;
 }
 

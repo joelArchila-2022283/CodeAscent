@@ -11,6 +11,7 @@ export interface IMissionProgress {
   prediccion_correcta: boolean;
   pistas_usadas: number;
   first_try_perfect: boolean;
+  terminal_code?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -26,11 +27,15 @@ export class MissionProgressService {
     return this.http.post(`${this.apiUrl}/missions/${missionId}/progress`, { reached_step: step });
   }
 
-  updateTerminalStats(missionId: number, stats: { prediccion_correcta: boolean; pistas_usadas: number }): Observable<any> {
+  updateTerminalStats(missionId: number, stats: { prediccion_correcta: boolean; pistas_usadas: number; codigo?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/missions/${missionId}/terminal-stats`, stats);
   }
 
-  completeMission(missionId: number, correct: number, total: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/missions/${missionId}/complete`, { correct, total });
+  saveTerminalDraft(missionId: number, codigo: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/missions/${missionId}/terminal-draft`, { codigo });
+  }
+
+  completeMission(missionId: number, correct: number, total: number, source: 'terminal' | 'quiz'): Observable<any> {
+    return this.http.post(`${this.apiUrl}/missions/${missionId}/complete`, { correct, total, source });
   }
 }
