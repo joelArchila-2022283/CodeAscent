@@ -40,9 +40,33 @@ router.post('/:missionId/complete', async (req, res) => {
              FOR UPDATE`,
             [userId, missionId]
         );
-        const row = progress.rows[0];
-        if (!row) return res.status(404).json({ status: 'error', message: 'Progreso no encontrado.' });
-        if (row.reached_step !== 'quiz') return res.status(409).json({ status: 'error', message: 'El cuestionario aún no está desbloqueado.' });
+        let row = progress.rows[0];
+
+        if (!row) {
+            const info = await client.query(
+                `SELECT n.id_lenguaje, n.id_nivel, n.xp_requerida
+                 FROM leccion le
+                 JOIN nivel n ON n.id_nivel = le.id_nivel
+                 WHERE le.id_leccion = $1 AND le.estado = TRUE`,
+                [missionId]
+            );
+            if (!info.rows[0]) return res.status(404).json({ status: 'error', message: 'Misión no encontrada.' });
+            await client.query(
+                `INSERT INTO mission_progress (user_id, mission_id, reached_step)
+                 VALUES ($1, $2, 'quiz')
+                 ON CONFLICT (user_id, mission_id) DO NOTHING`,
+                [userId, missionId]
+            );
+            row = {
+                mission_id: missionId,
+                reached_step: 'quiz',
+                completed: false,
+                first_try_perfect: true,
+                pistas_usadas: 0,
+                id_lenguaje: info.rows[0].id_lenguaje,
+                xp_requerida: info.rows[0].xp_requerida
+            };
+        }
 
         const perfect = total > 0 && correct === total;
         if (!perfect) {
@@ -56,18 +80,16 @@ router.post('/:missionId/complete', async (req, res) => {
         }
 
         await client.query(
-            `UPDATE mission_progress SET completed = TRUE, first_try_perfect = (pistas_usadas = 0), updated_at = CURRENT_TIMESTAMP
-             WHERE user_id = $1 AND mission_id = $2`,
+            `UPDATE mission_progress
+                SET reached_step = 'quiz', completed = TRUE,
+                    first_try_perfect = (pistas_usadas = 0),
+                    updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = $1 AND mission_id = $2`,
             [userId, missionId]
-        );
-        await client.query(
-            `INSERT INTO usuario_xp (user_id, id_lenguaje, xp) VALUES ($1, $2, $3)
-             ON CONFLICT (user_id, id_lenguaje) DO UPDATE SET xp = usuario_xp.xp + EXCLUDED.xp`,
-            [userId, row.id_lenguaje, row.xp_requerida]
         );
         const logros = await GamificationService.evaluateAchievements(client, userId, row.id_lenguaje);
         await client.query('COMMIT');
-        res.json({ status: 'success', data: { completed: true, xp_awarded: row.xp_requerida, correct, total, perfect: true, newAchievements: logros.filter((logro: { obtenido: boolean }) => logro.obtenido) } });
+        res.json({ status: 'success', data: { completed: true, xp_awarded: 0, correct, total, perfect: true, newAchievements: logros.filter((logro: { obtenido: boolean }) => logro.obtenido) } });
     } catch (error) {
         await client.query('ROLLBACK');
         res.status(500).json({ status: 'error', message: (error as Error).message });
