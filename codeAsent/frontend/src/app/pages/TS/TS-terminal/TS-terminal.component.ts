@@ -1,26 +1,20 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  inject,
+  signal
+} from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 
-import { forkJoin, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
-
-import { TsDataService } from '../../../services/ts-data.service';
-import { EjemploService } from '../../../services/ts-ejemplo.service';
-import { RetoService } from '../../../services/ts-reto.service';
-
-import { ILeccion } from '../../../interfaces/leccion.interface';
-import { IEjemplo } from '../../../interfaces/ejemplo.interface';
-import { IReto } from '../../../interfaces/reto.interface';
-
-interface ContenidoTerminal {
-
-  leccion: ILeccion;
-
-  ejemplo: IEjemplo | null;
-
-  reto: IReto | null;
-
-}
+import { ILabContext } from '../../../core/models/lab.model';
+import { LabService } from '../../../core/services/lab.service';
+import { IMission } from '../../../core/models/language.model';
+import { MissionProgressService } from '../../../core/services/mission-progress.service';
 
 @Component({
   selector: 'app-ts-terminal',
@@ -29,307 +23,117 @@ interface ContenidoTerminal {
   templateUrl: './TS-terminal.component.html',
   styleUrl: './TS-terminal.component.scss'
 })
-export class TsTerminalComponent implements OnInit {
+export class TsTerminalComponent implements OnChanges {
 
   @Input()
-  retoSeleccionado: IReto | null = null;
+  retoSeleccionado: IMission | null = null;
 
   @Output()
-  back =
-    new EventEmitter<void>();
+  back = new EventEmitter<void>();
 
-  private tsDataService =
-    inject(TsDataService);
+  @Output()
+  missionCompleted = new EventEmitter<void>();
 
-  private ejemploService =
-    inject(EjemploService);
+  private readonly labService =
+    inject(LabService);
 
-  private retoService =
-    inject(RetoService);
+  private readonly missionProgressService =
+    inject(MissionProgressService);
 
-  cargando =
-    signal(true);
+  cargando = signal(true);
 
-  errorCarga =
-    signal<string | null>(null);
+  errorCarga = signal<string | null>(null);
 
-  contenidos =
-    signal<ContenidoTerminal[]>([]);
+  lab = signal<ILabContext | null>(null);
 
-  indiceActual =
-    signal(0);
+  code = signal('');
 
-  code =
-    signal('');
+  output = signal('');
 
-  output =
-    signal('');
+  compiled = signal(false);
 
-  compiled =
-    signal(false);
+  error = signal(false);
 
-  error =
-    signal(false);
+  ejecutado = signal(false);
 
-  ejecutado =
-    signal(false);
+  prediccion = signal('');
 
-  prediccion =
-    signal('');
+  mostrarPrediccion = signal(false);
 
-  mostrarPrediccion =
-    signal(false);
+  feedback = signal('');
 
-  feedback =
-    signal('');
+  mostrarFeedback = signal(false);
 
-  mostrarFeedback =
-    signal(false);
+  finalizado = signal(false);
 
-  finalizado =
-    signal(false);
+  pistasSolicitadas = signal(0);
 
-  codigoInicial = '';
+  estrellasRestantes = signal(3);
 
-  ngOnInit(): void {
-    this.cargarContenidos();
+  private readonly codigoInicial =
+    '// Escribe aquí tu solución TypeScript\n\n';
+
+  ngOnChanges(changes: SimpleChanges): void {
+
+    if (
+      changes['retoSeleccionado'] &&
+      this.retoSeleccionado?.id_leccion
+    ) {
+
+      this.cargarLaboratorio(
+        this.retoSeleccionado.id_leccion
+      );
+    }
   }
 
-  private cargarContenidos(): void {
+  private cargarLaboratorio(
+    missionId: number
+  ): void {
 
     this.cargando.set(true);
 
     this.errorCarga.set(null);
 
-    this.tsDataService
-      .obtenerContexto()
-      .pipe(
-
-        switchMap(contexto => {
-
-          const niveles =
-            contexto.niveles || [];
-
-          if (
-            niveles.length === 0
-          ) {
-            return of([]);
-          }
-
-          const peticionesNiveles =
-            niveles
-
-              .filter(
-                nivel =>
-                  !!nivel.id_nivel
-              )
-
-              .sort(
-                (a, b) =>
-                  a.numero_nivel -
-                  b.numero_nivel
-              )
-
-              .map(
-                nivel =>
-                  this.obtenerContenidoNivel(
-                    nivel.id_nivel!
-                  )
-              );
-
-          return forkJoin(
-            peticionesNiveles
-          );
-
-        })
-
-      )
-
+    this.labService
+      .getLabData(missionId)
       .subscribe({
 
-        next: contenidos => {
+        next: response => {
 
-          const lista =
-            contenidos.filter(
-              (
-                contenido
-              ): contenido is ContenidoTerminal =>
-                contenido !== null
-            );
+          /*
+           * IMPORTANTE:
+           * usamos directamente el objeto que devuelve
+           * LabService.
+           *
+           * NO hacemos casts ni creamos un ILabContext
+           * incompleto.
+           */
+          this.lab.set(response.data);
 
-          this.contenidos.set(lista);
+          this.resetearSesion();
 
-          if (
-            this.retoSeleccionado?.id_reto
-          ) {
-
-            const indice =
-              lista.findIndex(
-                contenido =>
-                  contenido.reto?.id_reto ===
-                  this.retoSeleccionado?.id_reto
-              );
-
-            if (indice >= 0) {
-
-              this.indiceActual.set(
-                indice
-              );
-
-            } else {
-
-              this.indiceActual.set(0);
-
-            }
-
-          } else {
-
-            this.indiceActual.set(0);
-
-          }
-
-          if (
-            lista.length > 0
-          ) {
-
-            this.cargarContenidoActual();
-
-          } else {
-
-            this.errorCarga.set(
-              'No existen contenidos TypeScript configurados.'
-            );
-
-            this.cargando.set(false);
-          }
-
+          this.cargando.set(false);
         },
 
-        error: err => {
+        error: error => {
 
           console.error(
-            'Error al cargar contenidos TypeScript:',
-            err
+            'Error al cargar el laboratorio TypeScript:',
+            error
           );
 
           this.errorCarga.set(
-            'No se pudo cargar el contenido del Terminal.'
+            'No se pudo cargar el laboratorio TypeScript.'
           );
+
+          this.lab.set(null);
 
           this.cargando.set(false);
         }
-
       });
   }
 
-  private obtenerContenidoNivel(
-    idNivel: number
-  ) {
-
-    return this.tsDataService
-      .obtenerLeccionesPorNivel(
-        idNivel
-      )
-
-      .pipe(
-
-        switchMap(lecciones => {
-
-          const leccion =
-            lecciones[0];
-
-          if (
-            !leccion?.id_leccion
-          ) {
-
-            return of(null);
-
-          }
-
-          return forkJoin({
-
-            ejemplo:
-              this.ejemploService
-                .obtenerPorLeccion(
-                  leccion.id_leccion
-                )
-                .pipe(
-
-                  map(
-                    ejemplos =>
-                      ejemplos[0] ?? null
-                  ),
-
-                  catchError(
-                    () => of(null)
-                  )
-
-                ),
-
-            reto:
-              this.retoService
-                .obtenerRetosDeLecciones([
-                  leccion.id_leccion
-                ])
-
-                .pipe(
-
-                  map(
-                    retos =>
-                      retos.find(
-                        reto =>
-                          reto.tipo_reto ===
-                          'codigo'
-                      ) ?? null
-                  ),
-
-                  catchError(
-                    () => of(null)
-                  )
-
-                )
-
-          })
-
-            .pipe(
-
-              map(
-                ({ ejemplo, reto }) => ({
-
-                  leccion,
-
-                  ejemplo,
-
-                  reto
-
-                })
-
-              )
-
-            );
-
-        }),
-
-        catchError(
-          () => of(null)
-        )
-
-      );
-  }
-
-  private cargarContenidoActual(): void {
-
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    if (!contenido) {
-      return;
-    }
-
-    this.codigoInicial =
-      '// Escribe aquí tu solución TypeScript\n\n';
+  private resetearSesion(): void {
 
     this.code.set(
       this.codigoInicial
@@ -337,144 +141,118 @@ export class TsTerminalComponent implements OnInit {
 
     this.output.set('');
 
-    this.prediccion.set('');
-
-    this.feedback.set('');
-
     this.compiled.set(false);
 
     this.error.set(false);
 
     this.ejecutado.set(false);
 
+    this.prediccion.set('');
+
     this.mostrarPrediccion.set(false);
+
+    this.feedback.set('');
 
     this.mostrarFeedback.set(false);
 
     this.finalizado.set(false);
 
-    this.cargando.set(false);
-  }
+    this.pistasSolicitadas.set(0);
 
-  obtenerNumeroNivel(): number {
-
-    return (
-      this.indiceActual() + 1
-    );
-  }
-
-  obtenerTituloNivel(): string {
-
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    return (
-      contenido?.leccion?.titulo ||
-      `Nivel TypeScript ${this.obtenerNumeroNivel()}`
-    );
+    this.estrellasRestantes.set(3);
   }
 
   obtenerTituloReto(): string {
 
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
     return (
-      contenido?.reto?.titulo ||
+      this.lab()?.titulo_leccion ??
+      this.retoSeleccionado?.titulo ??
       'RETO TYPESCRIPT'
     );
   }
 
   obtenerProblema(): string {
 
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
     return (
-      contenido?.reto?.descripcion ||
+      this.lab()?.contenido_leccion ??
+      this.retoSeleccionado?.contenido ??
       'Resuelve el problema utilizando TypeScript.'
     );
   }
 
   obtenerConcepto(): string {
 
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
     return (
-      contenido?.leccion?.contenido ||
+      this.lab()?.contenido_leccion ??
       ''
     );
   }
 
-  obtenerEjemplo(): string {
+  solicitarPista(): void {
 
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
+    const total =
+      this.lab()?.pistas?.length ?? 0;
+
+    if (
+      total === 0 ||
+      this.pistasSolicitadas() >= total
+    ) {
+      return;
+    }
+
+    this.pistasSolicitadas.update(
+      valor => valor + 1
+    );
+
+    this.estrellasRestantes.update(
+      valor => Math.max(0, valor - 1)
+    );
+  }
+
+  obtenerPista(): string {
+
+    const indice =
+      this.pistasSolicitadas() - 1;
+
+    if (indice < 0) {
+      return '';
+    }
 
     return (
-      contenido?.ejemplo?.codigo ||
+      this.lab()?.pistas?.[indice]?.texto ??
       ''
     );
   }
 
-  obtenerXpReto(): number {
+  actualizarCodigo(codigo: string): void {
 
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
+    this.code.set(codigo);
 
-    return (
-      contenido?.reto?.xp_recompensa ?? 0
-    );
+    this.error.set(false);
+
+    this.mostrarFeedback.set(false);
   }
 
   prepararEjecucion(): void {
 
-    if (
-      !this.code().trim()
-    ) {
+    if (!this.code().trim()) {
 
       this.output.set(
-        `[TS-TERMINAL]
-
-ERROR: El editor está vacío.
-
-Escribe una solución antes de ejecutar.`
+        '[TS-TERMINAL]\n\n' +
+        'ERROR: El editor está vacío.\n\n' +
+        'Escribe una solución antes de ejecutar.'
       );
-
-      this.compiled.set(false);
 
       this.error.set(true);
 
       return;
     }
 
-    this.mostrarPrediccion.set(
-      true
-    );
+    this.mostrarPrediccion.set(true);
 
     this.output.set(
-      `[TS-TERMINAL]
-
-Antes de ejecutar tu programa:
-
-¿Qué resultado crees que aparecerá
-en la terminal?
-
-Escribe tu predicción y después
-pulsa "EJECUTAR TS".`
+      '[TS-TERMINAL]\n\n' +
+      'Antes de ejecutar tu programa, escribe una predicción y después pulsa EJECUTAR TS.'
     );
   }
 
@@ -488,75 +266,67 @@ pulsa "EJECUTAR TS".`
     }
 
     try {
-      // El editor antiguo se mantiene sin importar el compilador de TypeScript
-      // en el bundle del navegador. La ejecución queda aislada en el runner
-      // compartido; aquí se eliminan únicamente anotaciones simples para
-      // conservar el flujo visual existente.
-      const codigoEjecutable = codigo
-        .replace(/interface\s+[A-Za-z0-9_]+\s*\{[^}]*\}/g, '')
-        .replace(/:\s*(string|number|boolean|any|unknown|never|void)\b/g, '')
-        .replace(/\bas\s+(string|number|boolean|any|unknown)\b/g, '');
 
-      const resultados:
-        string[] = [];
+      const codigoEjecutable =
+        codigo
+          .replace(
+            /interface\s+[A-Za-z0-9_]+\s*\{[^}]*\}/g,
+            ''
+          )
+          .replace(
+            /:\s*(string|number|boolean|any|unknown|never|void)\b/g,
+            ''
+          )
+          .replace(
+            /\bas\s+(string|number|boolean|any|unknown)\b/g,
+            ''
+          );
+
+      const resultados: string[] = [];
 
       const consoleOriginal =
         console.log;
 
-      console.log =
-        (...args: unknown[]) => {
+      console.log = (
+        ...args: unknown[]
+      ) => {
 
-          resultados.push(
-            args
-              .map(
-                valor =>
-                  this.formatearResultado(
-                    valor
-                  )
-              )
-              .join(' ')
-          );
-
-        };
+        resultados.push(
+          args
+            .map(valor =>
+              this.formatearResultado(valor)
+            )
+            .join(' ')
+        );
+      };
 
       try {
 
-        const ejecutar = new Function(codigoEjecutable);
-
-        ejecutar();
+        new Function(
+          codigoEjecutable
+        )();
 
       } finally {
 
         console.log =
           consoleOriginal;
-
       }
 
       const salida =
         resultados.join('\n');
 
       this.output.set(
-        `[TS-TERMINAL]
-
-> COMPILANDO TYPESCRIPT...
-
-COMPILACIÓN CORRECTA.
-
-> EJECUTANDO main.ts...
-
---------------------------------
-
-SALIDA DEL PROGRAMA
-
---------------------------------
-
-${salida || 'El programa no produjo ninguna salida.'}
-
---------------------------------
-
-> PROCESO FINALIZADO
-
---------------------------------`
+        `[TS-TERMINAL]\n\n` +
+        `> COMPILANDO TYPESCRIPT...\n\n` +
+        `COMPILACIÓN CORRECTA.\n\n` +
+        `> EJECUTANDO main.ts...\n\n` +
+        `--------------------------------\n\n` +
+        `SALIDA DEL PROGRAMA\n\n` +
+        `--------------------------------\n\n` +
+        `${salida || 'El programa no produjo ninguna salida.'}\n\n` +
+        `--------------------------------\n\n` +
+        `> PROCESO FINALIZADO\n\n` +
+        `--------------------------------`
       );
 
       this.compiled.set(true);
@@ -565,36 +335,22 @@ ${salida || 'El programa no produjo ninguna salida.'}
 
       this.ejecutado.set(true);
 
-      this.generarFeedback(
-        salida
-      );
+      this.generarFeedback(salida);
 
-      this.registrarIntento(
-        true
-      );
-
-    } catch (e) {
+    } catch (error) {
 
       const mensaje =
-        e instanceof Error
-          ? e.message
-          : String(e);
+        error instanceof Error
+          ? error.message
+          : String(error);
 
       this.output.set(
-        `[TS-TERMINAL]
-
-> COMPILANDO TYPESCRIPT...
-
-ERROR
-
---------------------------------
-
-${mensaje}
-
---------------------------------
-
-Revisa el código e inténtalo
-nuevamente.`
+        `[TS-TERMINAL]\n\n` +
+        `> COMPILANDO TYPESCRIPT...\n\n` +
+        `ERROR\n\n` +
+        `--------------------------------\n\n` +
+        `${mensaje}\n\n` +
+        `--------------------------------`
       );
 
       this.compiled.set(false);
@@ -604,16 +360,10 @@ nuevamente.`
       this.ejecutado.set(true);
 
       this.feedback.set(
-        'El código no pudo ejecutarse. Revisa el mensaje de error y encuentra qué parte de tu solución está provocando el problema.'
+        'El código no pudo ejecutarse. Revisa el mensaje y encuentra qué parte de tu solución provoca el error.'
       );
 
-      this.mostrarFeedback.set(
-        true
-      );
-
-      this.registrarIntento(
-        false
-      );
+      this.mostrarFeedback.set(true);
     }
   }
 
@@ -621,124 +371,45 @@ nuevamente.`
     salida: string
   ): void {
 
-    if (
-      !salida.trim()
-    ) {
+    const prediccion =
+      this.prediccion()
+        .trim()
+        .toLowerCase();
 
-      this.feedback.set(
-        'Tu código se ejecutó correctamente, pero no produjo ninguna salida. Revisa el problema y piensa qué información necesitas mostrar mediante console.log().'
-      );
+    const resultado =
+      salida
+        .trim()
+        .toLowerCase();
 
-      this.mostrarFeedback.set(
-        true
-      );
-
-      return;
-    }
-
-    if (
-      this.prediccion().trim()
-    ) {
-
-      const prediccion =
-        this.prediccion()
-          .trim()
-          .toLowerCase();
-
-      const resultado =
-        salida
-          .trim()
-          .toLowerCase();
-
-      if (
-        resultado.includes(
-          prediccion
-        )
-      ) {
-
-        this.feedback.set(
-          'Tu predicción coincide con parte del resultado. Pudiste anticipar correctamente el comportamiento del programa.'
-        );
-
-      } else {
-
-        this.feedback.set(
-          'El programa se ejecutó correctamente, pero el resultado fue diferente a tu predicción. Compara ambos y descubre qué instrucción produjo la diferencia.'
-        );
-
-      }
-
-    } else {
-
-      this.feedback.set(
-        'Tu programa se ejecutó correctamente. Analiza la salida y explica mentalmente por qué obtuviste ese resultado.'
-      );
-
-    }
-
-    this.mostrarFeedback.set(
-      true
+    this.feedback.set(
+      prediccion &&
+      resultado.includes(prediccion)
+        ? 'Tu predicción coincide con el resultado.'
+        : 'Compara tu predicción con la salida y explica qué instrucción produjo el resultado.'
     );
+
+    this.mostrarFeedback.set(true);
   }
 
   siguienteReto(): void {
+    const missionId = this.retoSeleccionado?.id_leccion;
+    if (!missionId) return;
 
-    const siguiente =
-      this.indiceActual() + 1;
-
-    if (
-      siguiente >=
-      this.contenidos().length
-    ) {
-
-      this.finalizado.set(
-        true
-      );
-
-      this.feedback.set(
-        'Has recorrido todos los retos disponibles de TypeScript.'
-      );
-
-      this.mostrarFeedback.set(
-        true
-      );
-
-      return;
-    }
-
-    this.indiceActual.set(
-      siguiente
-    );
-
-    this.cargarContenidoActual();
-  }
-
-  cargarEjemploEnEditor(): void {
-
-    const ejemplo =
-      this.obtenerEjemplo();
-
-    if (!ejemplo) {
-      return;
-    }
-
-    this.code.set(
-      ejemplo
-    );
-
-    this.output.set('');
-
-    this.feedback.set('');
-
-    this.compiled.set(false);
-
-    this.error.set(false);
-
-    this.ejecutado.set(false);
-
-    this.mostrarPrediccion.set(false);
-
-    this.mostrarFeedback.set(false);
+    const prediction = this.prediccion().trim().toLowerCase();
+    const output = this.output().toLowerCase();
+    this.missionProgressService.updateTerminalStats(missionId, {
+      prediccion_correcta: prediction.length > 0 && output.includes(prediction),
+      pistas_usadas: this.pistasSolicitadas()
+    }).subscribe({
+      next: () => this.missionProgressService.updateProgress(missionId, 'quiz').subscribe({
+        next: () => {
+          this.finalizado.set(true);
+          this.missionCompleted.emit();
+        },
+        error: error => console.error('No se pudo desbloquear el cuestionario:', error)
+      }),
+      error: error => console.error('No se pudieron guardar las estadísticas del terminal:', error)
+    });
   }
 
   reset(): void {
@@ -750,8 +421,6 @@ nuevamente.`
     this.output.set('');
 
     this.prediccion.set('');
-
-    this.feedback.set('');
 
     this.compiled.set(false);
 
@@ -772,8 +441,6 @@ nuevamente.`
 
     this.prediccion.set('');
 
-    this.feedback.set('');
-
     this.compiled.set(false);
 
     this.error.set(false);
@@ -785,85 +452,20 @@ nuevamente.`
     this.mostrarFeedback.set(false);
   }
 
-  private registrarIntento(
-    correcto: boolean
-  ): void {
-
-    const reto =
-      this.contenidos()[
-        this.indiceActual()
-      ]?.reto;
-
-    if (
-      !reto?.id_reto
-    ) {
-      return;
-    }
-
-    this.retoService
-      .registrarIntento({
-
-        id_reto:
-          reto.id_reto,
-
-        respuesta_usuario:
-          this.code(),
-
-        correcto,
-
-        xp_obtenida:
-          0
-
-      })
-      .subscribe({
-
-        next: resultado => {
-
-          if (
-            resultado &&
-            correcto
-          ) {
-
-            this.feedback.set(
-              `${this.feedback()}\n\nMisión registrada correctamente. Recompensa: +${reto.xp_recompensa ?? 0} XP.`
-            );
-
-          }
-
-        },
-
-        error: err =>
-          console.error(
-            'Error al registrar intento:',
-            err
-          )
-
-      });
-  }
-
   private formatearResultado(
     valor: unknown
   ): string {
 
     if (
-      typeof valor === 'object' &&
-      valor !== null
+      typeof valor === 'string'
     ) {
+      return valor;
+    }
 
-      try {
-
-        return JSON.stringify(
-          valor,
-          null,
-          2
-        );
-
-      } catch {
-
-        return '[Objeto]';
-
-      }
-
+    if (
+      typeof valor === 'object'
+    ) {
+      return JSON.stringify(valor);
     }
 
     return String(valor);
