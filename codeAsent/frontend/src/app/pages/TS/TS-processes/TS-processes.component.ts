@@ -1,23 +1,15 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  OnInit,
-  Output,
-  inject,
-  signal
-} from '@angular/core';
-
+import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
 import { LanguageService } from '../../../core/services/language.service';
 import { IMission } from '../../../core/models/language.model';
+import { RetoService } from '../../../services/ts-reto.service';
 
-interface MissionView {
+interface MisionViewTs {
   id: number;
   code: string;
   title: string;
   detail: string;
-  reward: string;
-  mission: IMission;
+  mision: IMission;
 }
 
 @Component({
@@ -28,70 +20,74 @@ interface MissionView {
   styleUrl: './TS-processes.component.scss'
 })
 export class TSProcessesComponent implements OnInit {
-
-  @Output()
-  back = new EventEmitter<void>();
-
-  @Output()
-  missionSelected = new EventEmitter<IMission>();
+  @Output() back = new EventEmitter<void>();
+  @Output() missionSelected = new EventEmitter<any>();
 
   private readonly languageService = inject(LanguageService);
+  private readonly retoService = inject(RetoService);
 
+  missions = signal<MisionViewTs[]>([]);
   cargando = signal(true);
-
   errorCarga = signal<string | null>(null);
 
-  missions = signal<MissionView[]>([]);
-
   ngOnInit(): void {
-    this.cargarMisiones();
-  }
-
-  cargarMisiones(): void {
-    this.cargando.set(true);
-    this.errorCarga.set(null);
-
     this.languageService.obtenerMisionesPorSlug('typescript').subscribe({
-      next: response => {
+      next: respuesta => {
+        const misiones = respuesta.data || [];
         this.missions.set(
-          (response.data ?? []).map((mission, index) => ({
-            id: mission.id_leccion,
-            code: `TS-${String(index + 1).padStart(2, '0')}`,
-            title: mission.titulo,
-            detail:
-              mission.contenido ||
-              'Completa esta misión de TypeScript.',
-            reward: `MISIÓN ${index + 1}`,
-            mission
-          }))
+          misiones.map((mision, index) => {
+            const numero = mision.numero_nivel ?? index + 1;
+            return {
+              id: numero,
+              code: `TS-${String(numero).padStart(2, '0')}`,
+              title: mision.titulo,
+              detail: this.resumirContenido(mision.contenido),
+              mision
+            };
+          })
         );
-
         this.cargando.set(false);
       },
-
       error: error => {
-        console.error(
-          'Error al cargar las misiones TypeScript:',
-          error
-        );
-
-        this.errorCarga.set(
-          'No se pudieron cargar las misiones TypeScript.'
-        );
-
+        console.error(error);
+        this.errorCarga.set('No se pudieron cargar las misiones TypeScript.');
         this.cargando.set(false);
       }
     });
   }
 
-  seleccionarMision(mission: MissionView): void {
-    if (
-      mission.mission.estado === 'locked' ||
-      mission.mission.estado === 'completed'
-    ) {
-      return;
-    }
+  private resumirContenido(contenido: string): string {
+    if (!contenido) return 'Completa esta misión de TypeScript.';
+    const primeraOracion = contenido.trim().split(/(?<=[.!?])\s\/?\s?(?=(?:[^`]*`[^`]*`)*[^`]*$)/)[0];
+    const resumen = primeraOracion || contenido.trim();
+    return resumen.length > 90 ? `${resumen.slice(0, 90)}...` : resumen;
+  }
 
-    this.missionSelected.emit(mission.mission);
+  seleccionarMision(view: MisionViewTs): void {
+    const mision = view.mision;
+    if (mision.estado === 'locked') return;
+
+    const retoParaDashboard: any = {
+      id_leccion: mision.id_leccion,
+      id_nivel: mision.id_nivel,
+      titulo: mision.titulo,
+      contenido: mision.contenido,
+      leccionContenido: mision.contenido,
+      numero_nivel: mision.numero_nivel,
+      estado: mision.estado
+    };
+
+    this.retoService.obtenerRetosDeLecciones([mision.id_leccion]).subscribe({
+      next: retos => {
+        const reto = retos[0] ?? null;
+        if (reto) {
+          retoParaDashboard.id_reto = reto.id_reto;
+          retoParaDashboard.tipo_reto = reto.tipo_reto;
+          retoParaDashboard.descripcion = reto.descripcion || mision.contenido;
+        }
+        this.missionSelected.emit(retoParaDashboard);
+      },
+      error: () => this.missionSelected.emit(retoParaDashboard)
+    });
   }
 }
