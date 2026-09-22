@@ -1,37 +1,8 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  inject,
-  signal
-} from '@angular/core';
-
-import { HttpClient } from '@angular/common/http';
-
-import { catchError, map, of } from 'rxjs';
-
-import { environment } from '../../../../environments/environment';
-
-import { IMission } from '../../../core/models/language.model';
-
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
+import { HtmlDataService, HtmlQuizQuestion } from '../../../services/html-data.service';
+import { RetoService } from '../../../services/ts-reto.service';
 import { MissionProgressService } from '../../../core/services/mission-progress.service';
-
-interface TSQuizAnswer {
-  id_respuesta: number;
-  texto_respuesta: string;
-  es_correcta: boolean;
-}
-
-interface TSQuizQuestion {
-  id_reto: number;
-  enunciado: string;
-  xp_recompensa?: number;
-  respuestas: TSQuizAnswer[];
-}
 
 @Component({
   selector: 'app-ts-test',
@@ -40,225 +11,105 @@ interface TSQuizQuestion {
   templateUrl: './TS-test.component.html',
   styleUrl: './TS-test.component.scss'
 })
-export class TSTestComponent
-  implements OnChanges {
+export class TSTestComponent implements OnChanges {
+  @Input() mission: any = null;
+  @Output() back = new EventEmitter<void>();
+  @Output() next = new EventEmitter<void>();
+  @Output() xpAwarded = new EventEmitter<number>();
 
-  @Input()
-  mission: IMission | null = null;
+  private readonly htmlDataService = inject(HtmlDataService);
+  private readonly retoService = inject(RetoService);
+  private readonly missionProgressService = inject(MissionProgressService);
 
-  @Output()
-  back = new EventEmitter<void>();
+  preguntas = signal<HtmlQuizQuestion[]>([]);
+  preguntaActual = signal(0);
+  seleccionada = signal<number | null>(null);
+  respondida = signal(false);
+  esCorrecta = signal(false);
+  cargando = signal(false);
+  finalizado = signal(false);
+  xpGanado = signal(0);
+  errorCarga = signal<string | null>(null);
 
-  @Output()
-  next = new EventEmitter<void>();
-
-  @Output()
-  quizCompleted =
-    new EventEmitter<void>();
-
-  private readonly http =
-    inject(HttpClient);
-
-  private readonly missionProgressService =
-    inject(MissionProgressService);
-
-  private readonly apiUrl =
-    environment.apiUrl;
-
-  preguntas =
-    signal<TSQuizQuestion[]>([]);
-
-  preguntaActual =
-    signal(0);
-
-  seleccionada =
-    signal<number | null>(null);
-
-  respondida =
-    signal(false);
-
-  esCorrecta =
-    signal(false);
-
-  cargando =
-    signal(false);
-
-  finalizado =
-    signal(false);
-
-  xpGanado =
-    signal(0);
-
-  errorCarga =
-    signal<string | null>(null);
-
-  ngOnChanges(
-    changes: SimpleChanges
-  ): void {
-
-    if (
-      changes['mission'] &&
-      this.mission?.id_leccion
-    ) {
-
-      this.cargarCuestionario(
-        this.mission.id_leccion
-      );
-    }
-  }
-
-  private cargarCuestionario(
-    idLeccion: number
-  ): void {
-
-    this.cargando.set(true);
-
-    this.errorCarga.set(null);
-
-    this.finalizado.set(false);
-
-    this.preguntaActual.set(0);
-
-    this.seleccionada.set(null);
-
-    this.respondida.set(false);
-
-    this.esCorrecta.set(false);
-
-    this.xpGanado.set(0);
-
-    this.http
-      .get<{ data: TSQuizQuestion[] }>(
-        `${this.apiUrl}/missions/${idLeccion}/quiz`
-      )
-      .pipe(
-
-        map(response =>
-          (response?.data ?? []).slice(0, 3)
-        ),
-
-        catchError(error => {
-
-          console.error(
-            'Error al cargar el cuestionario TypeScript:',
-            error
-          );
-
-          this.errorCarga.set(
-            'No se pudieron cargar los cuestionarios.'
-          );
-
-          return of([]);
-        })
-      )
-      .subscribe(preguntas => {
-
-        this.preguntas.set(
-          preguntas.map(pregunta => ({
-            ...pregunta,
-
-            respuestas: this.barajar(
-              (pregunta.respuestas ?? []).map(respuesta => ({
-                ...respuesta,
-                es_correcta:
-                  respuesta.es_correcta === true ||
-                  String(respuesta.es_correcta).toLowerCase() === 'true'
-              }))
-            )
-          }))
-        );
-
-        this.cargando.set(false);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mission'] && this.mission?.id_leccion) {
+      this.missionProgressService.updateProgress(this.mission.id_leccion, 'quiz').subscribe({
+        error: () => undefined
       });
-  }
-
-  private barajar<T>(elementos: T[]): T[] {
-    const resultado = [...elementos];
-    for (let indice = resultado.length - 1; indice > 0; indice -= 1) {
-      const aleatorio = Math.floor(Math.random() * (indice + 1));
-      [resultado[indice], resultado[aleatorio]] = [resultado[aleatorio], resultado[indice]];
+      this.cargarCuestionario(this.mission.id_leccion);
     }
-    return resultado;
   }
 
-  pregunta():
-    TSQuizQuestion | null {
-
-    return (
-      this.preguntas()[
-        this.preguntaActual()
-      ] ?? null
-    );
+  private cargarCuestionario(idLeccion: number): void {
+    this.cargando.set(true);
+    this.errorCarga.set(null);
+    this.finalizado.set(false);
+    this.preguntaActual.set(0);
+    this.seleccionada.set(null);
+    this.respondida.set(false);
+    this.xpGanado.set(0);
+    this.htmlDataService.obtenerCuestionario(idLeccion).subscribe({
+      next: preguntas => {
+        this.preguntas.set(preguntas.slice(0, 3));
+        this.cargando.set(false);
+      },
+      error: error => {
+        console.error(error);
+        this.errorCarga.set('No se pudieron cargar los cuestionarios.');
+        this.cargando.set(false);
+      }
+    });
   }
 
-  responder(
-    indice: number,
-    correcta: boolean
-  ): void {
+  pregunta(): HtmlQuizQuestion | null {
+    return this.preguntas()[this.preguntaActual()] ?? null;
+  }
 
-    if (
-      this.respondida() ||
-      !this.pregunta()
-    ) {
-      return;
-    }
+  responder(indice: number, correcta: boolean): void {
+    if (this.respondida() || !this.pregunta()) return;
 
     this.seleccionada.set(indice);
-
     this.esCorrecta.set(correcta);
-
     this.respondida.set(true);
 
+    if (!correcta) return;
+
+    const actual = this.pregunta()!;
+    this.retoService.registrarIntentoConXp({
+      id_reto: actual.id_reto,
+      respuesta_usuario: actual.respuestas[indice]?.texto_respuesta,
+      correcto: true
+    }).subscribe(xp => {
+      this.xpGanado.update(total => total + xp);
+      if (xp > 0) this.xpAwarded.emit(xp);
+    });
   }
 
   reintentar(): void {
-
     this.seleccionada.set(null);
-
     this.respondida.set(false);
-
     this.esCorrecta.set(false);
   }
 
+  private marcarMisionCompletada(): void {
+    const idLeccion = this.mission?.id_leccion;
+    const total = this.preguntas().length;
+    if (!idLeccion || total === 0) return;
+    this.missionProgressService.completeMission(idLeccion, total, total).subscribe({
+      error: () => undefined
+    });
+  }
+
   siguiente(): void {
-
-    if (
-      !this.respondida() ||
-      !this.esCorrecta()
-    ) {
+    if (!this.respondida() || !this.esCorrecta()) return;
+    if (this.preguntaActual() >= this.preguntas().length - 1) {
+      this.finalizado.set(true);
+      this.marcarMisionCompletada();
       return;
     }
-
-    if (
-      this.preguntaActual() >=
-      this.preguntas().length - 1
-    ) {
-
-      if (!this.mission?.id_leccion) return;
-
-      this.missionProgressService.completeMission(
-        this.mission.id_leccion,
-        this.preguntas().length,
-        this.preguntas().length
-      ).subscribe({
-        next: response => {
-          this.xpGanado.set(Number(response?.data?.xp_awarded ?? 0));
-          this.finalizado.set(true);
-        },
-        error: error => console.error('Error al completar la misión TypeScript:', error)
-      });
-
-      return;
-    }
-
-    this.preguntaActual.update(
-      indice => indice + 1
-    );
-
+    this.preguntaActual.update(indice => indice + 1);
     this.seleccionada.set(null);
-
     this.respondida.set(false);
-
     this.esCorrecta.set(false);
   }
 }
