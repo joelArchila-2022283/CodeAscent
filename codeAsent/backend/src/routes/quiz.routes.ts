@@ -73,11 +73,11 @@ router.post('/:missionId/complete', async (req, res) => {
              WHERE user_id = $1 AND mission_id = $2`,
             [userId, missionId]
         );
-        const xpAward = Number(row.numero_nivel) * 100;
+        const xpAward = row.slug === 'sql' ? 100 : Number(row.numero_nivel) * 100;
         const progresoLenguaje = await client.query(
             `SELECT
                 n.id_lenguaje,
-                COALESCE(SUM(CASE WHEN mp.completed THEN n.numero_nivel * 100 ELSE 0 END), 0)::int AS xp,
+                COALESCE(SUM(CASE WHEN mp.completed THEN CASE WHEN l.slug = 'sql' THEN 100 ELSE n.numero_nivel * 100 END ELSE 0 END), 0)::int AS xp,
                 COUNT(DISTINCT n.id_nivel)::int AS total_niveles,
                 COUNT(DISTINCT n.id_nivel) FILTER (WHERE mp.completed = TRUE)::int AS niveles_completados,
                 COALESCE(
