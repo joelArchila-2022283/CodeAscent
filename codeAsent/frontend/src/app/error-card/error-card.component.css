@@ -1,0 +1,96 @@
+@import url("https://fonts.googleapis.com/css2?family=Bangers&family=Baloo+2:wght@500;600;700&display=swap");
+
+:host{display:block;--g:#00e676;--c:#00e5ff;--r:#ff4d4d;--cream:#e8e1c7;--ink:#050604}:host *{box-sizing:border-box}
+.error-page{margin:0;min-height:100vh;background:#030504;color:var(--cream);font-family:"Baloo 2",sans-serif;display:grid;place-items:center;padding:24px;overflow-x:hidden}
+.wrap{width:min(100%,720px)}.brand{text-align:center;font:32px Bangers;letter-spacing:3px;color:var(--g);text-shadow:3px 3px #000,0 0 18px #00e67677;margin-bottom:14px}
+.picker{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-bottom:14px}.picker button{background:#0a100d;border:2px solid #294036;color:#92a59c;border-radius:999px;padding:7px 13px;font:14px Bangers;cursor:pointer}.picker button.on{background:var(--g);color:#031009;border-color:#000}
+.theater{height:650px;position:relative;overflow:hidden;border:5px solid #111b16;border-radius:20px;background:#050806;box-shadow:0 30px 80px #000}
+.theater:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#ffffff08 3px 4px),radial-gradient(circle,transparent 45%,#000b 100%);z-index:20}
+.curtain{position:absolute;z-index:15;top:0;width:105px;height:100%;background:repeating-linear-gradient(90deg,#0d3c29 0 20px,#071e15 20px 40px);border-right:5px solid #020302;filter:drop-shadow(8px 0 10px #000)}.curtain.r{right:0;transform:scaleX(-1)}.curtain.l{left:0}.curtain:after{content:"";position:absolute;top:42%;right:-12px;width:30px;height:28px;background:var(--g);border:5px solid #000;border-radius:50%}
+.stage{position:absolute;left:80px;right:80px;bottom:0;height:100px;background:repeating-linear-gradient(90deg,#251b12 0 45px,#342519 45px 90px);border-top:7px solid #000;transform:perspective(300px) rotateX(18deg);transform-origin:bottom}
+.spot{position:absolute;left:50%;top:-80px;transform:translateX(-50%);width:430px;height:580px;background:linear-gradient(100deg,transparent 18%,color-mix(in srgb,var(--accent) 14%,transparent) 50%,transparent 82%);clip-path:polygon(42% 0,58% 0,100% 100%,0 100%);animation:spot 4s ease-in-out infinite}@keyframes spot{50%{transform:translateX(-50%) rotate(2deg)}}
+.panel{display:none;position:absolute;inset:0;z-index:5;padding:42px 115px 115px;text-align:center}.panel.on{display:block;animation:enter .45s ease both}@keyframes enter{from{opacity:0;transform:scale(.93) translateY(15px)}to{opacity:1;transform:none}}
+.marquee{display:inline-block;background:var(--cream);color:#090a07;border:5px solid #000;padding:8px 18px;box-shadow:6px 7px #000;transform:rotate(-2deg);font:17px Bangers;letter-spacing:1px}
+.art{height:245px;position:relative;margin-top:15px}.title{font:32px/1 Bangers;color:var(--accent);text-shadow:3px 4px #000,0 0 14px var(--accent);letter-spacing:1px}.msg{font-size:14px;color:#91a49b;max-width:430px;margin:10px auto 15px;line-height:1.45;font-weight:600}.btn{background:var(--accent);color:#031009;border:4px solid #000;border-radius:7px;padding:9px 17px;font:16px Bangers;box-shadow:5px 5px #000;cursor:pointer}.btn.alt{background:#08100d;color:var(--c);border-color:var(--c);box-shadow:none;margin-left:7px}
+/* mascot-like generic cartoon props */
+.eye{position:absolute;width:18px;height:27px;background:#fff;border:4px solid #000;border-radius:50%}.eye:after{content:"";position:absolute;width:6px;height:9px;background:#000;border-radius:50%;left:4px;top:8px}
+/* 404 living sign */
+.sign404{position:absolute;left:50%;top:28px;transform:translateX(-50%) rotate(-3deg);width:220px;height:140px;background:#d8cfb4;border:7px solid #000;border-radius:9px;box-shadow:8px 9px #000;animation:wobble 2.3s ease-in-out infinite}.sign404:before{content:"404";position:absolute;inset:38px 0;text-align:center;font:66px Bangers;color:var(--c);text-shadow:3px 3px #000}.sign404 .e1{left:52px;top:23px}.sign404 .e2{right:52px;top:23px}.post{position:absolute;left:50%;top:163px;width:20px;height:75px;background:#6e4e2e;border:5px solid #000;transform:translateX(-50%)}@keyframes wobble{50%{transform:translateX(-50%) rotate(3deg) translateY(-5px)}}
+/* 500 goofy machine */
+.box{position:absolute;left:50%;top:30px;transform:translateX(-50%);width:205px;height:155px;background:#293b32;border:7px solid #000;border-radius:22px;box-shadow:8px 9px #000;animation:shake 2.5s infinite}.box:before{content:"500";position:absolute;left:45px;right:45px;top:62px;background:#080b09;color:var(--r);font:38px Bangers;border:4px solid #000}.box .e1{left:35px;top:22px}.box .e2{right:35px;top:22px}.mouth{position:absolute;left:76px;bottom:14px;width:50px;height:15px;border:5px solid #000;border-top:0;border-radius:0 0 30px 30px}.smoke{position:absolute;width:35px;height:35px;border-radius:50%;background:#b7b9aa;top:4px;left:55%;opacity:0;animation:smoke 2s infinite}.smoke.s2{animation-delay:.7s;left:61%}@keyframes smoke{25%{opacity:.55}100%{opacity:0;transform:translateY(-75px) scale(1.8)}}@keyframes shake{88%{transform:translateX(-50%)}91%{transform:translateX(-54%) rotate(-2deg)}94%{transform:translateX(-46%) rotate(2deg)}}
+/* 403 bouncer glove */
+.stopHand{position:absolute;left:50%;top:18px;transform:translateX(-50%);font-size:125px;filter:drop-shadow(6px 7px #000);animation:hand 2s ease-in-out infinite}.stopHand:after{content:"403";position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);font:31px Bangers;color:var(--r);text-shadow:2px 2px #000}@keyframes hand{50%{transform:translateX(-50%) rotate(7deg) scale(1.05)}}
+.chain{position:absolute;left:20%;right:20%;bottom:28px;height:12px;background:repeating-linear-gradient(90deg,var(--r) 0 18px,#000 18px 25px);transform:rotate(-5deg);box-shadow:0 0 12px #ff4d4d88}
+/* offline plug characters */
+.plugman{position:absolute;top:70px;width:95px;height:75px;background:#d8cfb4;border:6px solid #000;border-radius:15px;box-shadow:6px 7px #000}.plugman.a{left:20%;animation:leftplug 2s ease-in-out infinite}.plugman.b{right:20%;animation:rightplug 2s ease-in-out infinite}.plugman .eye{transform:scale(.65);top:12px}.plugman .eye:first-child{left:19px}.plugman .eye:nth-child(2){right:19px}.plugman:after{content:"";position:absolute;width:60px;height:10px;background:#16231d;border:5px solid #000;top:29px}.plugman.a:after{right:82px}.plugman.b:after{left:82px}.zap{position:absolute;left:50%;top:78px;transform:translateX(-50%);font:65px Bangers;color:var(--c);text-shadow:0 0 18px var(--c);animation:zap .7s steps(2) infinite}.retry{position:absolute;bottom:8px;left:0;right:0;color:var(--g);font:14px Bangers;letter-spacing:2px}@keyframes leftplug{50%{transform:translateX(-7px) rotate(-3deg)}}@keyframes rightplug{50%{transform:translateX(7px) rotate(3deg)}}@keyframes zap{50%{opacity:.15;transform:translateX(-50%) scale(.7)}}
+@media(max-width:600px){.theater{height:680px}.panel{padding-left:80px;padding-right:80px}.curtain{width:72px}.art{height:245px}.plugman.a{left:8%}.plugman.b{right:8%}}
+
+
+.stopHand{display:none}
+.stop-hand{position:absolute;left:50%;top:5px;width:180px;height:215px;transform:translateX(-50%) rotate(-5deg);transform-origin:50% 90%;animation:newHand 2.3s ease-in-out infinite;filter:drop-shadow(7px 9px 0 #000) drop-shadow(0 0 10px #ff4d4d55);z-index:6}
+.stop-hand .palm{position:absolute;left:38px;top:78px;width:105px;height:105px;background:var(--cream);border:7px solid #000;border-radius:48% 48% 42% 42%;box-shadow:inset -10px -8px 0 #c9c1aa;z-index:4}
+.stop-hand .finger{position:absolute;width:36px;background:var(--cream);border:7px solid #000;border-radius:22px 22px 15px 15px;box-shadow:inset -5px 0 #c9c1aa;z-index:2}
+.stop-hand .finger-1{height:105px;left:37px;top:18px;transform:rotate(-5deg)}
+.stop-hand .finger-2{height:125px;left:69px;top:0}
+.stop-hand .finger-3{height:112px;left:101px;top:10px;transform:rotate(3deg)}
+.stop-hand .finger-4{height:90px;left:130px;top:34px;transform:rotate(8deg)}
+.stop-hand .thumb{position:absolute;width:75px;height:40px;left:0;top:115px;background:var(--cream);border:7px solid #000;border-radius:25px;transform:rotate(-38deg);box-shadow:inset -5px -5px #c9c1aa;z-index:6}
+.stop-hand .wrist{position:absolute;width:80px;height:55px;left:52px;bottom:0;background:#111814;border:7px solid #000;border-radius:12px 12px 28px 28px;z-index:3;display:grid;place-items:center;font:23px Bangers;color:var(--r);font-style:normal;text-shadow:0 0 8px #ff4d4dcc}
+.stop-hand:before,.stop-hand:after{content:"";position:absolute;width:40px;height:6px;background:var(--r);border:3px solid #000;border-radius:20px;box-shadow:0 0 8px #ff4d4dbb;top:75px;animation:warn .8s ease-in-out infinite alternate}
+.stop-hand:before{left:-38px;transform:rotate(15deg)}.stop-hand:after{right:-38px;transform:rotate(-15deg)}
+@keyframes newHand{0%,100%{transform:translateX(-50%) translateY(5px) rotate(-5deg)}50%{transform:translateX(-50%) translateY(-7px) rotate(4deg) scale(1.03)}}
+@keyframes warn{from{opacity:.3}to{opacity:1}}
+
+
+/* === COMPUTER-THEMED FIGURES ONLY === */
+
+/* 404 — lost computer monitor */
+.computer404{position:absolute;left:50%;top:22px;width:230px;height:205px;transform:translateX(-50%);animation:pcFloat 2.5s ease-in-out infinite}
+.monitor-face{position:absolute;left:27px;top:5px;width:176px;height:125px;background:#263a31;border:7px solid #000;border-radius:18px;box-shadow:7px 8px #000,0 0 18px #00e5ff44}
+.monitor-face:before{content:"";position:absolute;inset:13px;background:#06100c;border:4px solid #000;border-radius:8px}
+.monitor-face b{position:absolute;z-index:4;left:0;right:0;top:48px;text-align:center;font:36px Bangers;color:var(--c);text-shadow:0 0 10px var(--c)}
+.monitor-face .eye{z-index:5;width:14px;height:20px;border-width:3px;top:24px}.monitor-face .eye:after{width:4px;height:6px;left:3px;top:5px}
+.ce1{left:56px}.ce2{right:56px}
+.monitor-neck{position:absolute;left:99px;top:128px;width:30px;height:35px;background:#293b32;border:6px solid #000}
+.monitor-base{position:absolute;left:61px;top:157px;width:108px;height:25px;background:#293b32;border:6px solid #000;border-radius:50%}
+.broken-cable{position:absolute;left:168px;top:142px;width:55px;height:45px;border-right:7px solid var(--c);border-bottom:7px solid var(--c);border-radius:0 0 28px 0;filter:drop-shadow(0 0 5px var(--c))}
+.broken-cable:after{content:"×";position:absolute;right:-13px;bottom:-23px;font:28px Bangers;color:var(--r)}
+@keyframes pcFloat{50%{transform:translateX(-50%) translateY(-6px) rotate(1deg)}}
+
+/* 500 — overheating computer tower */
+.cpu500{position:absolute;left:50%;top:25px;width:175px;height:180px;transform:translateX(-50%);background:#293b32;border:7px solid #000;border-radius:18px;box-shadow:8px 9px #000;animation:cpuCrash 2.7s infinite}
+.cpu-screen{position:absolute;left:25px;right:25px;top:22px;height:55px;background:#06100c;border:5px solid #000;border-radius:7px;color:var(--r);font:38px Bangers;display:grid;place-items:center;text-shadow:0 0 10px var(--r)}
+.cpu-light{position:absolute;bottom:25px;width:15px;height:15px;border:4px solid #000;border-radius:50%}.l1{left:27px;background:var(--r);box-shadow:0 0 9px var(--r);animation:cpuBlink .5s steps(2) infinite}.l2{left:51px;background:var(--c);box-shadow:0 0 9px var(--c)}
+.cpu-slot{position:absolute;left:82px;right:20px;bottom:28px;height:12px;background:#050806;border:4px solid #000;border-radius:5px}
+.mini-gear{position:absolute;border:6px dashed var(--g);border-radius:50%;animation:spin 2.8s linear infinite}.mg1{width:48px;height:48px;right:-31px;top:88px}.mg2{width:36px;height:36px;right:-48px;top:125px;border-color:var(--c);animation-direction:reverse}
+@keyframes cpuCrash{0%,82%,100%{transform:translateX(-50%)}86%{transform:translateX(-54%) rotate(-2deg)}90%{transform:translateX(-46%) rotate(2deg)}}
+@keyframes cpuBlink{50%{opacity:.2}}
+
+/* 403 — firewall/security shield */
+.firewall403{position:absolute;left:50%;top:17px;width:235px;height:205px;transform:translateX(-50%);animation:securityPulse 2.2s ease-in-out infinite}
+.server-door{position:absolute;left:27px;right:27px;top:30px;height:160px;background:#1b2922;border:7px solid #000;border-radius:15px;box-shadow:7px 8px #000}
+.server-door i{display:block;height:24px;margin:17px 18px;background:#07100c;border:4px solid #000;position:relative}
+.server-door i:after{content:"";position:absolute;right:8px;top:4px;width:7px;height:7px;border-radius:50%;background:var(--r);box-shadow:0 0 7px var(--r)}
+.shield403{position:absolute;z-index:5;left:50%;top:4px;transform:translateX(-50%);width:125px;height:145px;background:var(--r);border:7px solid #000;clip-path:polygon(50% 0,95% 18%,87% 68%,50% 100%,13% 68%,5% 18%);filter:drop-shadow(0 0 11px #ff4d4d88);display:grid;place-items:center}
+.shield403 span{font:38px Bangers;color:#0b0707;text-shadow:1px 2px #ff8989}
+.keyhole{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:15px;height:28px;background:#080806;border-radius:10px 10px 3px 3px}
+.keyhole:before{content:"";position:absolute;width:19px;height:19px;left:-2px;top:-7px;background:#080806;border-radius:50%}
+@keyframes securityPulse{50%{filter:brightness(1.16);transform:translateX(-50%) translateY(-4px)}}
+
+/* Offline — disconnected Wi-Fi router */
+.router-off{position:absolute;left:50%;top:42px;width:230px;height:165px;transform:translateX(-50%);animation:routerBob 2.4s ease-in-out infinite}
+.router-body{position:absolute;left:25px;right:25px;top:63px;height:82px;background:#293b32;border:7px solid #000;border-radius:18px;box-shadow:7px 8px #000}
+.router-body span{position:absolute;left:17px;top:15px;font:27px Bangers;color:var(--r);text-shadow:0 0 8px var(--r)}
+.antenna{position:absolute;width:8px;height:75px;background:#293b32;border:4px solid #000;top:3px;transform-origin:bottom}.an1{left:47px;transform:rotate(-16deg)}.an2{right:47px;transform:rotate(16deg)}
+.led{position:absolute;width:12px;height:12px;border-radius:50%;border:3px solid #000;bottom:14px}.rd1{right:52px;background:var(--r);box-shadow:0 0 8px var(--r)}.rd2{right:32px;background:#17231d}.rd3{right:12px;background:#17231d}
+.wifi-x{position:absolute;right:0;top:0;width:64px;height:64px;border:5px solid var(--c);border-radius:50%;display:grid;place-items:center;color:var(--r);font:50px/1 Bangers;background:#07100c;box-shadow:0 0 14px #00e5ff77;animation:wifiFail 1s steps(2) infinite}
+@keyframes routerBob{50%{transform:translateX(-50%) translateY(-5px)}}
+@keyframes wifiFail{50%{opacity:.4}}
+
+.panel{display:block}.error-page{width:100%}
+
+.btn {
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto;
+}

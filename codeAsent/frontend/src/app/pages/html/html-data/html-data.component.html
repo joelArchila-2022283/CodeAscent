@@ -1,0 +1,56 @@
+<section class="html-section data-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-book-half"></i> ARCH-01 / LECTURA</span>
+    <h2>MANUAL TÉCNICO</h2>
+    <p>Analiza la teoría, comprende la lógica y estudia la sintaxis.</p>
+  </header>
+
+  <div class="manual-grid">
+    <div class="manual-content">
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-lightbulb-fill"></i> Nivel Conceptual</h3>
+        <p>{{ manual().conceptual }}</p>
+      </div>
+
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-gear-fill"></i> Nivel Lógico</h3>
+        <p>{{ manual().logico }}</p>
+        <div class="level-note level-note--logic"><strong>Lectura del explorador</strong><span>Piensa en el contenido como un árbol: cada elemento debe tener una función y una relación clara con su contenedor.</span></div>
+      </div>
+
+      <div class="concept-box">
+        <h3 class="box-subtitle"><i class="bi bi-code-slash"></i> Nivel Sintáctico</h3>
+        <p>{{ manual().sintactico }}</p>
+        <div class="level-note level-note--syntax"><strong>Regla del terminal</strong><span>Abre y cierra las etiquetas, respeta la jerarquía y añade atributos solo cuando describan una necesidad real.</span></div>
+      </div>
+    </div>
+
+    <div class="manual-graphic">
+      <div class="graphic-guide">
+        <div class="graphic-guide__title"><i class="bi bi-diagram-3"></i><span>MAPA DE CONSTRUCCIÓN HTML · NIVEL {{ missionNumber }}</span></div>
+        <h3 class="map-title">{{ mapa().title }}</h3>
+        <p class="graphic-guide__intro">{{ mapa().objective }}</p>
+        <div class="html-tree" aria-label="Estructura visual de un documento HTML">
+          <div class="tree-node tree-node--root"><code>{{ mapa().root }}</code><span>idea principal</span></div>
+          <div class="tree-branch tree-branch--content">
+            @for (node of mapa().nodes; track node.tag) {
+              <div class="tree-node"><code>{{ node.tag }}</code><span>{{ node.label }}</span></div>
+            }
+          </div>
+        </div>
+        <div class="graphic-legend"><span><b>1</b> estructura</span><span><b>2</b> intención</span><span><b>3</b> sintaxis</span></div>
+        <div class="map-callout"><i class="bi bi-lightning-charge-fill"></i><span>En la terminal no copies el mapa: úsalo para justificar por qué cada etiqueta pertenece a ese lugar.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="manual-method">
+    <div class="concept-box method-card"><h3 class="box-subtitle"><i class="bi bi-signpost-split-fill"></i> Ruta de aprendizaje</h3><ol><li>Observa qué necesita comunicar la página.</li><li>Elige el elemento HTML que representa esa intención.</li><li>Escribe la etiqueta y sus atributos con orden.</li><li>Comprueba el resultado en la terminal.</li></ol></div>
+    <div class="concept-box method-card"><h3 class="box-subtitle"><i class="bi bi-search"></i> Antes de continuar</h3><p>Una solución correcta no es la que solo se ve bien: es la que tiene una estructura comprensible, etiquetas adecuadas y cumple todos los requisitos de la misión.</p></div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="html-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> ELEGIR OTRA MISIÓN</button>
+    <button class="html-next" (click)="next.emit()">IR AL CUESTIONARIO <i class="bi bi-arrow-right"></i></button>
+  </div>
+</section>

@@ -1,0 +1,164 @@
+.ts-section {
+    animation: tsReveal .45s ease both;
+}
+
+header {
+    margin-bottom: 1.5rem;
+}
+
+.section-kicker {
+    color: #00d9ff;
+    font: 700 .72rem monospace;
+    letter-spacing: .14em;
+}
+
+h2 {
+    margin: .35rem 0;
+    color: #42b5ff;
+    font: 2.1rem 'Bangers', cursive;
+    letter-spacing: .05em;
+}
+
+header p {
+    color: #8998ad;
+}
+
+.test-panel {
+    max-width: 700px;
+    padding: 1.5rem;
+    background: linear-gradient(145deg,
+            #172033,
+            #080d14);
+    border: 2px solid #36516f;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px #0008;
+}
+
+.test-progress {
+    display: flex;
+    justify-content: space-between;
+    color: #8998ad;
+    font: 700 .72rem monospace;
+}
+
+.ts-orb {
+    display: grid;
+    place-items: center;
+    width: 70px;
+    height: 70px;
+    margin: 1.4rem auto;
+    color: #42b5ff;
+    border: 2px solid #168cff;
+    border-radius: 50%;
+    box-shadow: 0 0 25px #168cff66;
+    font-size: 2rem;
+    animation: orbPulse 2s infinite;
+}
+
+.test-panel h3 {
+    margin: 0 0 1.2rem;
+    color: #e1e9f5;
+    font-size: 1.25rem;
+    line-height: 1.35;
+}
+
+.options {
+    display: grid;
+    gap: .65rem;
+}
+
+.options button {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 52px;
+    padding: .85rem 1rem;
+    color: #e1e9f5;
+    text-align: left;
+    background: linear-gradient(145deg, #16263a, #0d1622);
+    border: 2px solid #293b55;
+    border-radius: 9px;
+    box-shadow: 0 3px 0 #080b12;
+    font: 700 .9rem 'Baloo 2', sans-serif;
+    cursor: pointer;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.options button:hover,
+.options button.selected {
+    border-color: #168cff;
+    background: #1b3552;
+    transform: translateY(-1px);
+}
+
+.options button.correct {
+    border-color: #00d9ff;
+    color: #9fe8ff;
+    background: #123447;
+}
+
+.options button.incorrect {
+    border-color: #d66b5b;
+    color: #ffd0c4;
+    background: #42231f;
+}
+
+.options button span {
+    color: #42b5ff;
+    font-weight: 700;
+}
+
+.options button i {
+    margin-left: auto;
+}
+
+.options button:disabled {
+    cursor: default;
+}
+
+.answer-note {
+    padding: .75rem;
+    color: #8fdfff;
+    background: #102c42;
+    border-radius: 6px;
+    font: .82rem monospace;
+}
+
+.answer-note.good {
+    color: #9fe8ff;
+    background: #123447;
+}
+
+.ts-back {
+    margin-top: 1.5rem;
+    padding: .7rem 1rem;
+    color: #42b5ff;
+    background: #101a29;
+    border: 2px solid #36516f;
+    border-radius: 8px;
+    font: 1rem 'Bangers', cursive;
+    cursor: pointer;
+}
+
+.ts-back:hover {
+    background: #172b42;
+}
+
+@keyframes orbPulse {
+    50% {
+        transform: scale(1.06);
+        box-shadow: 0 0 36px #42b5ff99;
+    }
+}
+
+@keyframes tsReveal {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}

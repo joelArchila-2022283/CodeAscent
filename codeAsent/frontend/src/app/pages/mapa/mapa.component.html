@@ -1,0 +1,69 @@
+<div class="dispositivo">
+  <div class="engranajes izquierda">
+    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+  </div>
+  <div class="engranajes derecha">
+    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+  </div>
+
+  <div class="pantalla">
+    <div class="lineas-escaneo"></div>
+    <div class="viñeta"></div>
+
+    <a routerLink="/dashboard" class="boton-panel">
+      &#11013; PANEL PRINCIPAL
+    </a>
+
+    <div class="encabezado-mapa">
+      <div class="titulo-seccion">LA ODISEA DEL CÓDIGO</div>
+      <div class="subtitulo-seccion">selecciona una ubicación para consultar tu avance</div>
+      <div class="progreso-mapa">{{ desbloqueadosCount() }} DE {{ territorios().length }} TERRITORIOS DESBLOQUEADOS</div>
+    </div>
+
+    <div class="contenedor-mapa">
+      <div class="mapa-proporcion">
+        <img src="assets/images/map-world.jpg" alt="Mapa La Odisea del Código" />
+        
+        <div class="niebla-mapa">
+          <div 
+            *ngFor="let item of territorios()" 
+            class="fragmento-mapa"
+            [ngClass]="{'desbloqueado': item.estado !== 'bloqueado', 'bloqueado': item.estado === 'bloqueado'}"
+            [style.clipPath]="item.corte"
+            [style.-webkit-clip-path]="item.corte">
+          </div>
+        </div>
+
+        <div class="capa-pines">
+          <div 
+            *ngFor="let item of territorios()" 
+            class="pin-mapa"
+            [ngClass]="{'visible': item.estado !== 'bloqueado', 'bloqueado': item.estado === 'bloqueado'}"
+            [style.left.%]="item.posX"
+            [style.top.%]="item.posY"
+            (click)="irATerritorio(item)">
+            
+            <div class="pulso-pin"></div>
+            <div class="punto-pin" [ngClass]="{'bloqueado': item.estado === 'bloqueado'}">
+              {{ item.estado !== 'bloqueado' ? item.id : '🔒' }}
+            </div>
+            
+            <div class="etiqueta-pin">
+              {{ item.nombre }}
+              <div class="lenguaje-pin">{{ item.lenguaje }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="leyenda-mapa">
+      <div class="item-leyenda"><div class="punto-leyenda actual"></div> Territorio Desbloqueado</div>
+      <div class="item-leyenda"><div class="punto-leyenda bloqueado"></div> Territorio Bloqueado</div>
+    </div>
+
+    <div class="nota-inferior">
+      RECOMENDACIÓN: ¡Supera el área activa para dispersar la niebla del siguiente sector!
+    </div>
+  </div>
+</div>

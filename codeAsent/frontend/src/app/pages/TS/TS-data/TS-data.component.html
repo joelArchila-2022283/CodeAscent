@@ -1,0 +1,48 @@
+<section class="ts-section data-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-book-half"></i> ARCH-01 / LECTURA</span>
+    <h2>MANUAL TÉCNICO</h2>
+    <p>Analiza la teoría, comprende la lógica y estudia la sintaxis TypeScript.</p>
+  </header>
+
+  @if (mission) {
+    <div class="manual-grid">
+      <div class="manual-content">
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-lightbulb-fill"></i> Nivel Conceptual</h3>
+          <p>{{ manual().conceptual }}</p>
+        </div>
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-gear-fill"></i> Nivel Lógico</h3>
+          <p>{{ manual().logico }}</p>
+        </div>
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-code-slash"></i> Nivel Sintáctico</h3>
+          <pre><code>{{ manual().sintactico }}</code></pre>
+        </div>
+      </div>
+      <div class="manual-graphic">
+        <div class="graphic-placeholder">
+          <i class="bi bi-diagram-3"></i>
+          <span>{{ mission.titulo }}</span>
+          <div class="wireframe-box">
+            <div class="w-head"></div>
+            <div class="w-body">
+              <div class="w-element"></div>
+              <div class="w-element short"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="concept-box">
+      <p>Selecciona una misión para cargar el manual.</p>
+    </div>
+  }
+
+  <div class="action-buttons">
+    <button class="ts-back" type="button" (click)="back.emit()"><i class="bi bi-arrow-left"></i> ELEGIR OTRA MISIÓN</button>
+    <button class="html-next" type="button" [disabled]="!mission" (click)="next.emit()">IR A LA LECCIÓN <i class="bi bi-arrow-right"></i></button>
+  </div>
+</section>

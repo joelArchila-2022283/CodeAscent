@@ -1,0 +1,105 @@
+<div class="auth-container">
+  <div class="auth-split">
+    
+    <!-- Columna Izquierda: Video Frame -->
+    <div class="auth-video-pane">
+      <div class="film-corner tl">ESCENA 01</div>
+      <div class="film-corner tr">
+        <span class="rec-dot"></span>LOOP
+      </div>
+
+      <video 
+        #videoPlayer
+        autoplay 
+        loop 
+        [muted]="true" 
+        playsinline 
+        preload="auto"
+        class="video-fondo">
+        <source src="assets/videos/login-scene.mp4" type="video/mp4">
+        Tu navegador no soporta el formato de video.
+      </video>
+
+      <div class="auth-frame-caption">
+        <div class="cap-title">CODE ASCENT</div>
+        <div class="cap-sub">¡BIENVENIDO DE VUELTA!</div>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Formulario de Login -->
+    <div class="auth-form-pane">
+      <div class="auth-header">
+        <h2 class="auth-title">INICIAR SESIÓN</h2>
+        <div class="auth-sub">- CONTINÚA TU TRAVESÍA -</div>
+      </div>
+
+      <div *ngIf="mensajeError" class="error-alert" role="alert" aria-live="polite">
+        {{ mensajeError }}
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+        <!-- Campo Correo -->
+        <div class="campo-grupo">
+          <label for="correo">CORREO</label>
+          <input 
+            id="correo"
+            type="email" 
+            formControlName="correo" 
+            placeholder="tu@correo.com"
+            [class.input-error]="f['correo'].invalid && f['correo'].touched">
+        </div>
+
+        <!-- Campo Contraseña con Ojito Animado -->
+        <div class="campo-grupo">
+          <label for="password">CONTRASEÑA</label>
+          <div class="input-password-wrapper">
+            <input 
+              id="password"
+              [type]="mostrarPassword ? 'text' : 'password'" 
+              formControlName="password" 
+              placeholder="••••••••"
+              [class.input-error]="f['password'].invalid && f['password'].touched">
+            
+            <button 
+              type="button" 
+              class="btn-ojo" 
+              (click)="toggleMostrarPassword()"
+              [class.activo]="mostrarPassword"
+              title="Mostrar u ocultar clave">
+              <svg class="icono-ojo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path class="ojo-base" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle class="ojo-pupila" cx="12" cy="12" r="3"></circle>
+                <line class="ojo-linea" x1="3" y1="3" x2="21" y2="21" *ngIf="!mostrarPassword"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recordarme y Olvidaste clave -->
+        <div class="opciones-fila">
+          <label class="checkbox-container">
+            <input type="checkbox" formControlName="recordarme">
+            <span>Recordarme</span>
+          </label>
+          <a routerLink="/recuperar-password" class="forgot-password-link">¿Olvidaste clave?</a>
+        </div>
+
+        <!-- Botón Entrar -->
+        <button type="submit" class="btn-principal" [disabled]="cargando">
+          {{ cargando ? 'ENTRANDO...' : 'ENTRAR ▶' }}
+        </button>
+
+        <div class="divisor-retro"><span>O</span></div>
+
+        <!-- Contenedor Oficial Google Sign-In -->
+        <div id="googleBtn" class="google-btn-wrapper"></div>
+
+        <div class="registro-pie">
+          ¿No tienes cuenta? 
+          <a (click)="irARegistro()" class="link-destacado" style="cursor: pointer;">Regístrate</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

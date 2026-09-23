@@ -1,0 +1,14 @@
+# Dependencias locales instaladas por pnpm
+node_modules/
+
+# Carpeta de salida de compilación TypeScript
+dist/
+
+# Variables de entorno secretas (conexiones a DB, claves)
+.env
+.env.local
+
+# Archivos de registros/logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

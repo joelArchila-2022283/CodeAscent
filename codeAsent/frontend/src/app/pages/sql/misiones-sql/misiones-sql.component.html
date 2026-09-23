@@ -1,0 +1,53 @@
+<section class="sql-section misiones-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-tools"></i> MISIONES ACTIVAS / SECTOR 03</span>
+    <h2>SELECCIÓN DE MISIÓN</h2>
+    <p>Completa cada operación del reactor para desbloquear nuevas consultas de datos.</p>
+  </header>
+
+  @if (niveles.length === 0) {
+    <p>Cargando misiones...</p>
+  }
+
+  <div class="mission-list">
+    @for (mision of misiones(); track mision.nivel.id_nivel) {
+      <button
+        class="mission"
+        [class.done]="mision.completada"
+        [class.locked]="!mision.desbloqueada"
+        [disabled]="!mision.desbloqueada"
+        (click)="seleccionarMision(mision)"
+      >
+        <span class="mission-icon">
+          <i
+            class="bi"
+            [class]="
+              mision.completada
+                ? 'bi-check-circle-fill'
+                : mision.desbloqueada
+                  ? 'bi-door-open'
+                  : 'bi-lock-fill'
+            "
+          ></i>
+        </span>
+        <span class="mission-copy">
+          <small>{{ mision.codigoIdentificador }} · {{ mision.mision.tema }}</small>
+          <strong
+            >{{ mision.mision.titulo }}
+            @if (mision.nivel.nombre && mision.nivel.nombre !== mision.mision.titulo) {
+              ({{ mision.nivel.nombre }})
+            }
+          </strong>
+          <span>{{ mision.mision.objetivoClaro }}</span>
+        </span>
+        <span class="mission-reward">{{
+          mision.completada ? 'LISTO' : '+' + mision.xpRecompensa + ' XP'
+        }}</span>
+      </button>
+    }
+  </div>
+
+  <button class="sql-back" (click)="back.emit()">
+    <i class="bi bi-arrow-left"></i> VOLVER AL PANEL
+  </button>
+</section>

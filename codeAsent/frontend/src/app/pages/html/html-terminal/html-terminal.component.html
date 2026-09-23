@@ -1,0 +1,53 @@
+<section class="html-section terminal-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-terminal-fill"></i> CRT-VGA / PUERTO 01</span>
+    <h2>ALTAR DE RAYOS CATÓDICOS</h2>
+    <p>Escribe HTML, ejecuta la misión y observa el resultado visual en tiempo real.</p>
+  </header>
+
+  <div class="flow-steps" aria-label="Flujo de la misión">
+    <span class="flow-step flow-step--done">01 LECCIÓN</span><span class="flow-line"></span>
+    <span class="flow-step flow-step--done">02 PREDICCIÓN</span><span class="flow-line"></span>
+    <span class="flow-step flow-step--active">03 TERMINAL</span>
+  </div>
+
+  <div class="terminal-grid">
+    <div class="terminal-window">
+      <div class="terminal-bar">
+        <span><i class="bi bi-circle-fill"></i><i class="bi bi-circle-fill"></i><i class="bi bi-circle-fill"></i></span>
+        <small>{{ retoSeleccionado?.titulo || 'Selecciona una misión' }}</small>
+        <i class="bi bi-broadcast"></i>
+      </div>
+
+      <div class="requirements" aria-label="Requisitos de la misión">
+        <div class="requirements__heading"><strong>CHECKLIST DE MISIÓN</strong><span>{{ obtenerRequisitos().filter(item => item.completado).length }}/{{ obtenerRequisitos().length }}</span></div>
+        @for (item of obtenerRequisitos(); track item.etiqueta) {
+          <div class="requirement" [class.requirement--done]="item.completado" [class.requirement--pending]="!item.completado">
+            <i class="bi" [class.bi-check-circle-fill]="item.completado" [class.bi-circle]="!item.completado"></i><code>{{ item.etiqueta }}</code><span>{{ item.completado ? 'LISTO' : 'PENDIENTE' }}</span>
+          </div>
+        }
+      </div>
+
+      <textarea [ngModel]="code()" (ngModelChange)="actualizarCodigo($event)" spellcheck="false" aria-label="Editor HTML"></textarea>
+      <div class="terminal-toolbar">
+        <button class="terminal-tool terminal-tool--primary" type="button" (click)="render()" [disabled]="!retoSeleccionado || cargando()"><i class="bi bi-play-fill"></i> EJECUTAR</button>
+        <button class="terminal-tool" type="button" (click)="restaurarEjemplo()"><i class="bi bi-arrow-counterclockwise"></i> RESTAURAR</button>
+        <button class="terminal-tool" type="button" (click)="limpiarCodigo()"><i class="bi bi-trash3"></i> LIMPIAR</button>
+        <button class="terminal-tool" type="button" (click)="copiarCodigo()"><i class="bi bi-clipboard"></i> COPIAR</button>
+      </div>
+      <div class="html-hints"><span>ESTRELLAS: {{ estrellasRestantes() }}</span><button type="button" (click)="solicitarPista()" [disabled]="pistasSolicitadas() >= 4 || cargando()">PISTA {{ pistasSolicitadas() + 1 }}/4</button>@if (pistasSolicitadas() > 0) { <p>{{ obtenerPista() }}</p> }</div>
+    </div>
+
+    <div class="preview-window">
+      <div class="preview-label"><i class="bi bi-display"></i> VISTA PREVIA EN VIVO</div>
+       <iframe class="html-preview-frame" [attr.srcdoc]="vistaPrevia()" (load)="aplicarColorVistaPrevia($event)" title="Vista previa del código HTML" sandbox="allow-same-origin"></iframe>
+      @if (resultado()) { <p class="render-status" [class.error]="!ejecucionExitosa()"><i class="bi" [class.bi-check-circle-fill]="ejecucionExitosa()" [class.bi-exclamation-triangle-fill]="!ejecucionExitosa()"></i> {{ resultado() }}</p> }
+    </div>
+  </div>
+
+  @if (diagnostico().length) {
+    <div class="diagnostico"><strong>DIAGNÓSTICO GUIADO</strong>@for (item of diagnostico(); track item.error) { <p><b>{{ item.error }}</b><br>{{ item.sintoma }}<br><span>Pregunta guía: {{ item.preguntaGuia }}</span></p> }</div>
+  }
+
+  <button class="html-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER AL DASHBOARD</button>
+</section>

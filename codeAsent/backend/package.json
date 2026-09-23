@@ -1,0 +1,32 @@
+{
+  "name": "codeasent-backend",
+  "version": "1.0.0",
+  "description": "Backend para la plataforma educativa CodeAsent",
+  "main": "dist/servidor.js",
+  "scripts": {
+    "dev": "tsx watch -r dotenv/config src/server.ts",
+    "construir": "tsc",
+    "iniciar": "node dist/server.js",
+    "sembrar": "tsx src/seed.ts"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.11.0",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.22.4",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "google-auth-library": "^11.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.0.10",
+    "pg": "^8.23.0"
+  }
+}

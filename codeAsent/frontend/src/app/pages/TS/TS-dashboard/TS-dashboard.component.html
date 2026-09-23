@@ -1,0 +1,236 @@
+<main class="ts-dashboard" id="ts-dashboard-root">
+
+  <div class="ts-bg-layer" aria-hidden="true">
+    <div class="ts-bg-image"></div>
+    <div class="torch-ambient-glow torch-left"></div>
+    <div class="torch-ambient-glow torch-right"></div>
+    <div class="ts-dust-motes"></div>
+  </div>
+
+  <header class="bunker-header" id="ts-dashboard-header">
+
+    <div class="bunker-brand">
+
+      <div class="bunker-logo-stone">
+
+        <div class="miner-mascot-unit" [class.bounce]="cartoonMascotState() === 'idle'" [title]="mascotDialogue()">
+
+          <img class="miner-avatar-img" [src]="obtenerUrlAvatar(player.name || 'default')" alt="Avatar del jugador">
+
+        </div>
+
+        <div class="bunker-title-block">
+
+          <h1 class="bunker-title">
+            TYPESCRIPT LAB
+          </h1>
+
+          <span class="bunker-subtitle">
+            SECTOR 02: TYPESCRIPT
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="bunker-player-hud">
+
+      <div class="hud-stats-box">
+
+        <div class="hud-name-row">
+
+          <span class="hud-name">
+            {{ jugadorCargando() ? 'CARGANDO...' : player.name }}
+          </span>
+
+          <span class="hud-rank">
+            RANGO LVL {{ player.level }}
+          </span>
+
+        </div>
+
+        <div class="hud-xp-rail">
+
+          <div class="hud-xp-fill" [style.width.%]="obtenerPorcentajeXp()"></div>
+
+        </div>
+
+        <div class="hud-meta-row">
+
+          <span>
+            {{ player.currentXp }}/{{ player.nextLevelXp }} XP
+          </span>
+
+          <span class="hud-watts">
+            ⚡ {{ player.energyWatts }}W
+          </span>
+
+        </div>
+
+      </div>
+
+      <a class="map-return-button" routerLink="/mapa" aria-label="Regresar al mapa">
+
+        <i class="bi bi-arrow-left-circle-fill"></i>
+
+        <span>
+          REGRESAR AL MAPA
+        </span>
+
+      </a>
+
+    </div>
+
+  </header>
+
+
+  <nav class="bunker-nav-rock" aria-label="Módulos TypeScript">
+
+    <ul class="bunker-nav__list">
+
+      <li>
+
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'dashboard'
+          " (click)="navigateTo('dashboard')">
+
+          <span class="rock-btn__icon">
+            <i class="bi bi-hdd-rack-fill"></i>
+          </span>
+
+          <span class="rock-btn__text">
+            DASHBOARD
+          </span>
+
+        </button>
+
+      </li>
+
+      <li>
+
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'processes'
+          " (click)="navigateTo('processes')">
+
+          <span class="rock-btn__icon">
+            <i class="bi bi-gear-wide-connected"></i>
+          </span>
+
+          <span class="rock-btn__text">
+            MISIONES
+          </span>
+
+          <span class="rock-badge">
+            10
+          </span>
+
+        </button>
+
+      </li>
+
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'data'" (click)="navigateTo('data')">
+          <span class="rock-btn__icon"><i class="bi bi-book"></i></span>
+          <span class="rock-btn__text">MANUAL</span>
+        </button>
+      </li>
+
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'lesson'" (click)="navigateTo('lesson')">
+          <span class="rock-btn__icon"><i class="bi bi-lightbulb"></i></span>
+          <span class="rock-btn__text">LECCIÓN</span>
+        </button>
+      </li>
+
+
+      <li>
+
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'terminal'
+          " (click)="navigateTo('terminal')">
+
+          <span class="rock-btn__icon">
+            <i class="bi bi-terminal-fill"></i>
+          </span>
+
+          <span class="rock-btn__text">
+            LABORATORIO
+          </span>
+
+        </button>
+
+      </li>
+
+
+      <li>
+
+        <button class="rock-btn" [class.rock-btn--active]="
+            activeSection() === 'test'
+          " (click)="navigateTo('test')">
+
+          <span class="rock-btn__icon">
+            <i class="bi bi-patch-question"></i>
+          </span>
+
+          <span class="rock-btn__text">
+            CUESTIONARIO
+          </span>
+
+        </button>
+
+      </li>
+
+    </ul>
+
+  </nav>
+
+
+  <div class="bunker-content-stage">
+
+    @switch (activeSection()) {
+
+    @case ('dashboard') {
+
+    <app-ts-dashboard-section (sectionSelected)="navigateTo($event)" />
+
+    }
+
+
+    @case ('data') {
+
+    <app-ts-data [mission]="retoSeleccionado()" (back)="navigateTo('processes')" (next)="avanzarALeccion()" />
+
+    }
+
+    @case ('lesson') {
+    <section class="ts-section"><header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN</span><h2>{{ retoSeleccionado()?.titulo || 'Lección de la misión' }}</h2><p>Comprende el tipo, el dato y el comportamiento que debes comprobar antes de ejecutar TypeScript.</p></header><div class="concept-box"><h3>Orientación</h3><p>{{ retoSeleccionado()?.contenido || 'Divide el problema en entradas, transformación y salida. Después verifica en la terminal que el tipado protege esa decisión y que el resultado coincide con la misión.' }}</p></div><button class="html-next" [disabled]="!retoSeleccionado()" (click)="avanzarATerminal()">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></section>
+    }
+
+
+    @case ('processes') {
+
+    <app-ts-processes (back)="navigateTo('dashboard')" (missionSelected)="seleccionarReto($event)" />
+
+    }
+
+
+    @case ('terminal') {
+
+    <app-ts-terminal [retoSeleccionado]="retoSeleccionado()" (missionCompleted)="navigateTo('test')" (back)="navigateTo('lesson')" />
+
+    }
+
+
+    @case ('test') {
+
+    <app-ts-test [mission]="retoSeleccionado()" (back)="navigateTo('terminal')" (next)="volverAProcesos()" (xpAwarded)="sumarExperiencia($event)" />
+
+    }
+
+    }
+
+  </div>
+
+</main>

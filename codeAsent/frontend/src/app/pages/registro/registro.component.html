@@ -1,0 +1,164 @@
+<div class="auth-container">
+  <div class="auth-split">
+    
+    <!-- Columna Izquierda: Formulario de Registro -->
+    <div class="auth-form-pane">
+      <div class="auth-header">
+        <h2 class="auth-title">CREAR CUENTA</h2>
+        <div class="auth-sub">- EMPIEZA TU TRAVESÍA -</div>
+      </div>
+
+      <div *ngIf="mensajeError" class="error-alert">
+        {{ mensajeError }}
+      </div>
+
+      <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="registro-form">
+        
+        <!-- Campo Usuario -->
+        <div class="campo-grupo">
+          <label for="usuario">USUARIO</label>
+          <input 
+            id="usuario"
+            type="text" 
+            formControlName="usuario" 
+            placeholder="player_01"
+            [class.input-error]="registroForm.controls['usuario'].invalid && registroForm.controls['usuario'].touched">
+        </div>
+        
+        <!-- Campo Correo -->
+        <div class="campo-grupo">
+          <label for="correo">CORREO</label>
+          <input 
+            id="correo"
+            type="email" 
+            formControlName="correo" 
+            placeholder="tu@correo.com"
+            [class.input-error]="registroForm.controls['correo'].invalid && registroForm.controls['correo'].touched">
+        </div>
+        
+        <!-- Campo Contraseña con Ojito -->
+        <div class="campo-grupo">
+          <label for="password">CONTRASEÑA</label>
+          <div class="input-password-wrapper">
+            <input 
+              id="password"
+              [type]="mostrarPassword ? 'text' : 'password'" 
+              formControlName="password" 
+              placeholder="••••••••"
+              [class.input-error]="registroForm.controls['password'].invalid && registroForm.controls['password'].touched">
+            
+            <button 
+              type="button" 
+              class="btn-ojo" 
+              (click)="toggleMostrarPassword()"
+              [class.activo]="mostrarPassword"
+              title="Mostrar u ocultar clave">
+              <svg class="icono-ojo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path class="ojo-base" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle class="ojo-pupila" cx="12" cy="12" r="3"></circle>
+                <line class="ojo-linea" x1="3" y1="3" x2="21" y2="21" *ngIf="!mostrarPassword"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Términos -->
+        <div class="opciones-fila">
+          <label class="checkbox-container" for="terminos">
+            <input id="terminos" type="checkbox" formControlName="terminos">
+            <span>Acepto los <a href="#" class="link-terminos" (click)="abrirModalTerminos($event)">Términos y Condiciones</a></span>
+          </label>
+        </div>
+
+        <div *ngIf="registroForm.controls['terminos'].invalid && registroForm.controls['terminos'].touched" class="error-texto-terminos">
+          * Debes aceptar los términos para continuar.
+        </div>
+
+        <!-- Botón Crear Cuenta -->
+        <button type="submit" class="btn-principal" [disabled]="cargando">
+          {{ cargando ? 'CREANDO...' : 'CREAR CUENTA ▶' }}
+        </button>
+
+        <div class="divisor-retro"><span>O</span></div>
+
+        <!-- Contenedor Oficial Google Sign-In -->
+        <div id="googleBtnRegister" class="google-btn-wrapper"></div>
+
+        <div class="registro-pie">
+          ¿Ya tienes cuenta? 
+          <a routerLink="/login" class="link-destacado">Inicia sesión</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Columna Derecha: Video Frame -->
+    <div class="auth-video-pane">
+      <div class="film-corner tl">ESCENA 02</div>
+      <div class="film-corner tr">
+        <span class="rec-dot"></span>LOOP
+      </div>
+      
+      <video 
+        #videoPlayer
+        autoplay 
+        loop 
+        [muted]="true" 
+        playsinline 
+        preload="auto"
+        class="video-fondo">
+        <source src="assets/videos/register-scene.mp4" type="video/mp4">
+      </video>
+
+      <div class="auth-frame-caption">
+        <div class="cap-title">CODE ASCENT</div>
+        <div class="cap-sub">¡ÚNETE A LA AVENTURA!</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalTerminos">
+  <div class="modal-box">
+    
+    <div class="modal-header">
+      <h3 class="modal-title">TÉRMINOS Y CONDICIONES</h3>
+      <button type="button" class="btn-cerrar" (click)="cerrarModalTerminos()">✖</button>
+    </div>
+
+    <div class="modal-body">
+      <h4>1. Bienvenido a CodeAscent</h4>
+      <p>CodeAscent es una plataforma educativa gamificada diseñada para enseñar tecnologías de desarrollo web como HTML, CSS, TypeScript y bases de datos SQL. Al registrarte, aceptas participar con fines de aprendizaje y desarrollo personal.</p>
+
+      <h4>2. Tu Cuenta y Seguridad</h4>
+      <p>Tu cuenta está protegida mediante medidas de autenticación diseñadas para cuidar tu información. 
+        Las contraseñas no se almacenan directamente, sino mediante un hash seguro, por lo que CodeAscent 
+        no puede ver ni recuperar tu contraseña original. Al iniciar sesión se genera una sesión segura 
+        con duración limitada; para acceder a las funciones protegidas es necesario contar con una 
+        autenticación válida y vigente.
+      </p>
+
+      <p>
+        Si eliges iniciar sesión con Google, la credencial se verifica directamente con Google y no 
+        necesitas crear ni almacenar una contraseña local en CodeAscent. El acceso a determinadas 
+        funciones también depende de los permisos asignados a tu cuenta. No compartas tus credenciales, 
+        utiliza una contraseña única y cierra sesión cuando uses un dispositivo compartido.
+      </p>
+
+      <h4>3. Progreso y Datos del Jugador</h4>
+      <p>Almacenamos tu correo electrónico y nombre de usuario para guardar tu progreso en los distintos niveles de programación. No venderemos tu información personal a terceros. Tu esfuerzo se queda en tu cuenta.</p>
+
+      <h4>4. Reglas del Juego y Conducta</h4>
+      <p>Se espera que los jugadores mantengan un ambiente de respeto. Cualquier intento de vulnerar la seguridad de la plataforma (hacking malicioso), manipular las puntuaciones o usar bots resultará en la suspensión de la cuenta.</p>
+
+      <h4>5. Disponibilidad del Servicio</h4>
+      <p>CodeAscent es un proyecto en continuo desarrollo. Haremos nuestro mejor esfuerzo para mantener el servidor en línea, pero pueden ocurrir interrupciones por mantenimiento o actualizaciones del sistema.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-cancelar" (click)="cerrarModalTerminos()">CERRAR</button>
+      <button type="button" class="btn-aceptar" (click)="aceptarTerminosModal()">ACEPTO EL RETO ▶</button>
+    </div>
+
+  </div>
+</div>

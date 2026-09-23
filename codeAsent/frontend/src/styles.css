@@ -1,0 +1,38 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+:root {
+  --rock-dark: #0c0908;
+  --rock-base: #1c1512;
+  --rock-panel: #261e19;
+  --rock-border: #42342c;
+  --amber-fire: #ff9100;
+  --amber-glow: #ffb700;
+  --cyan-screen: #00e5ff;
+  --purple-disk: #b55afe;
+  --text-html: #e6ded6;
+  --text-dim: #9a8a80;
+}
+
+/* ... rest of original file ... */
+html, 
+body {
+  cursor: url('assets/images/pointer.png') 0 0, auto !important;
+  background-color: var(--rock-dark);
+}
+
+button, 
+a, 
+input[type="checkbox"], 
+.btn-ojo, 
+.checkbox-container,
+.btn-principal,
+.btn-secundario {
+  cursor: url('assets/images/pointer.png') 0 0, pointer !important;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  cursor: url('assets/images/text-pointer.png') 0 0, text !important;
+}

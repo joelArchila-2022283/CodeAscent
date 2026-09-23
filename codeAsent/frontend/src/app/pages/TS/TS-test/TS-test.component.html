@@ -1,0 +1,56 @@
+<section class="ts-section test-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-patch-question-fill"></i> CUESTIONARIO TYPESCRIPT</span>
+    <h2>DEMUESTRA LO APRENDIDO</h2>
+    <p>Responde las preguntas de la misión. El resultado perfecto otorga la XP una sola vez.</p>
+  </header>
+
+  @if (cargando()) {
+    <div class="test-panel"><h3>Cargando preguntas...</h3></div>
+  } @else if (errorCarga()) {
+    <div class="test-panel"><h3>{{ errorCarga() }}</h3></div>
+  } @else if (!preguntas().length) {
+    <div class="test-panel"><h3>No hay preguntas disponibles para esta misión.</h3></div>
+  } @else if (finalizado()) {
+    <div class="test-panel">
+      <div class="ts-orb"><i class="bi bi-trophy-fill"></i></div>
+      <h3>Cuestionario completado</h3>
+      <p class="answer-note good">XP obtenido en este intento: {{ xpGanado() }}</p>
+    </div>
+  } @else {
+    <div class="test-progress">Pregunta {{ preguntaActual() + 1 }} de {{ preguntas().length }}</div>
+    <div class="test-panel">
+      <div class="ts-orb"><i class="bi bi-question-lg"></i></div>
+      <h3>{{ pregunta()?.enunciado }}</h3>
+      <div class="options">
+        @for (opcion of pregunta()?.respuestas ?? []; track opcion.id_respuesta; let i = $index) {
+          <button type="button"
+            [class.selected]="seleccionada() === i"
+            [class.correct]="respondida() && opcion.es_correcta"
+            [class.incorrect]="respondida() && seleccionada() === i && !opcion.es_correcta"
+            (click)="responder(i, opcion.es_correcta)">
+            <span>{{ ['A', 'B', 'C', 'D'][i] }}</span>
+            {{ opcion.texto_respuesta }}
+            @if (respondida() && opcion.es_correcta) { <i class="bi bi-check-circle-fill"></i> }
+          </button>
+        }
+      </div>
+      @if (respondida()) {
+        <p class="answer-note" [class.good]="esCorrecta()">
+          {{ esCorrecta() ? 'Respuesta correcta. XP registrado.' : 'Respuesta incorrecta. Inténtalo de nuevo.' }}
+        </p>
+      }
+    </div>
+  }
+
+  <div class="action-buttons" style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+    <button class="ts-back" type="button" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER A LA TERMINAL</button>
+    @if (respondida() && !esCorrecta()) {
+      <button class="html-next" type="button" (click)="reintentar()">INTENTAR DE NUEVO</button>
+    } @else if (respondida() && esCorrecta()) {
+      <button class="html-next" type="button" (click)="siguiente()">{{ preguntaActual() === preguntas().length - 1 ? 'FINALIZAR' : 'SIGUIENTE' }} <i class="bi bi-arrow-right"></i></button>
+    } @else if (finalizado()) {
+      <button class="html-next" type="button" (click)="next.emit()">VOLVER AL DASHBOARD</button>
+    }
+  </div>
+</section>

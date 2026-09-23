@@ -1,0 +1,72 @@
+<section class="ts-section process-section">
+  <header>
+    <span class="section-kicker">
+      <i class="bi bi-tools"></i>
+      MISIONES ACTIVAS
+    </span>
+
+    <h2>SELECCIÓN DE MISIÓN</h2>
+
+    <p>
+      Completa cada misión TypeScript para abrir nuevas cámaras de conocimiento.
+    </p>
+  </header>
+
+  <p *ngIf="cargando()">
+    Cargando misiones...
+  </p>
+
+  <p *ngIf="errorCarga()" role="alert">
+    {{ errorCarga() }}
+  </p>
+
+  <div class="mission-list">
+
+    <button
+      class="mission"
+      *ngFor="let mission of missions()"
+      type="button"
+      [class.done]="mission.completada"
+      [class.locked]="!mission.desbloqueada"
+      [disabled]="!mission.desbloqueada"
+      (click)="seleccionarMision(mission)"
+    >
+
+      <span class="mission-icon">
+        <i class="bi" [class]="mission.completada ? 'bi-check-circle-fill' : (mission.desbloqueada ? 'bi-door-open' : 'bi-lock-fill')"></i>
+      </span>
+
+      <span class="mission-copy">
+
+        <small>
+          {{ mission.code }}
+        </small>
+
+        <strong>
+          {{ mission.title }}
+        </strong>
+
+        <span>
+          {{ mission.detail }}
+        </span>
+
+      </span>
+
+      <span class="mission-reward">
+        {{ mission.completada ? 'LISTO' : 'MISIÓN ' + mission.id }}
+      </span>
+
+    </button>
+
+  </div>
+
+  <button
+    class="ts-back"
+    type="button"
+    (click)="back.emit()"
+  >
+    <i class="bi bi-arrow-left"></i>
+    VOLVER AL PANEL
+  </button>
+
+</section>

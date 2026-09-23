@@ -1,0 +1,108 @@
+<section class="content">
+
+  <button
+    class="back"
+    type="button"
+    (click)="back.emit()"
+  >
+    ← DASHBOARD
+  </button>
+
+  <div class="eyebrow">
+    PROCESSES // MISIONES CSS
+  </div>
+
+  <h2>
+    MISIONES DEL POBLADO
+  </h2>
+
+  <p class="lead">
+    Cada misión conserva su lección, reto CSS y cuestionario hasta el final del recorrido.
+  </p>
+
+  @if (loading()) {
+
+    <div class="state-message">
+      Cargando misiones CSS...
+    </div>
+
+  } @else if (error()) {
+
+    <div class="state-message">
+      {{ error() }}
+    </div>
+
+  } @else {
+
+    @for (level of levels; track level.id_nivel) {
+      @let mision = misionPorNivel(level);
+
+       <article class="mission" [class.mission--locked]="!mision?.desbloqueada" [class.mission--completed]="mision?.completada">
+
+        <div class="badge">
+          {{
+            level.numero_nivel < 10
+              ? '0' + level.numero_nivel
+              : level.numero_nivel
+          }}
+        </div>
+
+        <div class="mission-info">
+
+          <h3>
+            {{
+              codigo(level)?.titulo
+              || level.nombre
+            }}
+          </h3>
+
+          <p>
+            {{
+              codigo(level)?.descripcion
+              || level.descripcion
+            }}
+          </p>
+
+          <small>
+            <b>NIVEL:</b>
+            {{ level.nombre }}
+
+            ·
+
+            {{
+              xpMision(level)
+            }}
+            XP
+          </small>
+
+          @if (!mision?.desbloqueada) {
+            <small class="state-message">Bloqueada: completa la misión anterior.</small>
+          } @else if (mision?.completada) {
+            <small class="state-message">Completada.</small>
+          }
+
+        </div>
+
+         <button
+           type="button"
+           class="mission-action"
+           [disabled]="!mision?.desbloqueada || !mision?.reto"
+           (click)="iniciarMision(level)"
+         >
+           @if (!mision?.desbloqueada) { <i class="bi bi-lock-fill" aria-hidden="true"></i> BLOQUEADA }
+           @else { {{ mision?.completada ? 'REVISAR' : 'INICIAR MISIÓN' }} }
+         </button>
+
+      </article>
+
+    } @empty {
+
+      <div class="state-message">
+        No hay misiones CSS disponibles.
+      </div>
+
+    }
+
+  }
+
+</section>

@@ -1,0 +1,266 @@
+@use 'sass:color';
+
+$cobre-transistor: #d9a441;
+$pergamino-vintage: #d9ead8;
+$tinta-oscura: #102019;
+$valley-green: #8ed6a3;
+$cyan-screen: #00e5ff;
+$text-html: #e6ded6;
+$text-dim: #9a8a80;
+$rock-border: #416b51;
+
+.sql-section { animation: sqlReveal .45s ease both; }
+
+header { margin-bottom: 1.5rem; }
+
+.section-kicker {
+  color: $cyan-screen;
+  font: 700 .72rem monospace;
+  letter-spacing: .14em;
+}
+
+h2 {
+  margin: .35rem 0;
+  color: $cobre-transistor;
+  font: 2.1rem 'Bangers', cursive;
+  letter-spacing: .05em;
+  text-shadow: 2px 2px 0px $tinta-oscura;
+}
+
+header p { color: $text-dim; }
+
+.manual-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+.concept-box {
+  background: linear-gradient(145deg, rgba(24, 47, 38, .94), rgba(11, 25, 21, .94));
+  border: 2px solid $rock-border;
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 4px 4px 0px $tinta-oscura;
+
+  .box-subtitle {
+    color: $cobre-transistor;
+    margin-top: 0;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-family: 'Bangers', cursive;
+    letter-spacing: .04em;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: $text-html;
+  }
+
+  pre {
+    background: rgba(7, 16, 12, .9);
+    padding: 1rem;
+    border-radius: 8px;
+    color: $cyan-screen;
+    overflow-x: auto;
+    margin: .8rem 0 0 0;
+    border: 1px solid rgba(0, 229, 255, .25);
+    font-family: 'Fira Code', monospace;
+    font-size: .9rem;
+  }
+}
+
+.manual-graphic {
+  background: linear-gradient(160deg, #172a21, #0e1b15);
+  border: 2px dashed $cobre-transistor;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 300px;
+  box-shadow: 4px 4px 0px $tinta-oscura;
+
+  .graphic-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: $cobre-transistor;
+    opacity: .8;
+
+    i { font-size: 3rem; margin-bottom: 1rem; }
+    span { font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: .05em; margin-bottom: 1.5rem; }
+
+    .query-circuit {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      width: 100%;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+
+      .circuit-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 8px;
+        padding: .5rem .7rem;
+        font-family: 'Fira Code', monospace;
+        border: 2px solid;
+
+        i { font-size: 1rem; margin-bottom: .3rem; }
+        strong { font-size: .95rem; letter-spacing: .08em; }
+        small { font-size: .62rem; opacity: .85; font-family: monospace; letter-spacing: .03em; }
+
+        &.copper {
+          color: #ffe2a1;
+          border-color: $cobre-transistor;
+          background: rgba(217, 164, 65, .15);
+        }
+
+        &.green {
+          color: $valley-green;
+          border-color: $valley-green;
+          background: rgba(142, 214, 163, .15);
+        }
+
+        &.cyan {
+          color: $cyan-screen;
+          border-color: $cyan-screen;
+          background: rgba(0, 229, 255, .12);
+        }
+      }
+
+      .circuit-wire { color: $text-dim; font-size: 1.4rem; }
+    }
+
+    .query-example {
+      width: 100%;
+      text-align: left;
+      background: rgba(7, 16, 12, .9);
+      border: 1px solid rgba(217, 164, 65, .4);
+      border-radius: 8px;
+      padding: .8rem 1rem;
+      margin-bottom: 1rem;
+
+      .example-label {
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        color: $cobre-transistor;
+        font: 700 .68rem monospace;
+        letter-spacing: .1em;
+        margin-bottom: .4rem;
+      }
+
+      pre {
+        margin: 0;
+        color: $cyan-screen;
+        font-family: 'Fira Code', monospace;
+        font-size: .78rem;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+    }
+
+    .schema-box {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      width: 100%;
+      min-width: 220px;
+      justify-content: center;
+
+      .schema-table {
+        flex: 1;
+        border: 2px solid $valley-green;
+        border-radius: 6px;
+        padding: .5rem;
+
+        .schema-head { height: 14px; background: rgba(217, 164, 65, .35); margin-bottom: .4rem; border-radius: 3px; }
+        .schema-row { height: 10px; background: rgba(142, 214, 163, .18); margin-bottom: .35rem; border-radius: 3px; }
+        .schema-row.short { width: 55%; }
+
+        .schema-title {
+          font-family: 'Bangers', cursive;
+          letter-spacing: .04em;
+          color: $cobre-transistor;
+          font-size: .9rem;
+          padding: .2rem .3rem;
+          margin-bottom: .35rem;
+          border-bottom: 2px solid rgba(217, 164, 65, .35);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .schema-col {
+          font-family: 'Fira Code', monospace;
+          font-size: .62rem;
+          color: $valley-green;
+          background: rgba(142, 214, 163, .14);
+          border-radius: 3px;
+          padding: .18rem .3rem;
+          margin-bottom: .28rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .schema-link { color: $cyan-screen; font-size: 1.3rem; }
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sql-back, .sql-next {
+  padding: .7rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  transition: all .2s;
+}
+
+.sql-back {
+  color: $cobre-transistor;
+  background: rgba(24, 47, 38, .9);
+  border: 2px solid $cobre-transistor;
+  font-family: 'Bangers', cursive;
+  letter-spacing: .05em;
+
+  &:hover { background: color.adjust(rgba(24, 47, 38, .9), $lightness: 4%); transform: translateY(-2px); }
+}
+
+.sql-next {
+  color: $tinta-oscura;
+  background: $valley-green;
+  border: 2px solid color.adjust($valley-green, $lightness: -15%);
+  font-family: 'Bangers', cursive;
+  letter-spacing: .05em;
+
+  &:hover {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(142, 214, 163, .4);
+  }
+}
+
+@keyframes sqlReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}

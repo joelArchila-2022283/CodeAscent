@@ -1,0 +1,26 @@
+<section class="content">
+  <button class="back" type="button" (click)="back.emit()">← MISIONES</button>
+  <div class="eyebrow">DATA // MANUAL TÉCNICO CSS</div>
+  <h2>APRENDE ANTES DE PROGRAMAR</h2>
+  @if (loading()) { <p class="lead">Cargando contenido CSS...</p> }
+  @else if (error()) { <p class="lead">{{ error() }}</p> }
+  @else if (mission; as selected) {
+    <div class="layout">
+      <article class="card theory-card">
+        <span class="card-label">NIVEL {{ selected.nivel.numero_nivel }} · {{ selected.nivel.nombre }}</span>
+        <h3>{{ selected.leccion?.titulo }}</h3>
+        <p class="objective"><b>Objetivo:</b> {{ selected.nivel.descripcion }}</p>
+        <p>{{ selected.leccion?.contenido }}</p>
+      </article>
+      <article class="card example-card">
+        <span class="card-label">RETO SELECCIONADO</span>
+        <h3>{{ selected.reto?.titulo }}</h3>
+        <p>{{ selected.reto?.descripcion }}</p>
+        @for (ejemplo of selected.leccion?.ejemplos ?? []; track ejemplo.id_ejemplo) {
+          <h4>{{ ejemplo.titulo }}</h4><pre>{{ ejemplo.codigo }}</pre><p>{{ ejemplo.explicacion }}</p>
+        }
+        <button class="primary" type="button" (click)="next.emit()">CONTINUAR A LA LECCIÓN →</button>
+      </article>
+    </div>
+  } @else { <p class="lead">Selecciona una misión CSS para cargar su manual.</p> }
+</section>

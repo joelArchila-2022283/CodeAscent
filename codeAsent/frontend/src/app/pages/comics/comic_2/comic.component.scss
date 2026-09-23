@@ -1,0 +1,475 @@
+$neon: #00FF99;
+$neon-cian: #00C88C;
+$oscuro-1: #0D1317;
+$oscuro-2: #111b1f;
+$rojo-carmesi: #FF1A1A;
+$naranja-ambar: #FF6600;
+$texto-atenuado: #7fb3a3;
+
+:host {
+    display: block;
+    min-height: 100vh;
+    width: 100%;
+    background:
+        radial-gradient(circle at 50% 20%, rgba(0, 255, 153, 0.08), transparent 35%),
+        radial-gradient(circle at 50% 100%, rgba(0, 200, 140, 0.05), transparent 40%),
+        #050809;
+    color: $neon;
+    font-family: 'Baloo 2', sans-serif;
+    overflow-x: hidden;
+}
+
+.dispositivo {
+    width: min(1400px, 98%);
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 30px;
+    position: relative;
+    background:
+        linear-gradient(145deg, rgba(17, 27, 31, 0.98), rgba(7, 12, 14, 0.98));
+    border-left: 2px solid rgba(0, 255, 153, 0.25);
+    border-right: 2px solid rgba(0, 255, 153, 0.25);
+    box-shadow:
+        0 0 35px rgba(0, 255, 153, 0.08),
+        inset 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.pantalla {
+    width: 100%;
+    min-height: calc(100vh - 60px);
+    padding: 35px 25px 30px;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(0, 255, 153, 0.07), transparent 35%),
+        linear-gradient(180deg, $oscuro-2, $oscuro-1);
+    border: 2px solid $neon;
+    border-radius: 12px;
+    box-shadow:
+        0 0 18px rgba(0, 255, 153, 0.3),
+        inset 0 0 35px rgba(0, 255, 153, 0.04);
+}
+
+.lineas-escaneo {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.12;
+    background: repeating-linear-gradient(to bottom,
+            transparent 0,
+            transparent 4px,
+            rgba(0, 255, 153, 0.08) 5px,
+            transparent 6px);
+    z-index: 1;
+}
+
+.viñeta {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center,
+            transparent 45%,
+            rgba(0, 0, 0, 0.55) 100%);
+    z-index: 2;
+}
+
+.encabezado-comic {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.codigo-comic {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 5px 14px;
+    border: 1px solid $naranja-ambar;
+    color: $naranja-ambar;
+    background: rgba(255, 102, 0, 0.06);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-shadow: 0 0 8px rgba(255, 102, 0, 0.6);
+}
+
+.encabezado-comic h1 {
+    margin: 0;
+    color: $neon;
+    font-family: 'Bangers', cursive;
+    font-size: clamp(2.3rem, 4vw, 3.7rem);
+    line-height: 0.95;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow:
+        0 0 5px $neon,
+        0 0 15px rgba(0, 255, 153, 0.6);
+}
+
+.encabezado-comic p {
+    margin: 8px 0 0;
+    color: $texto-atenuado;
+    font-size: clamp(0.8rem, 1.3vw, 1rem);
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.contenedor-comic {
+    position: relative;
+    z-index: 5;
+    width: 65%;
+    max-width: 800px;
+    min-width: 500px;
+    margin: 0 auto 25px;
+    padding: 14px;
+    background:
+        linear-gradient(145deg,
+            rgba(0, 255, 153, 0.025),
+            rgba(0, 0, 0, 0.5)),
+        #070b0d;
+    border: 3px solid $neon;
+    box-shadow:
+        0 0 12px rgba(0, 255, 153, 0.45),
+        0 0 35px rgba(0, 255, 153, 0.12),
+        inset 0 0 25px rgba(0, 255, 153, 0.05);
+}
+
+.contenedor-comic::before,
+.contenedor-comic::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-color: $neon-cian;
+    pointer-events: none;
+}
+
+.contenedor-comic::before {
+    top: -3px;
+    left: -3px;
+    border-top: 5px solid $neon-cian;
+    border-left: 5px solid $neon-cian;
+}
+
+.contenedor-comic::after {
+    right: -3px;
+    bottom: -3px;
+    border-right: 5px solid $neon-cian;
+    border-bottom: 5px solid $neon-cian;
+}
+
+.marco-superior,
+.marco-inferior {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    min-height: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    color: $texto-atenuado;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.marco-superior {
+    padding: 0 5px 9px;
+    border-bottom: 1px solid rgba(0, 255, 153, 0.25);
+    margin-bottom: 12px;
+}
+
+.marco-inferior {
+    padding: 9px 5px 0;
+    border-top: 1px solid rgba(0, 255, 153, 0.25);
+    margin-top: 12px;
+}
+
+.contenedor-comic img {
+    display: block;
+    width: 100%;
+    max-width: 770px;
+    height: auto;
+    margin: 0 auto;
+    border: 2px solid $neon-cian;
+    background: #000;
+    box-shadow:
+        0 0 12px rgba(0, 200, 140, 0.35),
+        0 0 30px rgba(0, 200, 140, 0.08);
+    image-rendering: auto;
+}
+
+.boton-panel {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    width: fit-content;
+    min-width: 210px;
+    min-height: 54px;
+    margin: 18px auto 22px;
+    padding: 0 28px;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: $neon;
+    background: rgba(0, 255, 153, 0.04);
+    border: 2px solid $neon;
+    border-radius: 5px;
+    box-shadow:
+        0 0 10px rgba(0, 255, 153, 0.25),
+        inset 0 0 12px rgba(0, 255, 153, 0.04);
+    font-family: 'Bangers', cursive;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.boton-panel span {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+}
+
+.boton-panel:hover {
+    color: #06100c;
+    background: $neon;
+    box-shadow:
+        0 0 15px $neon,
+        0 0 35px rgba(0, 255, 153, 0.4);
+    transform: translateY(-2px);
+}
+
+.boton-panel:active {
+    transform: translateY(1px);
+}
+
+.nota-inferior {
+    position: relative;
+    z-index: 5;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 7px 16px;
+    color: $texto-atenuado;
+    border: 1px dashed rgba(0, 200, 140, 0.4);
+    background: rgba(0, 200, 140, 0.03);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.engranajes {
+    position: absolute;
+    top: 100px;
+    width: 100px;
+    height: 400px;
+    opacity: 0.18;
+    pointer-events: none;
+}
+
+.engranajes.izquierda {
+    left: -20px;
+}
+
+.engranajes.derecha {
+    right: -20px;
+}
+
+.engranajes div {
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    border: 5px dashed $neon-cian;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0, 200, 140, 0.3);
+}
+
+.engranajes div:nth-child(1) {
+    top: 20px;
+    left: 10px;
+}
+
+.engranajes div:nth-child(2) {
+    top: 100px;
+    left: 35px;
+    width: 40px;
+    height: 40px;
+}
+
+.engranajes div:nth-child(3) {
+    top: 165px;
+    left: 0;
+    width: 70px;
+    height: 70px;
+}
+
+.engranajes div:nth-child(4) {
+    top: 270px;
+    left: 35px;
+    width: 45px;
+    height: 45px;
+}
+
+.engranajes div:nth-child(5) {
+    top: 335px;
+    left: 5px;
+    width: 60px;
+    height: 60px;
+}
+
+.engranajes.derecha div {
+    left: auto;
+    right: 10px;
+}
+
+.engranajes.derecha div:nth-child(2) {
+    right: 35px;
+}
+
+.engranajes.derecha div:nth-child(3) {
+    right: 0;
+}
+
+.engranajes.derecha div:nth-child(4) {
+    right: 35px;
+}
+
+.engranajes.derecha div:nth-child(5) {
+    right: 5px;
+}
+
+@media (max-width: 1100px) {
+    .dispositivo {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .pantalla {
+        min-height: calc(100vh - 30px);
+        padding: 25px 15px;
+    }
+
+    .engranajes {
+        display: none;
+    }
+
+    .contenedor-comic {
+        width: 70%;
+    }
+}
+
+@media (max-width: 768px) {
+    .dispositivo {
+        padding: 8px;
+    }
+
+    .pantalla {
+        padding: 22px 8px;
+        border-radius: 7px;
+    }
+
+    .encabezado-comic {
+        margin-bottom: 18px;
+    }
+
+    .codigo-comic {
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+    }
+
+    .encabezado-comic h1 {
+        font-size: clamp(2rem, 9vw, 3rem);
+        letter-spacing: 2px;
+    }
+
+    .encabezado-comic p {
+        font-size: 0.75rem;
+        letter-spacing: 1.5px;
+    }
+
+    .contenedor-comic {
+        width: 90%;
+        min-width: 0;
+        padding: 9px;
+        margin-bottom: 20px;
+    }
+
+    .marco-superior,
+    .marco-inferior {
+        font-size: 0.62rem;
+        letter-spacing: 1px;
+    }
+
+    .marco-superior {
+        padding-bottom: 8px;
+        margin-bottom: 9px;
+    }
+
+    .marco-inferior {
+        padding-top: 8px;
+        margin-top: 9px;
+    }
+
+    .boton-panel {
+        min-width: 190px;
+        min-height: 52px;
+        padding: 0 22px;
+        font-size: 1.3rem;
+    }
+
+    .nota-inferior {
+        font-size: 0.62rem;
+        letter-spacing: 1px;
+        padding: 6px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dispositivo {
+        padding: 4px;
+    }
+
+    .pantalla {
+        padding: 18px 5px;
+    }
+
+    .codigo-comic {
+        font-size: 0.58rem;
+        padding: 4px 8px;
+    }
+
+    .encabezado-comic h1 {
+        font-size: 2rem;
+    }
+
+    .encabezado-comic p {
+        font-size: 0.62rem;
+    }
+
+    .contenedor-comic {
+        width: 96%;
+        padding: 5px;
+        border-width: 2px;
+    }
+
+    .marco-superior,
+    .marco-inferior {
+        font-size: 0.5rem;
+    }
+
+    .boton-panel {
+        width: 90%;
+        min-width: 0;
+    }
+}

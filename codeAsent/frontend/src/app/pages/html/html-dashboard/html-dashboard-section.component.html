@@ -1,0 +1,37 @@
+<section class="html-section html-dashboard-section">
+  <div class="section-stone-header">
+    <span class="section-kicker"><i class="bi bi-broadcast-pin"></i> NÚCLEO OPERATIVO / ONLINE</span>
+    <h2 class="stone-heading">PANEL DE CONTROL SUBTERRÁNEO</h2>
+    <p class="stone-desc">Los sistemas de soporte vital operan al 100%. Selecciona tu estación de trabajo.</p>
+  </div>
+
+  <div class="stone-modules-grid">
+    <button class="stone-panel-card" (click)="selectSection('processes')">
+      <span class="panel-card__top"><span>BUS-IRQ</span><i class="bi bi-circle-fill status-green"></i></span>
+      <span class="panel-icon-stone"><i class="bi bi-journal-check"></i></span>
+      <span class="panel-title">Misiones</span>
+      <span class="panel-text">Selecciona y activa las operaciones de excavación disponibles en tu rango.</span>
+    </button>
+
+    <button class="stone-panel-card" (click)="selectSection('data')">
+      <span class="panel-card__top"><span>ARCH-01</span><i class="bi bi-circle-fill status-amber"></i></span>
+      <span class="panel-icon-stone"><i class="bi bi-book"></i></span>
+      <span class="panel-title">Manual Técnico</span>
+      <span class="panel-text">Consulta los diagramas estructurales, teoría y ejemplos del lenguaje HTML.</span>
+    </button>
+
+    <button class="stone-panel-card" (click)="selectSection('test')">
+      <span class="panel-card__top"><span>BIOS-TST</span><i class="bi bi-circle-fill status-purple"></i></span>
+      <span class="panel-icon-stone"><i class="bi bi-patch-question"></i></span>
+      <span class="panel-title">Cuestionario</span>
+      <span class="panel-text">Pon a prueba tu aprendizaje prediciendo el comportamiento del código HTML.</span>
+    </button>
+
+    <button class="stone-panel-card" (click)="selectSection('terminal')">
+      <span class="panel-card__top"><span>CRT-VGA</span><i class="bi bi-circle-fill status-cyan"></i></span>
+      <span class="panel-icon-stone"><i class="bi bi-display"></i></span>
+      <span class="panel-title">Laboratorio</span>
+      <span class="panel-text">Inyecta etiquetas directamente en la consola CRT para resolver el desafío.</span>
+    </button>
+  </div>
+</section>
