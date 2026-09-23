@@ -9,6 +9,35 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       return res.status(401).json({ mensaje: 'Usuario no autenticado.' });
     }
 
+    // Auto-corrige SQL a 100 XP por nivel (máximo 1000) si la BD aún tiene 50..500 (5500 total)
+    await pool.query(`
+      UPDATE nivel SET xp_requerida = 100
+      WHERE id_lenguaje IN (SELECT id_lenguaje FROM lenguaje WHERE slug = 'sql' OR LOWER(nombre)='sql')
+        AND xp_requerida != 100
+    `);
+    // Corrige XP de usuario SQL si quedó desfasado por premios viejos (solo corrige al alza, nunca resta para no confundir)
+    await pool.query(`
+      UPDATE usuario_xp SET xp = LEAST(1000, (
+        SELECT COUNT(*) * 100 FROM mission_progress mp
+        JOIN leccion l ON l.id_leccion = mp.mission_id
+        JOIN nivel n ON n.id_nivel = l.id_nivel
+        JOIN lenguaje lang ON lang.id_lenguaje = n.id_lenguaje
+        WHERE mp.user_id = usuario_xp.user_id AND mp.completed = TRUE AND lang.slug='sql'
+      ))
+      WHERE id_lenguaje IN (SELECT id_lenguaje FROM lenguaje WHERE slug='sql' OR LOWER(nombre)='sql')
+        AND xp < LEAST(1000, (
+        SELECT COUNT(*) * 100 FROM mission_progress mp2
+        JOIN leccion l2 ON l2.id_leccion = mp2.mission_id
+        JOIN nivel n2 ON n2.id_nivel = l2.id_nivel
+        JOIN lenguaje lang2 ON lang2.id_lenguaje = n2.id_lenguaje
+        WHERE mp2.user_id = usuario_xp.user_id AND mp2.completed = TRUE AND lang2.slug='sql'
+      ))
+    `);
+    // Asegura que nunca supere 1000 (por si quedó 2750 de instalación vieja)
+    await pool.query(`
+      UPDATE usuario_xp SET xp = 1000 WHERE xp > 1000 AND id_lenguaje IN (SELECT id_lenguaje FROM lenguaje WHERE slug='sql' OR LOWER(nombre)='sql')
+    `);
+
     // 1. Obtener Usuario
     const resUsuario = await pool.query(
       'SELECT id_usuario, nombre, correo, rol, fecha_registro FROM usuario WHERE id_usuario = $1',
@@ -66,14 +95,15 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
           SELECT MAX(nivel.numero_nivel)
           FROM nivel nivel
           WHERE nivel.id_lenguaje = l.id_lenguaje
-            AND (
+            AND CASE WHEN l.slug = 'sql' THEN nivel.numero_nivel * 100 ELSE (
               SELECT COALESCE(SUM(anterior.xp_requerida), 0)
               FROM nivel anterior
               WHERE anterior.id_lenguaje = l.id_lenguaje
                 AND anterior.numero_nivel <= nivel.numero_nivel
-            ) <= COALESCE(uxp.xp, 0)
+            ) END <= COALESCE(uxp.xp, 0)
         ), 1)::int AS nivel_actual,
-        LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2))::float AS porcentaje,
+        CASE WHEN l.slug = 'sql' THEN LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / 1000) * 100, 2))
+             ELSE LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2)) END::float AS porcentaje,
         COUNT(DISTINCT n.id_nivel)::int AS total_niveles
       FROM lenguaje l
       LEFT JOIN usuario_xp uxp
