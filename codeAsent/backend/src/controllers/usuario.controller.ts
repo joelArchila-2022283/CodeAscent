@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { UsuarioService } from '../services/usuario.service';
 import { OAuth2Client } from 'google-auth-library';
-import { generarToken } from '../utils/jwt.util';
+import { CLAVE_SECRETA, generarToken } from '../utils/jwt.util';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 
@@ -291,7 +291,12 @@ export class UsuarioController {
     // Recuperacion de contraseña
     static async solicitarRecuperacion(req: Request, res: Response): Promise<void> {
         try {
-            const { correo } = req.body;
+            const correo = typeof req.body.correo === 'string' ? req.body.correo.trim().toLowerCase() : '';
+
+            if (!correo) {
+                res.status(400).json({ mensaje: 'El correo electrónico es obligatorio.' });
+                return;
+            }
 
             // 1. Usar el servicio que ya tienes para buscar al usuario
             const usuario = await UsuarioService.obtenerPorCorreo(correo);
@@ -303,13 +308,14 @@ export class UsuarioController {
 
             // 2. Generar un token temporal que caduca en 15 minutos
             const tokenRecuperacion = jwt.sign(
-                { id_usuario: usuario.id_usuario, correo: usuario.correo },
-                process.env.JWT_SECRET as string,
+                { id_usuario: usuario.id_usuario, correo: usuario.correo, tipo: 'recuperacion' },
+                CLAVE_SECRETA,
                 { expiresIn: '15m' }
             );
 
             // 3. Crear el enlace seguro hacia tu frontend
-            const enlace = `${process.env.FRONTEND_URL}/restaurar-password?token=${tokenRecuperacion}`;
+            const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:4200').replace(/\/$/, '');
+            const enlace = `${frontendUrl}/restaurar-password?token=${encodeURIComponent(tokenRecuperacion)}`;
 
             // 4. Diseñar y enviar el correo con la temática de la cueva
             await transporter.sendMail({
@@ -344,17 +350,25 @@ export class UsuarioController {
         try {
             const { token, nuevaPassword } = req.body;
 
-            let decodificado: any;
+            if (typeof token !== 'string' || !token || typeof nuevaPassword !== 'string' || nuevaPassword.length < 6) {
+                res.status(400).json({ mensaje: 'El token y una contraseña de al menos 6 caracteres son obligatorios.' });
+                return;
+            }
+
+            let decodificado: { id_usuario?: number; tipo?: string };
             try {
-                decodificado = jwt.verify(token, process.env.JWT_SECRET as string);
+                decodificado = jwt.verify(token, CLAVE_SECRETA) as typeof decodificado;
             } catch (err) {
                 res.status(401).json({ mensaje: 'El enlace de recuperación ha caducado o es inválido.' });
                 return;
             }
 
-            const id_usuario = decodificado.id_usuario;
+            if (decodificado.tipo !== 'recuperacion' || !Number.isInteger(decodificado.id_usuario)) {
+                res.status(401).json({ mensaje: 'El enlace de recuperación ha caducado o es inválido.' });
+                return;
+            }
 
-            await UsuarioService.actualizar(id_usuario, { password: nuevaPassword });
+            await UsuarioService.actualizar(decodificado.id_usuario!, { password: nuevaPassword });
 
             res.status(200).json({ mensaje: 'Contraseña actualizada correctamente.' });
 
