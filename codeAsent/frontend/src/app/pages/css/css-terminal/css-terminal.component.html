@@ -38,7 +38,7 @@
               <div class="hints"><b>PISTAS PROGRESIVAS</b>@for (hint of hints().slice(0, visibleHints()); track hint.id_pista) {<p>{{ hint.orden }}. {{ hint.texto }}</p>}</div>
             }
             @if (success()) {
-              <button class="primary continue-quiz" type="button" (click)="irAlCuestionario()">IR AL CUESTIONARIO →</button>
+              <button class="primary continue-quiz css-launch-button" type="button" (click)="irAlCuestionario()"><i class="bi bi-terminal-fill" aria-hidden="true"></i> ABRIR CUESTIONARIO <i class="bi bi-arrow-right-circle-fill" aria-hidden="true"></i></button>
             }
             <pre class="console">{{ consoleText() }}</pre>
           </div>

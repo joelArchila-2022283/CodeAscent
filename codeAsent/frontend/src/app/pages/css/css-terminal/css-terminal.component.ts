@@ -175,12 +175,12 @@ export class CssTerminalComponent implements OnInit, OnChanges, OnDestroy {
         if (resultado.ya_completado) {
           this.consoleText.set(
             '> MISIÓN CORRECTA.\n' +
-            '> Esta misión ya había sido completada, por eso no se otorgó XP adicional.'
+            '> CONTINÚA CON EL CUESTIONARIO.'
           );
         } else {
           this.consoleText.set(
             '> MISIÓN CSS VALIDADA.\n' +
-            '> La terminal no otorga XP. Continúa con el cuestionario.'
+            '> CONTINÚA CON EL CUESTIONARIO.'
           );
         }
 
