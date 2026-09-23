@@ -20,13 +20,10 @@ export class GamificationService {
              ORDER BY numero_nivel`,
             [idLenguaje]
         );
-        // Normaliza SQL a 100 XP por nivel (máximo 1000) aunque la BD aún tenga 50..500
-        const slugRes = await db.query<{ slug: string }>(`SELECT slug FROM lenguaje WHERE id_lenguaje = $1`, [idLenguaje]);
-        const slug = slugRes.rows[0]?.slug?.toLowerCase();
-        if (slug === 'sql') {
-            return resultado.rows.map((n) => ({ ...n, xp_requerida: 100 }));
-        }
-        return resultado.rows;
+        return resultado.rows.map((nivel) => ({
+            ...nivel,
+            xp_requerida: Number(nivel.numero_nivel) * 100,
+        }));
     }
 
     static computeLevel(xp: number, niveles: NivelGamificacion[]) {

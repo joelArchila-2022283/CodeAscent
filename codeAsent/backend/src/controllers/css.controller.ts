@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { pool } from '../config/conexion';
+import { GamificationService } from '../services/gamification.service';
 
 const XP_POR_MISION = 100;
 
@@ -126,6 +127,7 @@ export const registrarIntentoCss = async (
     const retoResult = await cliente.query(
       `SELECT
           r.id_reto,
+          r.id_leccion,
           r.xp_recompensa,
           r.tipo_reto,
           n.id_nivel,
@@ -183,6 +185,39 @@ export const registrarIntentoCss = async (
       Boolean(solucion) &&
       normalizarCss(codigo).includes(normalizarCss(solucion));
 
+    const intentoPrevio = await cliente.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM intento
+         WHERE id_usuario = $1 AND id_reto = $2 AND correcto = TRUE
+       ) AS ya_completado`,
+      [idUsuario, idReto]
+    );
+    const yaCompletado = Boolean(intentoPrevio.rows[0]?.ya_completado);
+    const xpObtenida = correcto && !yaCompletado ? Number(reto.xp_recompensa) || 0 : 0;
+
+    await cliente.query(
+      `INSERT INTO intento (id_usuario, id_reto, respuesta_usuario, correcto, xp_obtenida)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [idUsuario, idReto, codigo, correcto, xpObtenida]
+    );
+
+    if (correcto) {
+      await cliente.query(
+        `INSERT INTO mission_progress
+            (user_id, mission_id, reached_step, prediccion_correcta, terminal_code)
+         VALUES ($1, $2, 'terminal', TRUE, $3)
+         ON CONFLICT (user_id, mission_id) DO UPDATE SET
+            reached_step = CASE
+              WHEN array_position(ARRAY['manual','lesson','terminal','quiz'], mission_progress.reached_step)
+                 < array_position(ARRAY['manual','lesson','terminal','quiz'], 'terminal')
+              THEN 'terminal' ELSE mission_progress.reached_step END,
+            prediccion_correcta = TRUE,
+            terminal_code = EXCLUDED.terminal_code,
+            updated_at = CURRENT_TIMESTAMP`,
+        [idUsuario, reto.id_leccion, codigo]
+      );
+    }
+
     const progresoResult = await cliente.query(
       `SELECT
           id_progreso,
@@ -205,8 +240,8 @@ export const registrarIntentoCss = async (
       status: 'success',
       data: {
         correcto,
-        xp_obtenida: 0,
-        ya_completado: false,
+        xp_obtenida: xpObtenida,
+        ya_completado: yaCompletado,
         progreso: progresoResult.rows[0] ?? null
       }
     });
@@ -304,8 +339,16 @@ export const completarCuestionarioCss = async (
 
     const anterior = await cliente.query(
       `SELECT
-          n.id_nivel,
-          COALESCE(nu.completado, FALSE) AS completado
+           n.id_nivel,
+           (COALESCE(nu.completado, FALSE) OR EXISTS (
+             SELECT 1
+             FROM leccion le_anterior
+             JOIN mission_progress mp_anterior
+               ON mp_anterior.mission_id = le_anterior.id_leccion
+              AND mp_anterior.user_id = $1
+              AND mp_anterior.completed = TRUE
+             WHERE le_anterior.id_nivel = n.id_nivel
+           )) AS completado
        FROM nivel n
        LEFT JOIN nivel_usuario nu
          ON nu.id_nivel = n.id_nivel
@@ -372,6 +415,18 @@ export const completarCuestionarioCss = async (
            CURRENT_TIMESTAMP
          )`,
       [idUsuario, mision.id_nivel]
+    );
+
+    await cliente.query(
+      `INSERT INTO mission_progress
+          (user_id, mission_id, reached_step, completed, prediccion_correcta)
+       VALUES ($1, $2, 'quiz', TRUE, TRUE)
+       ON CONFLICT (user_id, mission_id) DO UPDATE SET
+          reached_step = 'quiz',
+          completed = TRUE,
+          prediccion_correcta = TRUE,
+          updated_at = CURRENT_TIMESTAMP`,
+      [idUsuario, idLeccion]
     );
 
     const siguiente = await cliente.query(
@@ -482,6 +537,12 @@ export const completarCuestionarioCss = async (
       ]
     );
 
+    const logros = await GamificationService.evaluateAchievements(
+      cliente,
+      idUsuario,
+      mision.id_lenguaje
+    );
+
     await cliente.query('COMMIT');
 
     res.json({
@@ -491,7 +552,8 @@ export const completarCuestionarioCss = async (
         siguiente_nivel: siguiente.rows[0]?.id_nivel ?? null,
         xp_mision: xpMision,
         xp_obtenida: Number(xp.rows[0]?.xp ?? 0),
-        porcentaje: Number(porcentaje.rows[0]?.porcentaje ?? 0)
+        porcentaje: Number(porcentaje.rows[0]?.porcentaje ?? 0),
+        newAchievements: logros.filter((logro: { obtenido: boolean }) => logro.obtenido)
       }
     });
   } catch (error: any) {

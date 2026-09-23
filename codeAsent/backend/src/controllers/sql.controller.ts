@@ -63,12 +63,11 @@ export const obtenerNivelesSql = async (_req: Request, res: Response): Promise<v
       ORDER BY n.numero_nivel ASC
     `);
 
-    // Normaliza SQL a 100 XP por nivel (máximo 1000) aunque la BD aún tenga valores viejos 50..500
-    const normalizados = resultado.rows.map((nivel: any) => ({
+    const niveles = resultado.rows.map((nivel: any) => ({
       ...nivel,
-      xp_requerida: 100,
+      xp_requerida: Number(nivel.numero_nivel) * 100,
     }));
-    res.status(200).json({ status: 'success', data: normalizados });
+    res.status(200).json({ status: 'success', data: niveles });
   } catch (error: any) {
     console.error('Error al obtener niveles SQL:', error?.message || error);
     res.status(500).json({ status: 'error', message: 'No se pudieron cargar los niveles SQL.' });

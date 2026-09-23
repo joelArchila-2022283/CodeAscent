@@ -1059,51 +1059,51 @@ CALL sp_crear_logro('Desarrollador Frontend', 'Completa los niveles de HTML y CS
 
 -- Niveles: SQL (10 Niveles)
 CALL sp_crear_nivel('SQL', 'Introducción a Bases de Datos', 1, 'Conceptos clave de modelos relacionales.', 100);
-CALL sp_crear_nivel('SQL', 'Sentencia SELECT Básica', 2, 'Consultar filas y columnas específicas.', 100);
-CALL sp_crear_nivel('SQL', 'Filtros con WHERE', 3, 'Uso de operadores lógicos y de comparación.', 100);
-CALL sp_crear_nivel('SQL', 'Ordenamiento y Límites', 4, 'Aplicación de ORDER BY y LIMIT/OFFSET.', 100);
-CALL sp_crear_nivel('SQL', 'Funciones de Agregación', 5, 'Uso de COUNT, SUM, AVG, MIN y MAX.', 100);
-CALL sp_crear_nivel('SQL', 'Agrupamiento con GROUP BY', 6, 'Agrupar registros y filtrar con HAVING.', 100);
-CALL sp_crear_nivel('SQL', 'Uniones con INNER JOIN', 7, 'Combinar información de múltiples tablas.', 100);
-CALL sp_crear_nivel('SQL', 'Uniones Externas (LEFT / RIGHT JOIN)', 8, 'Manejo de registros no coincidentes.', 100);
-CALL sp_crear_nivel('SQL', 'Subconsultas y CTEs', 9, 'Consultas anidadas y expresiones de tabla.', 100);
-CALL sp_crear_nivel('SQL', 'Manipulación de Datos (DML)', 10, 'Uso avanzado de INSERT, UPDATE y DELETE.', 100);
+CALL sp_crear_nivel('SQL', 'Sentencia SELECT Básica', 2, 'Consultar filas y columnas específicas.', 200);
+CALL sp_crear_nivel('SQL', 'Filtros con WHERE', 3, 'Uso de operadores lógicos y de comparación.', 300);
+CALL sp_crear_nivel('SQL', 'Ordenamiento y Límites', 4, 'Aplicación de ORDER BY y LIMIT/OFFSET.', 400);
+CALL sp_crear_nivel('SQL', 'Funciones de Agregación', 5, 'Uso de COUNT, SUM, AVG, MIN y MAX.', 500);
+CALL sp_crear_nivel('SQL', 'Agrupamiento con GROUP BY', 6, 'Agrupar registros y filtrar con HAVING.', 600);
+CALL sp_crear_nivel('SQL', 'Uniones con INNER JOIN', 7, 'Combinar información de múltiples tablas.', 700);
+CALL sp_crear_nivel('SQL', 'Uniones Externas (LEFT / RIGHT JOIN)', 8, 'Manejo de registros no coincidentes.', 800);
+CALL sp_crear_nivel('SQL', 'Subconsultas y CTEs', 9, 'Consultas anidadas y expresiones de tabla.', 900);
+CALL sp_crear_nivel('SQL', 'Manipulación de Datos (DML)', 10, 'Uso avanzado de INSERT, UPDATE y DELETE.', 1000);
 
 -- Niveles: HTML (10 Niveles)
-CALL sp_crear_nivel('HTML', 'Estructura Básica Documento', 1, 'Etiquetas doctype, html, head y body.', 50);
-CALL sp_crear_nivel('HTML', 'Encabezados y Párrafos', 2, 'Jerarquía de texto con h1-h6 y p.', 100);
-CALL sp_crear_nivel('HTML', 'Enlaces y Navegación', 3, 'Uso del elemento a y rutas relativas/absolutas.', 150);
-CALL sp_crear_nivel('HTML', 'Imágenes y Multimedia', 4, 'Inserción de img, audio y video.', 200);
-CALL sp_crear_nivel('HTML', 'Listas Ordenadas y Desordenadas', 5, 'Estructuración mediante ul, ol y li.', 250);
-CALL sp_crear_nivel('HTML', 'Tablas de Datos', 6, 'Creación de tablas con table, tr, th y td.', 300);
-CALL sp_crear_nivel('HTML', 'Formularios Básicos', 7, 'Uso de form, input, label y button.', 350);
-CALL sp_crear_nivel('HTML', 'Tipos de Input Avanzados', 8, 'Validación nativa con email, number y date.', 400);
-CALL sp_crear_nivel('HTML', 'HTML Semántico', 9, 'Uso de header, nav, main, section y footer.', 450);
-CALL sp_crear_nivel('HTML', 'Atributos Globales y Accesibilidad', 10, 'Atributos ARIA, id, class y lang.', 500);
+CALL sp_crear_nivel('HTML', 'Estructura Básica Documento', 1, 'Etiquetas doctype, html, head y body.', 100);
+CALL sp_crear_nivel('HTML', 'Encabezados y Párrafos', 2, 'Jerarquía de texto con h1-h6 y p.', 200);
+CALL sp_crear_nivel('HTML', 'Enlaces y Navegación', 3, 'Uso del elemento a y rutas relativas/absolutas.', 300);
+CALL sp_crear_nivel('HTML', 'Imágenes y Multimedia', 4, 'Inserción de img, audio y video.', 400);
+CALL sp_crear_nivel('HTML', 'Listas Ordenadas y Desordenadas', 5, 'Estructuración mediante ul, ol y li.', 500);
+CALL sp_crear_nivel('HTML', 'Tablas de Datos', 6, 'Creación de tablas con table, tr, th y td.', 600);
+CALL sp_crear_nivel('HTML', 'Formularios Básicos', 7, 'Uso de form, input, label y button.', 700);
+CALL sp_crear_nivel('HTML', 'Tipos de Input Avanzados', 8, 'Validación nativa con email, number y date.', 800);
+CALL sp_crear_nivel('HTML', 'HTML Semántico', 9, 'Uso de header, nav, main, section y footer.', 900);
+CALL sp_crear_nivel('HTML', 'Atributos Globales y Accesibilidad', 10, 'Atributos ARIA, id, class y lang.', 1000);
 
 -- Niveles: CSS (10 Niveles)
-CALL sp_crear_nivel('CSS', 'Sintaxis y Selectores Básicos', 1, 'Selectores de elemento, clase e ID.', 50);
-CALL sp_crear_nivel('CSS', 'Modelo de Caja (Box Model)', 2, 'Manejo de margin, border, padding y content.', 100);
-CALL sp_crear_nivel('CSS', 'Colores y Fondos', 3, 'Uso de HEX, RGB, HSL y propiedades de background.', 150);
-CALL sp_crear_nivel('CSS', 'Tipografía y Fuentes', 4, 'Propiedades font-family, size, weight y line-height.', 200);
-CALL sp_crear_nivel('CSS', 'Posicionamiento', 5, 'Estrategias static, relative, absolute y fixed.', 250);
-CALL sp_crear_nivel('CSS', 'Flexbox Contenedor', 6, 'Alineación con display flex y justify-content.', 300);
-CALL sp_crear_nivel('CSS', 'Flexbox Elementos', 7, 'Uso de flex-grow, flex-shrink y align-self.', 350);
-CALL sp_crear_nivel('CSS', 'CSS Grid Layout', 8, 'Definición de filas y columnas con grid-template.', 400);
-CALL sp_crear_nivel('CSS', 'Diseño Responsivo', 9, 'Uso de Media Queries y unidades relativas (rem/em).', 450);
-CALL sp_crear_nivel('CSS', 'Transiciones y Animaciones', 10, 'Efectos con transition, transform y keyframes.', 500);
+CALL sp_crear_nivel('CSS', 'Sintaxis y Selectores Básicos', 1, 'Selectores de elemento, clase e ID.', 100);
+CALL sp_crear_nivel('CSS', 'Modelo de Caja (Box Model)', 2, 'Manejo de margin, border, padding y content.', 200);
+CALL sp_crear_nivel('CSS', 'Colores y Fondos', 3, 'Uso de HEX, RGB, HSL y propiedades de background.', 300);
+CALL sp_crear_nivel('CSS', 'Tipografía y Fuentes', 4, 'Propiedades font-family, size, weight y line-height.', 400);
+CALL sp_crear_nivel('CSS', 'Posicionamiento', 5, 'Estrategias static, relative, absolute y fixed.', 500);
+CALL sp_crear_nivel('CSS', 'Flexbox Contenedor', 6, 'Alineación con display flex y justify-content.', 600);
+CALL sp_crear_nivel('CSS', 'Flexbox Elementos', 7, 'Uso de flex-grow, flex-shrink y align-self.', 700);
+CALL sp_crear_nivel('CSS', 'CSS Grid Layout', 8, 'Definición de filas y columnas con grid-template.', 800);
+CALL sp_crear_nivel('CSS', 'Diseño Responsivo', 9, 'Uso de Media Queries y unidades relativas (rem/em).', 900);
+CALL sp_crear_nivel('CSS', 'Transiciones y Animaciones', 10, 'Efectos con transition, transform y keyframes.', 1000);
 
 -- Niveles: TypeScript (10 Niveles)
-CALL sp_crear_nivel('TypeScript', 'Tipos Primitivos', 1, 'Declaración explicita con string, number y boolean.', 50);
-CALL sp_crear_nivel('TypeScript', 'Inferencia de Tipos', 2, 'Comprensión del tipado implícito en TS.', 100);
-CALL sp_crear_nivel('TypeScript', 'Arreglos y Tuplas', 3, 'Definición de arrays tipados y tuplas fijas.', 150);
-CALL sp_crear_nivel('TypeScript', 'Interfaces Básicas', 4, 'Definición de contratos de estructura de objetos.', 200);
-CALL sp_crear_nivel('TypeScript', 'Type Aliases', 5, 'Creación de tipos personalizados y de unión.', 250);
-CALL sp_crear_nivel('TypeScript', 'Tipado de Funciones', 6, 'Parámetros opcionales, por defecto y retorno.', 300);
-CALL sp_crear_nivel('TypeScript', 'Enums y Literales', 7, 'Uso de enumeraciones numéricas y de cadena.', 350);
-CALL sp_crear_nivel('TypeScript', 'Clases y Modificadores', 8, 'Uso de public, private, protected y readonly.', 400);
-CALL sp_crear_nivel('TypeScript', 'Genéricos Básicos', 9, 'Creación de componentes y funciones reutilizables.', 450);
-CALL sp_crear_nivel('TypeScript', 'Narrowing y Type Guards', 10, 'Verificación estricta de tipos en tiempo de ejecución.', 500);
+CALL sp_crear_nivel('TypeScript', 'Tipos Primitivos', 1, 'Declaración explicita con string, number y boolean.', 100);
+CALL sp_crear_nivel('TypeScript', 'Inferencia de Tipos', 2, 'Comprensión del tipado implícito en TS.', 200);
+CALL sp_crear_nivel('TypeScript', 'Arreglos y Tuplas', 3, 'Definición de arrays tipados y tuplas fijas.', 300);
+CALL sp_crear_nivel('TypeScript', 'Interfaces Básicas', 4, 'Definición de contratos de estructura de objetos.', 400);
+CALL sp_crear_nivel('TypeScript', 'Type Aliases', 5, 'Creación de tipos personalizados y de unión.', 500);
+CALL sp_crear_nivel('TypeScript', 'Tipado de Funciones', 6, 'Parámetros opcionales, por defecto y retorno.', 600);
+CALL sp_crear_nivel('TypeScript', 'Enums y Literales', 7, 'Uso de enumeraciones numéricas y de cadena.', 700);
+CALL sp_crear_nivel('TypeScript', 'Clases y Modificadores', 8, 'Uso de public, private, protected y readonly.', 800);
+CALL sp_crear_nivel('TypeScript', 'Genéricos Básicos', 9, 'Creación de componentes y funciones reutilizables.', 900);
+CALL sp_crear_nivel('TypeScript', 'Narrowing y Type Guards', 10, 'Verificación estricta de tipos en tiempo de ejecución.', 1000);
 
 -- Lecciones (5 Registros)
 CALL sp_crear_leccion(1, '¿Qué es una Base de Datos Relacional?', 'Una base de datos relacional organiza la información en tablas...', 1);
