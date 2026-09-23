@@ -14,7 +14,9 @@ router.get('/:leccionId/quiz', async (req, res) => {
                     ORDER BY a.id_respuesta) FILTER (WHERE a.id_respuesta IS NOT NULL), '[]'::json) AS respuestas
          FROM reto r
          LEFT JOIN respuesta a ON a.id_reto = r.id_reto
-         WHERE r.id_leccion = $1 AND r.estado = TRUE
+         WHERE r.id_leccion = $1
+           AND r.estado = TRUE
+           AND r.tipo_reto = 'opcion_multiple'
          GROUP BY r.id_reto, r.titulo
          ORDER BY r.id_reto
           LIMIT 3`,
