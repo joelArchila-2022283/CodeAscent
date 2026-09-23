@@ -4,7 +4,7 @@ WORKDIR /app/frontend
 
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 
-RUN corepack enable && pnpm install --frozen-lockfile --config.ignore-scripts=false
+RUN corepack enable && pnpm install --frozen-lockfile --ignore-scripts=false
 
 COPY frontend/ ./
 
@@ -17,9 +17,9 @@ FROM node:22-alpine AS backend-build
 
 WORKDIR /app/backend
 
-COPY backend/package.json backend/pnpm-lock.yaml ./
+COPY backend/package.json backend/pnpm-lock.yaml backend/pnpm-workspace.yaml ./
 
-RUN corepack enable && pnpm install --frozen-lockfile --config.ignore-scripts=false
+RUN corepack enable && pnpm install --frozen-lockfile --allow-build=esbuild
 
 COPY backend/ ./
 
@@ -34,9 +34,9 @@ ENV NODE_ENV=production
 
 RUN corepack enable
 
-COPY backend/package.json backend/pnpm-lock.yaml ./backend/
+COPY backend/package.json backend/pnpm-lock.yaml backend/pnpm-workspace.yaml ./backend/
 
-RUN cd backend && pnpm install --prod --frozen-lockfile --config.ignore-scripts=false
+RUN cd backend && pnpm install --prod --frozen-lockfile --allow-build=esbuild
 
 COPY --from=backend-build /app/backend/dist ./backend/dist
 
