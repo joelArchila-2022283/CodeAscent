@@ -42,6 +42,8 @@ export class CssDashboardComponent implements OnInit {
 
   activeSection = signal<CSSSection>('dashboard');
   selectedMission = signal<CssMision | null>(null);
+  cuestionarioAprobado = signal(false);
+  misiones = signal<CssMision[]>([]);
 
   player = {
     name: '',
@@ -69,6 +71,7 @@ export class CssDashboardComponent implements OnInit {
     });
 
     this.recargarProgreso();
+    this.recargarMisiones();
   }
 
   recargarProgreso(): void {
@@ -93,7 +96,54 @@ export class CssDashboardComponent implements OnInit {
   }
 
   navigateTo(section: CSSSection): void {
+    if (["lesson", "terminal", "test"].includes(section) && !this.misionDisponible()) {
+      this.activeSection.set("processes");
+      return;
+    }
     this.activeSection.set(section);
+  }
+
+  recargarMisiones(): void {
+    this.cssDataService.obtenerMisionesCss().subscribe({
+      next: misiones => {
+        this.misiones.set(misiones);
+
+        // No reemplazar el @Input mientras el cuestionario muestra el resultado.
+        // Cambiar la referencia aquí dispararía ngOnChanges y reiniciaría el test.
+        if (this.activeSection() !== 'test') {
+          const selectedId = this.selectedMission()?.nivel.id_nivel;
+          const actualizada = misiones.find(
+            mision => mision.nivel.id_nivel === selectedId
+          );
+          if (actualizada) this.selectedMission.set(actualizada);
+        }
+      },
+      error: err => console.error("Error cargando misiones CSS:", err)
+    });
+  }
+
+  private misionDisponible(): boolean {
+    const id = this.selectedMission()?.nivel.id_nivel;
+    return !!id && this.misiones().some(m => m.nivel.id_nivel === id && m.desbloqueada);
+  }
+
+  abrirSiguienteNivel(): void {
+    const numero = this.selectedMission()?.nivel.numero_nivel;
+    this.cssDataService.obtenerMisionesCss().subscribe({
+      next: misiones => {
+        this.misiones.set(misiones);
+        this.cuestionarioAprobado.set(false);
+
+        const siguiente = misiones.find(
+          mision => mision.nivel.numero_nivel === (numero ?? 0) + 1
+            && mision.desbloqueada
+        );
+
+        if (siguiente) this.seleccionarMision(siguiente);
+        else this.navigateTo('processes');
+      },
+      error: () => this.navigateTo('processes')
+    });
   }
 
   terminalCompletado(): void {
@@ -101,10 +151,14 @@ export class CssDashboardComponent implements OnInit {
   }
 
   cuestionarioCompletado(): void {
+    this.cuestionarioAprobado.set(true);
     this.recargarProgreso();
+    this.recargarMisiones();
   }
 
   seleccionarMision(mision: CssMision): void {
+    if (!mision.desbloqueada) return;
+    this.cuestionarioAprobado.set(false);
     this.selectedMission.set(mision);
     this.navigateTo('data');
   }

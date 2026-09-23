@@ -62,7 +62,7 @@
        @case ('lesson') { <section class="css-section"><header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN DE MISIÓN</span><h2>{{ selectedMission()?.reto?.titulo || 'Lección CSS' }}</h2><p>{{ selectedMission()?.reto?.descripcion }}</p></header><div class="concept-box"><h3>Antes de programar</h3><p>{{ selectedMission()?.leccion?.contenido }}</p><p><b>Resultado esperado:</b> identifica el selector y la propiedad que deben cambiar el elemento de la previsualización.</p></div><button class="html-next" (click)="navigateTo('terminal')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></section> }
        @case ('processes') { <app-css-processes (back)="navigateTo('dashboard')" (missionSelected)="seleccionarMision($event)" /> }
          @case ('terminal') { <app-css-terminal [mission]="selectedMission()" (back)="navigateTo('lesson')" (continueToQuiz)="terminalCompletado()" /> }
-        @case ('test') { <app-css-test [mission]="selectedMission()" (back)="navigateTo('dashboard')" (completed)="cuestionarioCompletado()" /> }
+         @case ('test') { <app-css-test [mission]="selectedMission()" (back)="navigateTo('processes')" (completed)="cuestionarioCompletado()" (goToMissions)="navigateTo('processes')" /> }
     }
   </div>
 </main>
