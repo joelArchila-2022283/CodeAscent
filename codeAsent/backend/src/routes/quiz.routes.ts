@@ -32,10 +32,11 @@ router.post('/:missionId/complete', async (req, res) => {
         const correct = Number(req.body.correct ?? 0);
         const total = Number(req.body.total ?? 0);
         const progress = await client.query(
-            `SELECT mp.*, n.xp_requerida, n.id_lenguaje
+            `SELECT mp.*, n.xp_requerida, n.id_lenguaje, l.slug
              FROM mission_progress mp
              JOIN leccion le ON le.id_leccion = mp.mission_id
              JOIN nivel n ON n.id_nivel = le.id_nivel
+             JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje
              WHERE mp.user_id = $1 AND mp.mission_id = $2
              FOR UPDATE`,
             [userId, missionId]
@@ -60,14 +61,19 @@ router.post('/:missionId/complete', async (req, res) => {
              WHERE user_id = $1 AND mission_id = $2`,
             [userId, missionId]
         );
+        const xpAward = row.slug === 'sql' ? 100 : Number(row.xp_requerida) || 0;
+        // Corrige tabla nivel si aún tiene valores viejos 50..500 para SQL
+        if (row.slug === 'sql' && Number(row.xp_requerida) !== 100) {
+          await client.query(`UPDATE nivel SET xp_requerida = 100 WHERE id_lenguaje = $1`, [row.id_lenguaje]);
+        }
         await client.query(
             `INSERT INTO usuario_xp (user_id, id_lenguaje, xp) VALUES ($1, $2, $3)
-             ON CONFLICT (user_id, id_lenguaje) DO UPDATE SET xp = usuario_xp.xp + EXCLUDED.xp`,
-            [userId, row.id_lenguaje, row.xp_requerida]
+             ON CONFLICT (user_id, id_lenguaje) DO UPDATE SET xp = LEAST(1000, usuario_xp.xp + EXCLUDED.xp)`,
+            [userId, row.id_lenguaje, xpAward]
         );
         const logros = await GamificationService.evaluateAchievements(client, userId, row.id_lenguaje);
         await client.query('COMMIT');
-        res.json({ status: 'success', data: { completed: true, xp_awarded: row.xp_requerida, correct, total, perfect: true, newAchievements: logros.filter((logro: { obtenido: boolean }) => logro.obtenido) } });
+        res.json({ status: 'success', data: { completed: true, xp_awarded: xpAward, correct, total, perfect: true, newAchievements: logros.filter((logro: { obtenido: boolean }) => logro.obtenido) } });
     } catch (error) {
         await client.query('ROLLBACK');
         res.status(500).json({ status: 'error', message: (error as Error).message });
