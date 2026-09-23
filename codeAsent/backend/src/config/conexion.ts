@@ -16,7 +16,10 @@ export const pool = new Pool({
   user: DB_USER,
   password: DB_PASSWORD,
   database: DB_NAME,
-  port: Number(DB_PORT) || 5432
+  port: Number(DB_PORT) || 5432,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 export const probarConexion = async (): Promise<void> => {

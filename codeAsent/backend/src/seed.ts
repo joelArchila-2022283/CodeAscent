@@ -1,3 +1,4 @@
+import 'dotenv/config'; // 👈 Esto carga las variables del archivo .env
 import { pool } from './config/conexion';
 
 const preguntasPorMision = (slug: string, titulo: string) => slug === 'css' ? [
@@ -54,8 +55,9 @@ const preguntasPorMision = (slug: string, titulo: string) => slug === 'css' ? [
 
 async function runSeed() {
   console.log('🚀 Iniciando proceso de migración y sembrado de base de datos...');
-  const client = await pool.connect();
+  let client;
   try {
+    client = await pool.connect();
     await client.query('BEGIN');
 
     // 1. Alteración de la tabla lenguaje para añadir slug
@@ -130,7 +132,7 @@ async function runSeed() {
       );
     `);
 
-    // 4. Tablas de logros (Hacer ON CONFLICT DO NOTHING sobre nombre o usar INSERT ... ON CONFLICT (nombre))
+    // 4. Tablas de logros
     console.log('4. Adaptando o creando tablas de logros...');
     await client.query(`
       CREATE TABLE IF NOT EXISTS logro (
@@ -166,7 +168,6 @@ async function runSeed() {
       UPDATE logro SET titulo = nombre WHERE (titulo IS NULL OR titulo = '') AND nombre IS NOT NULL;
     `);
 
-    // Inserción segura con ON CONFLICT (nombre)
     await client.query(`
       INSERT INTO logro (id_lenguaje, codigo, titulo, nombre, requisito, descripcion, dificultad) VALUES
       (NULL, 'global_primer_paso', 'Primer Paso', 'Primer Paso', 'completar', 'Completa tu primera misión en cualquier lenguaje.', 'facil'),
@@ -331,7 +332,7 @@ async function runSeed() {
 
         for (let indice = Math.min(existentes, 3); indice < 3; indice++) {
           const pregunta = preguntas[indice];
-          const reto = await client.query<{ id_reto: number }>(
+          await client.query(
             `INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
              VALUES ($1, $2, $3, 'opcion_multiple', 0, $4)
              RETURNING id_reto`,
@@ -339,10 +340,9 @@ async function runSeed() {
               id_leccion,
               `Cuestionario ${indice + 1}: ${titulo}`,
               pregunta.pregunta,
-              indice === 4 ? 'dificil' : indice >= 2 ? 'medio' : 'facil'
+              indice === 2 ? 'medio' : 'facil'
             ]
           );
-          const idReto = reto.rows[0].id_reto;
         }
 
         const quizRetos = await client.query<{ id_reto: number }>(
@@ -395,10 +395,14 @@ async function runSeed() {
     await client.query('COMMIT');
     console.log('✅ Migración y sembrado de la base de datos completado exitosamente.');
   } catch (error) {
-    await client.query('ROLLBACK');
+    if (client) {
+      await client.query('ROLLBACK');
+    }
     console.error('❌ Error crítico en la ejecución del sembrado:', error);
   } finally {
-    client.release();
+    if (client) {
+      client.release();
+    }
   }
 }
 
