@@ -33,6 +33,10 @@ import { ComicComponent7 } from './pages/comics/comic_7/comic.component';
 import { ComicComponent8 } from './pages/comics/comic_8/comic.component';
 import { ComicComponent9 } from './pages/comics/comic_9/comic.component';
 import { ComicComponent10 } from './pages/comics/comic_10/comic.component';
+import { ComicComponent11 } from './pages/comics/comic_11/comic.component';
+
+//Ruta de galeria de comics
+import { GaleriaComponent } from './pages/galeria/galeria.component';
 
 export const routes: Routes = [
   {
@@ -41,19 +45,70 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
 
-  // ==========================================
-  // RUTAS DE COMICS
-  // ==========================================
-  { path: 'comic/1', component: ComicComponent },
-  { path: 'comic/2', component: ComicComponent2 },
-  { path: 'comic/3', component: ComicComponent3 },
-  { path: 'comic/4', component: ComicComponent4 },
-  { path: 'comic/5', component: ComicComponent5 },
-  { path: 'comic/6', component: ComicComponent6 },
-  { path: 'comic/7', component: ComicComponent7 },
-  { path: 'comic/8', component: ComicComponent8 },
-  { path: 'comic/9', component: ComicComponent9 },
-  { path: 'comic/10', component: ComicComponent10 },
+  //Ruta Galeria
+  {
+    path: 'galeria',
+    component: GaleriaComponent,
+    canActivate: [authGuard]
+  },
+
+  //Rutas comics
+
+  {
+    path: 'comic/1',
+    component: ComicComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/2',
+    component: ComicComponent2,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/3',
+    component: ComicComponent3,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/4',
+    component: ComicComponent4,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/5',
+    component: ComicComponent5,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/6',
+    component: ComicComponent6,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/7',
+    component: ComicComponent7,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/8',
+    component: ComicComponent8,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/9',
+    component: ComicComponent9,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/10',
+    component: ComicComponent10,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'comic/11',
+    component: ComicComponent11,
+    canActivate: [authGuard]
+  },
 
   // ==========================================
   // RUTAS PÚBLICAS (Protegidas con guestGuard)
