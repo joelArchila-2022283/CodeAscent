@@ -28,15 +28,6 @@ header p { color: #9a8a80; }
   }
 
   p { margin: 0; font-size: 1rem; line-height: 1.5; color: #e6ded6; }
-  pre {
-    background: #000;
-    padding: 1rem;
-    border-radius: 6px;
-    color: #00e5ff;
-    overflow-x: auto;
-    margin: 0.8rem 0 0 0;
-    border: 1px solid #25463f;
-  }
 }
 
 .manual-graphic {
@@ -113,6 +104,7 @@ header p { color: #9a8a80; }
 .method-card li::marker { color: #00e5ff; font-weight: 700; }
 .map-callout { display: flex; gap: .55rem; margin-top: 1rem; padding-top: .75rem; border-top: 1px dashed #5b493d; color: #cbbdb3; font-size: .8rem; line-height: 1.35; }
 .map-callout i { color: #ffb700; }
+.map-title { color: #ff9100; margin: .9rem 0 .2rem; font: 1.35rem 'Bangers', cursive; letter-spacing: .04em; }
 
 .action-buttons {
   display: flex;

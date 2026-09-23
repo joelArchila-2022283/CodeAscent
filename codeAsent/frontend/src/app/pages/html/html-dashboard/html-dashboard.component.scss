@@ -21,6 +21,10 @@ $text-dim: #9a8a80;
   width: 100%;
   padding: 1.5rem;
   background-color: $rock-dark;
+  background-image: linear-gradient(rgba(12,9,8,.3), rgba(12,9,8,.72)), url('/assets/images/FondoHTML.jpg');
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
   color: $text-html;
   font-family: 'Baloo 2', sans-serif;
   position: relative;
@@ -40,7 +44,7 @@ $text-dim: #9a8a80;
   position: absolute;
   inset: 0;
   background: url('/assets/images/FondoHTML.jpg') no-repeat center center / cover;
-  opacity: .45;
+  opacity: .68;
   filter: contrast(1.15) brightness(.85);
 }
 
@@ -161,4 +165,8 @@ header, nav, .bunker-content-stage { position: relative; z-index: 10; }
 .lesson-view__content .lesson-checklist { grid-column: 1 / -1; margin-top: 0; }
 .lesson-view__actions { padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.08); }
 .lesson-view__actions button { min-height: 48px; box-shadow: 0 4px 0 rgba(0,0,0,.35); }
+.lesson-view__actions .html-back, .lesson-view__actions .html-next { border-radius: 7px; letter-spacing: .04em; transition: transform .2s, filter .2s, box-shadow .2s; }
+.lesson-view__actions .html-back:hover, .lesson-view__actions .html-next:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 0 rgba(0,0,0,.3); }
+.terminal-question-action { justify-content: flex-end; margin-top: 1rem; }
+.terminal-question-action .rock-btn { width: auto; min-width: 220px; }
 @media (max-width: 700px) { .lesson-view__content { grid-template-columns: 1fr; } .lesson-view__content .lesson-checklist { grid-column: auto; } .lesson-view__actions { flex-direction: column; } .lesson-view__actions button { justify-content: center; } }

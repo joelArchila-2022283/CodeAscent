@@ -29,7 +29,10 @@ export class HtmlDashboardComponent implements OnInit {
     name: '',
     level: 1,
     currentXp: 0,
+    levelStartXp: 0,
     nextLevelXp: 100,
+    completedMissions: 0,
+    totalMissions: 10,
     energyWatts: 86
   };
 
@@ -42,6 +45,10 @@ export class HtmlDashboardComponent implements OnInit {
   terminalLista = signal(false);
 
   ngOnInit(): void {
+    this.cargarDatosJugador();
+  }
+
+  private cargarDatosJugador(): void {
     this.dashboardService.obtenerDatosDashboard().subscribe({
       next: data => {
         if (data?.usuario?.nombre) {
@@ -50,7 +57,10 @@ export class HtmlDashboardComponent implements OnInit {
         const perfilHtml = data?.perfil?.lenguajes?.find(lenguaje => lenguaje.nombre?.toLowerCase() === 'html');
         this.player.currentXp = Math.max(0, Number(perfilHtml?.xp_actual ?? data?.progreso?.xp_actual ?? 0));
         this.player.level = Math.max(1, Number(perfilHtml?.nivel_actual ?? 1));
+        this.player.levelStartXp = Math.max(0, Number(perfilHtml?.xp_inicio_nivel ?? 0));
         this.player.nextLevelXp = Math.max(1, Number(perfilHtml?.xp_siguiente_nivel ?? this.player.currentXp + 100));
+        this.player.completedMissions = Number(perfilHtml?.misiones_completadas ?? 0);
+        this.player.totalMissions = Number(perfilHtml?.total_niveles ?? 10);
         this.jugadorCargando.set(false);
       },
       error: err => {
@@ -86,9 +96,8 @@ export class HtmlDashboardComponent implements OnInit {
     this.navigateTo('data');
   }
 
-  terminalCompletado(xp: number): void {
+  terminalCompletado(): void {
     this.terminalLista.set(true);
-    this.sumarExperiencia(xp);
   }
 
   irAlCuestionario(): void {
@@ -101,15 +110,16 @@ export class HtmlDashboardComponent implements OnInit {
   }
 
   sumarExperiencia(xp: number): void {
-    this.player.currentXp = Math.max(0, this.player.currentXp + Math.max(0, Number(xp) || 0));
-    while (this.player.currentXp >= this.player.nextLevelXp) {
-      this.player.level += 1;
-      this.player.nextLevelXp += this.player.level * 100;
-    }
+    if (Number(xp) <= 0) return;
+    this.player.currentXp += Number(xp);
+    this.cargarDatosJugador();
   }
 
   obtenerPorcentajeXp(): number {
-    if (!Number.isFinite(this.player.currentXp) || !Number.isFinite(this.player.nextLevelXp) || this.player.nextLevelXp <= 0) return 0;
-    return Math.min(100, Math.max(0, (this.player.currentXp / this.player.nextLevelXp) * 100));
+    const inicio = this.player.levelStartXp;
+    const siguiente = this.player.nextLevelXp;
+    const tramo = siguiente - inicio;
+    if (!Number.isFinite(tramo) || tramo <= 0) return 100;
+    return Math.min(100, Math.max(0, ((this.player.currentXp - inicio) / tramo) * 100));
   }
 }
