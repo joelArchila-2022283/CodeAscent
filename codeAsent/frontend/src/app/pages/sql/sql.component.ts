@@ -256,27 +256,22 @@ export class SqlComponent implements OnInit {
   }
 
   seleccionarReto(reto: RetoNivelSql): void {
-    this.retoSeleccionado.set(reto);
-    const numeroMision = reto.numero_nivel ?? this.nivelActivo()?.numero_nivel ?? 1;
-    const nivelMision = this.niveles().find((nivel) => nivel.numero_nivel === numeroMision);
-    if (nivelMision) {
-      this.nivelActivo.set(nivelMision);
-    }
+    const numeroMision = Number(reto.numero_nivel ?? this.nivelActivo()?.numero_nivel ?? 1);
+    const nivelMision = this.niveles().find((nivel) => Number(nivel.numero_nivel) === numeroMision);
     const mision = MISIONES_SQL.find((item) => item.numero === numeroMision);
-    if (!mision || !nivelMision?.lecciones[0]) {
+    const missionId = Number(reto.id_leccion);
+    if (!mision || !nivelMision || !Number.isInteger(missionId) || missionId <= 0) {
       this.mascotDialogue.set('Esta misión todavía no tiene una lección activa en el servidor.');
       return;
     }
+
+    this.retoSeleccionado.set({ ...reto, numero_nivel: numeroMision, id_leccion: missionId });
+    this.nivelActivo.set(nivelMision);
     this.misionActiva.set({
       ...mision,
       xpRecompensa: Number(nivelMision.xp_requerida ?? mision.xpRecompensa),
     });
-    const missionId = reto.id_leccion;
-    if (missionId) {
-      this.missionProgressService
-        .updateProgress(missionId, 'manual')
-        .subscribe({ error: () => {} });
-    }
+    this.missionProgressService.updateProgress(missionId, 'manual').subscribe({ error: () => {} });
     this.cambiarSeccion('manual');
   }
 
