@@ -5,74 +5,79 @@
     <p>Analiza la teoría, comprende la lógica y estudia la sintaxis de las consultas.</p>
   </header>
 
-  <div class="manual-grid">
-    <div class="manual-content">
-      <div class="concept-box">
-        <h3 class="box-subtitle"><i class="bi bi-lightbulb-fill"></i> Nivel Conceptual</h3>
-        <p>{{ manual().conceptual }}</p>
-      </div>
-
-      <div class="concept-box">
-        <h3 class="box-subtitle"><i class="bi bi-diagram-3-fill"></i> Nivel Lógico</h3>
-        <p>{{ manual().logico }}</p>
-      </div>
-
-      <div class="concept-box">
-        <h3 class="box-subtitle"><i class="bi bi-code-slash"></i> Nivel Sintáctico</h3>
-        <pre><code>{{ manual().sintactico }}</code></pre>
-      </div>
-    </div>
-
-    <div class="manual-graphic">
-      <div class="graphic-placeholder">
-        <i class="bi bi-diagram-3-fill"></i>
-        <span>Circuito de Consulta</span>
-
-        <div class="query-circuit">
-          <div class="circuit-chip copper">
-            <i class="bi bi-hdd-fill"></i>
-            <strong>FROM</strong>
-            <small>origen de datos</small>
-          </div>
-          <i class="bi bi-arrow-right circuit-wire"></i>
-          <div class="circuit-chip green">
-            <i class="bi bi-funnel-fill"></i>
-            <strong>WHERE</strong>
-            <small>filtro de filas</small>
-          </div>
-          <i class="bi bi-arrow-right circuit-wire"></i>
-          <div class="circuit-chip cyan">
-            <i class="bi bi-table"></i>
-            <strong>SELECT</strong>
-            <small>proyección de columnas</small>
-          </div>
+  @if (manual()) {
+    <div class="manual-grid">
+      <div class="manual-content">
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-lightbulb-fill"></i> Nivel Conceptual</h3>
+          <p>{{ manual()!.nivelConceptual }}</p>
         </div>
 
-        <div class="query-example">
-          <span class="example-label"><i class="bi bi-terminal-fill"></i> Sintaxis de esta misión</span>
-          <pre><code>{{ manual().sintactico }}</code></pre>
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-diagram-3-fill"></i> Nivel Lógico</h3>
+          <p>{{ manual()!.nivelLogico }}</p>
         </div>
 
-        <div class="schema-box">
-          <div class="schema-table">
-            <div class="schema-head"></div>
-            <div class="schema-row"></div>
-            <div class="schema-row short"></div>
-            <div class="schema-row"></div>
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-code-slash"></i> Nivel Sintáctico</h3>
+          <pre><code>{{ manual()!.nivelSintactico }}</code></pre>
+        </div>
+      </div>
+
+      <div class="manual-graphic">
+        <div class="graphic-placeholder">
+          <i class="bi" [class]="iconoTema(manual()!.temaGrafico)"></i>
+          <span>{{ manual()!.codigo }} · {{ manual()!.titulo }}</span>
+
+          <div class="query-circuit">
+            @for (chip of chips(); track chip.palabra) {
+              <div class="circuit-chip" [class]="chip.clase">
+                <strong>{{ chip.palabra }}</strong>
+                <small>{{ chip.sub }}</small>
+              </div>
+              @if (!$last) {
+                <i class="bi bi-arrow-right circuit-wire"></i>
+              }
+            }
           </div>
-          <div class="schema-link" aria-hidden="true"><i class="bi bi-arrow-return-right"></i></div>
-          <div class="schema-table">
-            <div class="schema-head"></div>
-            <div class="schema-row short"></div>
-            <div class="schema-row"></div>
+
+          <div class="query-example">
+            <span class="example-label"
+              ><i class="bi bi-terminal-fill"></i> Sintaxis de esta misión</span
+            >
+            <pre><code>{{ manual()!.ejemploSql }}</code></pre>
+          </div>
+
+          <div class="schema-box">
+            @for (tabla of manual()!.tablas.slice(0, 2); track tabla.nombre) {
+              <div class="schema-table">
+                <div class="schema-title">{{ tabla.nombre }}</div>
+                @for (columna of tabla.columnas.slice(0, 5); track columna.nombre) {
+                  <div class="schema-col">{{ columna.nombre }}</div>
+                }
+              </div>
+              @if (!$last) {
+                <div class="schema-link" aria-hidden="true">
+                  <i class="bi bi-arrow-return-right"></i>
+                </div>
+              }
+            }
           </div>
         </div>
       </div>
     </div>
-  </div>
+  } @else {
+    <div class="manual-grid">
+      <p>Selecciona una misión para cargar el manual técnico.</p>
+    </div>
+  }
 
   <div class="action-buttons">
-    <button class="sql-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> ELEGIR OTRA MISIÓN</button>
-    <button class="sql-next" (click)="next.emit()">IR A LA LECCIÓN <i class="bi bi-arrow-right"></i></button>
+    <button class="sql-back" (click)="back.emit()">
+      <i class="bi bi-arrow-left"></i> ELEGIR OTRA MISIÓN
+    </button>
+    <button class="sql-next" [disabled]="!manual()" (click)="next.emit()">
+      IR A LA LECCIÓN <i class="bi bi-arrow-right"></i>
+    </button>
   </div>
 </section>

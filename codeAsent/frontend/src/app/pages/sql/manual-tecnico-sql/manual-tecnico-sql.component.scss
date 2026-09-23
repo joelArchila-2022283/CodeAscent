@@ -187,6 +187,32 @@ header p { color: $text-dim; }
         .schema-head { height: 14px; background: rgba(217, 164, 65, .35); margin-bottom: .4rem; border-radius: 3px; }
         .schema-row { height: 10px; background: rgba(142, 214, 163, .18); margin-bottom: .35rem; border-radius: 3px; }
         .schema-row.short { width: 55%; }
+
+        .schema-title {
+          font-family: 'Bangers', cursive;
+          letter-spacing: .04em;
+          color: $cobre-transistor;
+          font-size: .9rem;
+          padding: .2rem .3rem;
+          margin-bottom: .35rem;
+          border-bottom: 2px solid rgba(217, 164, 65, .35);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .schema-col {
+          font-family: 'Fira Code', monospace;
+          font-size: .62rem;
+          color: $valley-green;
+          background: rgba(142, 214, 163, .14);
+          border-radius: 3px;
+          padding: .18rem .3rem;
+          margin-bottom: .28rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
 
       .schema-link { color: $cyan-screen; font-size: 1.3rem; }
