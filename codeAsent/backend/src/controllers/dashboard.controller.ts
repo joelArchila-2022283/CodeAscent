@@ -62,8 +62,8 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
         l.slug,
         l.descripcion,
         COALESCE(uxp.xp, 0)::int AS xp_actual,
-        COALESCE((
-          SELECT MAX(nivel.numero_nivel)
+       COALESCE((
+         SELECT LEAST(10, COALESCE(MAX(nivel.numero_nivel), 0) + 1)
           FROM nivel nivel
           WHERE nivel.id_lenguaje = l.id_lenguaje
             AND (
@@ -81,9 +81,31 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
              WHERE siguiente.id_lenguaje = l.id_lenguaje AND siguiente.estado = TRUE
            ) umbrales
            WHERE acumulado > COALESCE(uxp.xp, 0)
-         ), 0)::int AS xp_siguiente_nivel,
-         LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2))::float AS porcentaje,
-        COUNT(DISTINCT n.id_nivel)::int AS total_niveles
+          ), 0)::int AS xp_siguiente_nivel,
+          COALESCE((
+            SELECT MAX(acumulado)
+            FROM (
+              SELECT SUM(actual.xp_requerida) OVER (ORDER BY actual.numero_nivel) AS acumulado
+              FROM nivel actual
+              WHERE actual.id_lenguaje = l.id_lenguaje AND actual.estado = TRUE
+            ) umbral_inicial
+            WHERE acumulado <= COALESCE(uxp.xp, 0)
+          ), 0)::int AS xp_inicio_nivel,
+           LEAST(100, ROUND((COALESCE((
+            SELECT COUNT(*)
+            FROM mission_progress mp
+            JOIN leccion ml ON ml.id_leccion = mp.mission_id
+            JOIN nivel mn ON mn.id_nivel = ml.id_nivel
+            WHERE mp.user_id = $1 AND mp.completed = TRUE AND mn.id_lenguaje = l.id_lenguaje
+          ), 0)::numeric / NULLIF(COUNT(DISTINCT n.id_nivel), 0)) * 100, 2))::float AS porcentaje,
+          COUNT(DISTINCT n.id_nivel)::int AS total_niveles,
+          COALESCE((
+            SELECT COUNT(*)
+            FROM mission_progress mp
+            JOIN leccion ml ON ml.id_leccion = mp.mission_id
+            JOIN nivel mn ON mn.id_nivel = ml.id_nivel
+            WHERE mp.user_id = $1 AND mp.completed = TRUE AND mn.id_lenguaje = l.id_lenguaje
+          ), 0)::int AS misiones_completadas
       FROM lenguaje l
       LEFT JOIN usuario_xp uxp
         ON uxp.id_lenguaje = l.id_lenguaje AND uxp.user_id = $1
@@ -92,6 +114,21 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp
       ORDER BY l.id_lenguaje
     `, [idUsuario]);
+
+    // Mantener la respuesta antigua sincronizada con el perfil HTML, sin usarla
+    // como fuente global para los cuatro lenguajes.
+    const perfilHtml = resPerfil.rows.find((lenguaje: any) =>
+      String(lenguaje.nombre).toLowerCase() === 'html'
+    );
+    if (perfilHtml) {
+      progreso = {
+        ...progreso,
+        id_lenguaje: perfilHtml.id_lenguaje,
+        id_nivel_actual: perfilHtml.nivel_actual,
+        xp_actual: perfilHtml.xp_actual,
+        porcentaje: perfilHtml.porcentaje
+      };
+    }
 
     const resEstadisticas = await pool.query(`
       SELECT
@@ -155,14 +192,8 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       'TypeScript': 'bi-filetype-tsx'
     };
 
-    // Mapear progresos por id_lenguaje
-    const resProgresosUser = await pool.query(
-      'SELECT id_lenguaje, porcentaje FROM progreso WHERE id_usuario = $1',
-      [idUsuario]
-    );
-
     const mapProgresos = new Map<number, number>();
-    resProgresosUser.rows.forEach((p: any) => mapProgresos.set(p.id_lenguaje, p.porcentaje));
+    resPerfil.rows.forEach((p: any) => mapProgresos.set(p.id_lenguaje, Number(p.porcentaje || 0)));
 
     // Construir los nodos en la secuencia exacta requerida
     const nodosMapa = resLenguajes.rows.map((lenguaje: any, index: number) => {

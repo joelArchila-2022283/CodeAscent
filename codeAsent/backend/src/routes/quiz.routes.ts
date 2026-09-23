@@ -43,17 +43,18 @@ router.post('/:missionId/complete', async (req, res) => {
         );
         const row = progress.rows[0];
         if (!row) return res.status(404).json({ status: 'error', message: 'Progreso no encontrado.' });
-        if (source === 'terminal' && !row.terminal_code) {
-            return res.status(409).json({ status: 'error', message: 'Realiza el ejercicio de la consola para obtener tu XP' });
+        if (source === 'terminal') {
+            await client.query('COMMIT');
+            return res.json({ status: 'success', data: { completed: false, xp_awarded: 0, message: 'La consola quedó registrada. Completa el cuestionario para obtener tus puntos.' } });
         }
-        if (source === 'terminal' && !['terminal', 'quiz'].includes(row.reached_step)) {
-            return res.status(409).json({ status: 'error', message: 'La terminal aún no está completada.' });
+        if (!row.terminal_code || !row.prediccion_correcta) {
+            return res.status(409).json({ status: 'error', message: 'Recuerda realizar el ejercicio de la consola para obtener tus puntos' });
         }
         if (source === 'quiz' && row.reached_step !== 'quiz') {
             return res.status(409).json({ status: 'error', message: 'El cuestionario aún no está desbloqueado.' });
         }
 
-        const perfect = source === 'terminal' || (total > 0 && correct === total);
+        const perfect = total > 0 && correct === total;
         if (!perfect) {
             await client.query('COMMIT');
             return res.json({ status: 'success', data: { completed: false, xp_awarded: 0, correct, total, perfect: false, newAchievements: [] } });
