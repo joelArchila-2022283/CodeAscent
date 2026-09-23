@@ -1,69 +1,136 @@
-<div class="contenedor-quiz-sql">
-  @if (!quizFinalizado()) {
-    <div class="caja-quiz">
-      <div class="quiz-cabecera">
-        <div class="quiz-insignia" aria-hidden="true"><i class="bi bi-patch-question-fill"></i></div>
-        <div>
-          <span class="quiz-eyebrow">CALIBRACIÓN DEL REACTOR</span>
-          <h3>PREGUNTA {{ indicePreguntaActual() + 1 }} <span>DE {{ preguntas.length }}</span></h3>
-        </div>
-        <div class="quiz-progreso" aria-hidden="true">
-          <span [style.width.%]="((indicePreguntaActual() + 1) / preguntas.length) * 100"></span>
-        </div>
-      </div>
-      <p class="enunciado"><span class="enunciado-comilla">“</span>{{ preguntas[indicePreguntaActual()].pregunta }}<span class="enunciado-comilla">”</span></p>
+<section class="sql-section test-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-patch-question-fill"></i> CUESTIONARIO SQL</span>
+    <h2>DEMUESTRA LO APRENDIDO</h2>
+    <p>
+      Responde el test diagnóstico de la misión. La misión solo se considera completada cuando el
+      terminal y el diagnóstico están resueltos.
+    </p>
+  </header>
 
-      <div class="grid-opciones">
-        @for (opt of preguntas[indicePreguntaActual()].opciones; track $index) {
-          <button 
-            type="button"
-            class="opcion-quiz"
-            [class.seleccionada]="opcionSeleccionada() === $index"
-            [class.correcta]="respuestaVerificada() && $index === preguntas[indicePreguntaActual()].indiceCorrecto"
-            [class.incorrecta]="respuestaVerificada() && opcionSeleccionada() === $index && $index !== preguntas[indicePreguntaActual()].indiceCorrecto"
-            (click)="seleccionarRespuesta($index)">
-            <span class="opcion-marca" aria-hidden="true">{{ ['A', 'B', 'C', 'D'][$index] }}</span>
-            {{ opt }}
-            <i class="bi bi-arrow-right opcion-flecha" aria-hidden="true"></i>
-          </button>
-        }
-      </div>
+  @if (mision) {
+    <div class="contenedor-quiz-sql">
+      @if (!quizFinalizado()) {
+        <div class="caja-quiz">
+          <div class="quiz-cabecera">
+            <div class="quiz-insignia" aria-hidden="true">
+              <i class="bi bi-patch-question-fill"></i>
+            </div>
+            <div>
+              <span class="quiz-eyebrow">CALIBRACIÓN DEL REACTOR</span>
+              <h3>
+                PREGUNTA {{ indicePreguntaActual() + 1 }}
+                <span>DE {{ mision.preguntasDiagnostico.length }}</span>
+              </h3>
+            </div>
+            <div class="quiz-progreso" aria-hidden="true">
+              <span
+                [style.width.%]="
+                  ((indicePreguntaActual() + 1) / mision.preguntasDiagnostico.length) * 100
+                "
+              ></span>
+            </div>
+          </div>
+          <p class="enunciado">
+            <span class="enunciado-comilla">“</span>{{ preguntaActual().pregunta
+            }}<span class="enunciado-comilla">”</span>
+          </p>
 
-      @if (respuestaVerificada()) {
-        <div class="retroalimentacion-formativa">
-          <i class="bi bi-lightbulb-fill" aria-hidden="true"></i>
-          <p>{{ preguntas[indicePreguntaActual()].explicacionFormativa }}</p>
+          <div class="grid-opciones">
+            @for (opt of preguntaActual().opciones; track $index) {
+              <button
+                type="button"
+                class="opcion-quiz"
+                [class.seleccionada]="opcionSeleccionada() === $index"
+                [class.correcta]="
+                  respuestaVerificada() && $index === preguntaActual().indiceCorrecto
+                "
+                [class.incorrecta]="
+                  respuestaVerificada() &&
+                  opcionSeleccionada() === $index &&
+                  $index !== preguntaActual().indiceCorrecto
+                "
+                (click)="seleccionarRespuesta($index)"
+              >
+                <span class="opcion-marca" aria-hidden="true">{{
+                  ['A', 'B', 'C', 'D'][$index]
+                }}</span>
+                {{ opt }}
+                <i class="bi bi-arrow-right opcion-flecha" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
+
+          @if (respuestaVerificada()) {
+            <div class="retroalimentacion-formativa">
+              <i class="bi bi-lightbulb-fill" aria-hidden="true"></i>
+              <p>{{ preguntaActual().explicacion }}</p>
+            </div>
+          }
+
+          <div class="acciones-quiz">
+            @if (!respuestaVerificada()) {
+              <button
+                type="button"
+                class="boton-verificar"
+                [disabled]="opcionSeleccionada() === null"
+                (click)="verificarRespuesta()"
+              >
+                <i class="bi bi-check2-circle" aria-hidden="true"></i> VERIFICAR RESPUESTA
+              </button>
+            }
+            @if (
+              respuestaVerificada() && opcionSeleccionada() !== preguntaActual().indiceCorrecto
+            ) {
+              <button type="button" class="boton-siguiente" (click)="reintentar()">
+                INTENTAR DE NUEVO <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+              </button>
+            }
+            @if (
+              respuestaVerificada() && opcionSeleccionada() === preguntaActual().indiceCorrecto
+            ) {
+              <button type="button" class="boton-siguiente" (click)="siguientePregunta()">
+                {{
+                  indicePreguntaActual() === mision.preguntasDiagnostico.length - 1
+                    ? 'FINALIZAR MISIÓN'
+                    : 'SIGUIENTE PREGUNTA'
+                }}
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
         </div>
       }
 
-      <div class="acciones-quiz">
-        @if (!respuestaVerificada()) {
-          <button type="button" class="boton-verificar" [disabled]="opcionSeleccionada() === null" (click)="verificarRespuesta()">
-            <i class="bi bi-check2-circle" aria-hidden="true"></i> VERIFICAR RESPUESTA
+      @if (quizFinalizado()) {
+        <div class="caja-resultados">
+          <div class="resultado-emblema" aria-hidden="true"><i class="bi bi-trophy-fill"></i></div>
+          <span class="quiz-eyebrow">INFORME DEL REACTOR</span>
+          <h2>DIAGNÓSTICO FINALIZADO</h2>
+          <p>
+            Puntuación obtenida:
+            <strong>{{ puntuacion() }} / {{ mision.preguntasDiagnostico.length }}</strong>
+          </p>
+          <p>
+            Recompensa de la misión {{ mision.codigo }}:
+            <strong>+{{ mision.xpRecompensa }} XP</strong> al completar terminal y diagnóstico.
+          </p>
+          <div class="resultado-linea" aria-hidden="true"></div>
+          <button type="button" class="boton-siguiente" (click)="next.emit()">
+            VOLVER AL PANEL <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </button>
-        }
-        @if (respuestaVerificada() && opcionSeleccionada() !== preguntas[indicePreguntaActual()].indiceCorrecto) {
-          <button type="button" class="boton-siguiente" (click)="reintentar()">
-            INTENTAR DE NUEVO <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
-          </button>
-        }
-        @if (respuestaVerificada() && opcionSeleccionada() === preguntas[indicePreguntaActual()].indiceCorrecto) {
-          <button type="button" class="boton-siguiente" (click)="siguientePregunta()">
-            SIGUIENTE PREGUNTA <i class="bi bi-arrow-right" aria-hidden="true"></i>
-          </button>
-        }
-      </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="contenedor-quiz-sql">
+      <p>Selecciona una misión para cargar su test diagnóstico.</p>
     </div>
   }
 
-  @if (quizFinalizado()) {
-    <div class="caja-resultados">
-      <div class="resultado-emblema" aria-hidden="true"><i class="bi bi-trophy-fill"></i></div>
-      <span class="quiz-eyebrow">INFORME DEL REACTOR</span>
-      <h2>DIAGNÓSTICO FINALIZADO</h2>
-      <p>Puntuación obtenida: <strong>{{ puntuacion() }} / {{ preguntas.length }}</strong></p>
-      <p>XP obtenido: <strong>{{ xpGanado() }}</strong></p>
-      <div class="resultado-linea" aria-hidden="true"></div>
-    </div>
-  }
-</div>
+  <div class="action-buttons">
+    <button class="sql-back" (click)="back.emit()">
+      <i class="bi bi-arrow-left"></i> VOLVER AL MANUAL
+    </button>
+  </div>
+</section>

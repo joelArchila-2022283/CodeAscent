@@ -30,6 +30,8 @@ export interface RetoNivelSql {
   xp_recompensa: number;
   dificultad: 'facil' | 'medio' | 'dificil';
   respuestas: RespuestaNivelSql[];
+  numero_nivel?: number;
+  leccionContenido?: string;
 }
 
 export interface NivelSql {
@@ -72,15 +74,4 @@ export interface DesafioConsolaSql {
   consultaSqlCorrecta: string;
   retroalimentacionExito: string;
   explicacionErrorSintaxis: string;
-}
-
-export interface MisionSql {
-  idMision: string;
-  codigoIdentificador: string;
-  tituloMision: string;
-  descripcionMision: string;
-  recompensaExperiencia: number;
-  estadoMision: 'bloqueada' | 'en_progreso' | 'completada';
-  seccionDestino: SeccionSql;
-  requisitoDesbloqueo: string;
 }

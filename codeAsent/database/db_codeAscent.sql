@@ -1058,16 +1058,16 @@ CALL sp_crear_logro('Maestro SQL', 'Completa los 10 niveles de SQL.', 500, 'Comp
 CALL sp_crear_logro('Desarrollador Frontend', 'Completa los niveles de HTML y CSS.', 1000, 'Completar HTML y CSS');
 
 -- Niveles: SQL (10 Niveles)
-CALL sp_crear_nivel('SQL', 'Introducción a Bases de Datos', 1, 'Conceptos clave de modelos relacionales.', 50);
+CALL sp_crear_nivel('SQL', 'Introducción a Bases de Datos', 1, 'Conceptos clave de modelos relacionales.', 100);
 CALL sp_crear_nivel('SQL', 'Sentencia SELECT Básica', 2, 'Consultar filas y columnas específicas.', 100);
-CALL sp_crear_nivel('SQL', 'Filtros con WHERE', 3, 'Uso de operadores lógicos y de comparación.', 150);
-CALL sp_crear_nivel('SQL', 'Ordenamiento y Límites', 4, 'Aplicación de ORDER BY y LIMIT/OFFSET.', 200);
-CALL sp_crear_nivel('SQL', 'Funciones de Agregación', 5, 'Uso de COUNT, SUM, AVG, MIN y MAX.', 250);
-CALL sp_crear_nivel('SQL', 'Agrupamiento con GROUP BY', 6, 'Agrupar registros y filtrar con HAVING.', 300);
-CALL sp_crear_nivel('SQL', 'Uniones con INNER JOIN', 7, 'Combinar información de múltiples tablas.', 350);
-CALL sp_crear_nivel('SQL', 'Uniones Externas (LEFT / RIGHT JOIN)', 8, 'Manejo de registros no coincidentes.', 400);
-CALL sp_crear_nivel('SQL', 'Subconsultas y CTEs', 9, 'Consultas anidadas y expresiones de tabla.', 450);
-CALL sp_crear_nivel('SQL', 'Manipulación de Datos (DML)', 10, 'Uso avanzado de INSERT, UPDATE y DELETE.', 500);
+CALL sp_crear_nivel('SQL', 'Filtros con WHERE', 3, 'Uso de operadores lógicos y de comparación.', 100);
+CALL sp_crear_nivel('SQL', 'Ordenamiento y Límites', 4, 'Aplicación de ORDER BY y LIMIT/OFFSET.', 100);
+CALL sp_crear_nivel('SQL', 'Funciones de Agregación', 5, 'Uso de COUNT, SUM, AVG, MIN y MAX.', 100);
+CALL sp_crear_nivel('SQL', 'Agrupamiento con GROUP BY', 6, 'Agrupar registros y filtrar con HAVING.', 100);
+CALL sp_crear_nivel('SQL', 'Uniones con INNER JOIN', 7, 'Combinar información de múltiples tablas.', 100);
+CALL sp_crear_nivel('SQL', 'Uniones Externas (LEFT / RIGHT JOIN)', 8, 'Manejo de registros no coincidentes.', 100);
+CALL sp_crear_nivel('SQL', 'Subconsultas y CTEs', 9, 'Consultas anidadas y expresiones de tabla.', 100);
+CALL sp_crear_nivel('SQL', 'Manipulación de Datos (DML)', 10, 'Uso avanzado de INSERT, UPDATE y DELETE.', 100);
 
 -- Niveles: HTML (10 Niveles)
 CALL sp_crear_nivel('HTML', 'Estructura Básica Documento', 1, 'Etiquetas doctype, html, head y body.', 50);
@@ -3883,6 +3883,498 @@ LEFT JOIN leccion le ON le.id_nivel = n.id_nivel
 LEFT JOIN reto r ON r.id_leccion = le.id_leccion
 LEFT JOIN respuesta res ON res.id_reto = r.id_reto
 WHERE LOWER(l.nombre) = 'css'
+GROUP BY l.nombre, n.numero_nivel, n.nombre, le.id_leccion, le.titulo,
+         r.id_reto, r.tipo_reto, r.titulo
+ORDER BY n.numero_nivel, le.id_leccion, r.id_reto;
+
+-- ============================================================
+-- CONTENIDO SQL: LECCIONES Y RETOS PARA LOS NIVELES 3 A 10
+-- (idempotente: verifica por título antes de insertar)
+-- ============================================================
+DO $sql$
+DECLARE
+    v_id_lenguaje INTEGER;
+    v_id_nivel INTEGER;
+    v_id_leccion INTEGER;
+    v_id_reto INTEGER;
+BEGIN
+    SELECT id_lenguaje INTO v_id_lenguaje
+    FROM lenguaje
+    WHERE LOWER(nombre) = 'sql';
+
+    IF v_id_lenguaje IS NULL THEN
+        RAISE EXCEPTION 'El lenguaje SQL no existe en la base de datos.';
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 3: Filtrar con WHERE
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 3;
+
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel AND titulo = $txt$Filtrado con WHERE$txt$
+        ORDER BY id_leccion DESC LIMIT 1;
+
+        IF v_id_leccion IS NULL THEN
+            INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+            VALUES (v_id_nivel, $txt$Filtrado con WHERE$txt$, $txt$WHERE filtra filas fila por fila evaluando una condición booleana: solo se conservan las filas que resultan TRUE. Los literales de texto van entre comillas simples mientras que los números van sin comillas.$txt$, 1)
+            RETURNING id_leccion INTO v_id_leccion;
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Misión: Facturas pendientes$txt$
+          AND tipo_reto = 'codigo'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Misión: Facturas pendientes$txt$, $txt$Muestra todas las columnas de facturas cuyo estado sea estrictamente 'Pendiente'.$txt$, 'codigo', 100, 'facil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$SELECT * FROM facturas WHERE estado = 'Pendiente';$txt$, TRUE);
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Cuestionario: WHERE$txt$
+          AND tipo_reto = 'opcion_multiple'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Cuestionario: WHERE$txt$, $txt$¿Cómo se escribe el valor de texto 'Pendiente' dentro de una condición WHERE?$txt$, 'opcion_multiple', 10, 'facil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$WHERE estado = 'Pendiente'$txt$, TRUE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$WHERE estado = "Pendiente"$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$WHERE estado = [Pendiente]$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$WHERE estado = Pendiente$txt$, FALSE);
+        END IF;
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 4: Ordenamiento y Límites
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 4;
+
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel AND titulo = $txt$Ordenamiento con ORDER BY$txt$
+        ORDER BY id_leccion DESC LIMIT 1;
+
+        IF v_id_leccion IS NULL THEN
+            INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+            VALUES (v_id_nivel, $txt$Ordenamiento con ORDER BY$txt$, $txt$Las filas no tienen orden garantizado en un modelo relacional. ORDER BY aplica un orden al resultado (ASC menor a mayor por defecto, DESC mayor a menor) y LIMIT recorta la salida a una cantidad máxima de filas.$txt$, 1)
+            RETURNING id_leccion INTO v_id_leccion;
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Misión: Top 3 de jugadores$txt$
+          AND tipo_reto = 'codigo'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Misión: Top 3 de jugadores$txt$, $txt$Devuelve nombre y puntaje ordenados de mayor a menor y limita el resultado a 3 filas.$txt$, 'codigo', 100, 'facil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$SELECT nombre, puntaje FROM jugadores ORDER BY puntaje DESC LIMIT 3;$txt$, TRUE);
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Cuestionario: ORDER BY$txt$
+          AND tipo_reto = 'opcion_multiple'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Cuestionario: ORDER BY$txt$, $txt$¿Qué cláusula debe ir siempre después de ORDER BY para cortar el resultado?$txt$, 'opcion_multiple', 10, 'facil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$LIMIT$txt$, TRUE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$WHERE$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$GROUP BY$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$JOIN$txt$, FALSE);
+        END IF;
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 5: Funciones de Agregación
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 5;
+
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel AND titulo = $txt$Funciones de agregación$txt$
+        ORDER BY id_leccion DESC LIMIT 1;
+
+        IF v_id_leccion IS NULL THEN
+            INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+            VALUES (v_id_nivel, $txt$Funciones de agregación$txt$, $txt$Las funciones de agregación consolidan múltiples filas en un único valor escalar. COUNT cuenta valores no nulos, SUM suma, AVG promedia y MIN/MAX identifican extremos. Las agregaciones (salvo COUNT(*)) ignoran los NULL.$txt$, 1)
+            RETURNING id_leccion INTO v_id_leccion;
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Misión: Total del inventario$txt$
+          AND tipo_reto = 'codigo'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Misión: Total del inventario$txt$, $txt$Calcula la suma total de la columna precio de la tabla inventario.$txt$, 'codigo', 100, 'medio')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$SELECT SUM(precio) FROM inventario;$txt$, TRUE);
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Cuestionario: Agregación$txt$
+          AND tipo_reto = 'opcion_multiple'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Cuestionario: Agregación$txt$, $txt$¿Qué devuelve COUNT(comision) si de 10 filas solo 7 tienen un valor no nulo en comision?$txt$, 'opcion_multiple', 10, 'medio')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$7$txt$, TRUE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$10$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$NULL$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$0$txt$, FALSE);
+        END IF;
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 6: Agrupamiento con GROUP BY
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 6;
+
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel AND titulo = $txt$Agrupamiento con GROUP BY$txt$
+        ORDER BY id_leccion DESC LIMIT 1;
+
+        IF v_id_leccion IS NULL THEN
+            INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+            VALUES (v_id_nivel, $txt$Agrupamiento con GROUP BY$txt$, $txt$GROUP BY divide las filas en subgrupos según valores comunes y permite aplicar funciones de agregación a cada grupo. WHERE filtra filas antes de agrupar; HAVING filtra los grupos completos después de agregar. Toda columna no agregada del SELECT debe estar en GROUP BY.$txt$, 1)
+            RETURNING id_leccion INTO v_id_leccion;
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Misión: Conteo por departamento$txt$
+          AND tipo_reto = 'codigo'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Misión: Conteo por departamento$txt$, $txt$Devuelve departamento y COUNT(*) de empleados agrupando por departamento y conservando solo los grupos con más de 4 empleados.$txt$, 'codigo', 100, 'medio')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$SELECT departamento, COUNT(*) FROM empleados GROUP BY departamento HAVING COUNT(*) > 4;$txt$, TRUE);
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Cuestionario: GROUP BY$txt$
+          AND tipo_reto = 'opcion_multiple'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Cuestionario: GROUP BY$txt$, $txt$¿Qué cláusula se usa para filtrar los grupos después de agrupar con una función agregada?$txt$, 'opcion_multiple', 10, 'medio')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$HAVING$txt$, TRUE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$WHERE$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$LIMIT$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$ORDER BY$txt$, FALSE);
+        END IF;
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 7: INNER JOIN
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 7;
+
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel AND titulo = $txt$Uniones con INNER JOIN$txt$
+        ORDER BY id_leccion DESC LIMIT 1;
+
+        IF v_id_leccion IS NULL THEN
+            INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+            VALUES (v_id_nivel, $txt$Uniones con INNER JOIN$txt$, $txt$INNER JOIN combina filas de dos tablas conservando solo los pares donde el predicado ON es verdadero. Se recomienda prefijar las columnas con el nombre de su tabla para evitar ambigüedad en la proyección.$txt$, 1)
+            RETURNING id_leccion INTO v_id_leccion;
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Misión: Inscripciones académicas$txt$
+          AND tipo_reto = 'codigo'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Misión: Inscripciones académicas$txt$, $txt$Combina estudiantes con cursos por INNER JOIN y proyecta estudiantes.nombre y cursos.nombre_curso igualando estudiantes.curso_id con cursos.id.$txt$, 'codigo', 100, 'medio')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$SELECT estudiantes.nombre, cursos.nombre_curso FROM estudiantes INNER JOIN cursos ON estudiantes.curso_id = cursos.id;$txt$, TRUE);
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Cuestionario: INNER JOIN$txt$
+          AND tipo_reto = 'opcion_multiple'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Cuestionario: INNER JOIN$txt$, $txt$Si un estudiante tiene curso_id NULL, ¿aparecerá en el resultado de un INNER JOIN?$txt$, 'opcion_multiple', 10, 'medio')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$No, INNER JOIN descarta los registros sin coincidencia exacta.$txt$, TRUE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Sí, aparecerá con el curso vacío.$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Sí, se enlaza automáticamente al primer curso.$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Se generará un error de ejecución.$txt$, FALSE);
+        END IF;
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 8: LEFT JOIN
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 8;
+
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel AND titulo = $txt$Uniones externas LEFT JOIN$txt$
+        ORDER BY id_leccion DESC LIMIT 1;
+
+        IF v_id_leccion IS NULL THEN
+            INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+            VALUES (v_id_nivel, $txt$Uniones externas LEFT JOIN$txt$, $txt$LEFT JOIN conserva todas las filas de la tabla de la izquierda. Cuando un registro no encuentra coincidencia en la tabla derecha, los campos de esta se rellenan con NULL en lugar de eliminar la fila.$txt$, 1)
+            RETURNING id_leccion INTO v_id_leccion;
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Misión: Informe de vendedores$txt$
+          AND tipo_reto = 'codigo'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Misión: Informe de vendedores$txt$, $txt$Preserva todos los vendedores con LEFT JOIN hacia ventas mostrando vendedores.nombre y ventas.id con la condición vendedores.id = ventas.vendedor_id.$txt$, 'codigo', 100, 'dificil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$SELECT vendedores.nombre, ventas.id FROM vendedores LEFT JOIN ventas ON vendedores.id = ventas.vendedor_id;$txt$, TRUE);
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Cuestionario: LEFT JOIN$txt$
+          AND tipo_reto = 'opcion_multiple'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Cuestionario: LEFT JOIN$txt$, $txt$¿Qué valor aparece en ventas.monto para un vendedor que no ha realizado ventas en un LEFT JOIN?$txt$, 'opcion_multiple', 10, 'dificil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$NULL$txt$, TRUE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$0$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$La fila se elimina del resultado.$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Cadena vacía.$txt$, FALSE);
+        END IF;
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 9: Subconsultas
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 9;
+
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel AND titulo = $txt$Subconsultas escalares$txt$
+        ORDER BY id_leccion DESC LIMIT 1;
+
+        IF v_id_leccion IS NULL THEN
+            INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+            VALUES (v_id_nivel, $txt$Subconsultas escalares$txt$, $txt$Una subconsulta es un SELECT incrustado entre paréntesis cuyo resultado alimenta a la consulta externa. Cuando se usa con operadores escalares, la subconsulta debe devolver una sola fila y una sola columna, como con una agregación.$txt$, 1)
+            RETURNING id_leccion INTO v_id_leccion;
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Misión: Salarios sobre el promedio$txt$
+          AND tipo_reto = 'codigo'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Misión: Salarios sobre el promedio$txt$, $txt$Proyecta nombre y salario de empleados cuyo salario sea mayor que el promedio calculado por una subconsulta entre paréntesis.$txt$, 'codigo', 100, 'dificil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$SELECT nombre, salario FROM empleados WHERE salario > (SELECT AVG(salario) FROM empleados);$txt$, TRUE);
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Cuestionario: Subconsultas$txt$
+          AND tipo_reto = 'opcion_multiple'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Cuestionario: Subconsultas$txt$, $txt$¿Qué requisito cumple una subconsulta usada con el operador mayor que (>)?$txt$, 'opcion_multiple', 10, 'dificil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Debe devolver una sola fila y una sola columna.$txt$, TRUE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Debe devolver muchas filas.$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Debe ir sin paréntesis.$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Debe proyectar dos columnas.$txt$, FALSE);
+        END IF;
+    END IF;
+
+    -- ========================================================
+    -- NIVEL 10: Manipulación de Datos (DML)
+    -- ========================================================
+    SELECT id_nivel INTO v_id_nivel
+    FROM nivel
+    WHERE id_lenguaje = v_id_lenguaje AND numero_nivel = 10;
+
+    IF v_id_nivel IS NOT NULL THEN
+        SELECT id_leccion INTO v_id_leccion
+        FROM leccion
+        WHERE id_nivel = v_id_nivel AND titulo = $txt$Manipulación de datos DML$txt$
+        ORDER BY id_leccion DESC LIMIT 1;
+
+        IF v_id_leccion IS NULL THEN
+            INSERT INTO leccion (id_nivel, titulo, contenido, orden)
+            VALUES (v_id_nivel, $txt$Manipulación de datos DML$txt$, $txt$Las sentencias DML mutan el estado de los datos: INSERT agrega filas, UPDATE modifica registros existentes y DELETE los elimina. En UPDATE y DELETE la cláusula WHERE es obligatoria en producción: sin ella, todas las filas de la tabla son afectadas.$txt$, 1)
+            RETURNING id_leccion INTO v_id_leccion;
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Misión: Incremento de precios$txt$
+          AND tipo_reto = 'codigo'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Misión: Incremento de precios$txt$, $txt$Aplica un incremento del 10% a la columna precio de productos restringiendo la actualización a la categoría 'Electrónica'.$txt$, 'codigo', 100, 'dificil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$UPDATE productos SET precio = precio * 1.10 WHERE categoria = 'Electrónica';$txt$, TRUE);
+        END IF;
+
+        SELECT id_reto INTO v_id_reto
+        FROM reto
+        WHERE id_leccion = v_id_leccion
+          AND titulo = $txt$Cuestionario: DML$txt$
+          AND tipo_reto = 'opcion_multiple'
+        ORDER BY id_reto DESC LIMIT 1;
+
+        IF v_id_reto IS NULL THEN
+            INSERT INTO reto (id_leccion, titulo, descripcion, tipo_reto, xp_recompensa, dificultad)
+            VALUES (v_id_leccion, $txt$Cuestionario: DML$txt$, $txt$¿Qué sucede si ejecutas UPDATE productos SET precio = 0; sin cláusula WHERE?$txt$, 'opcion_multiple', 10, 'dificil')
+            RETURNING id_reto INTO v_id_reto;
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Todos los productos pasan a costar 0.$txt$, TRUE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Solo los productos de precio 0 se actualizan.$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$Genera un error sintáctico obligatorio.$txt$, FALSE);
+            INSERT INTO respuesta (id_reto, contenido, es_correcta)
+            VALUES (v_id_reto, $txt$No se aplica ningún cambio.$txt$, FALSE);
+        END IF;
+    END IF;
+
+    RAISE NOTICE 'Contenido SQL agregado correctamente.';
+END
+$sql$;
+
+-- ============================================================
+-- COMPROBACIÓN FINAL SQL
+-- ============================================================
+SELECT
+    l.nombre AS lenguaje,
+    n.numero_nivel,
+    n.nombre AS nivel,
+    le.titulo AS leccion,
+    r.tipo_reto,
+    r.titulo AS reto,
+    COUNT(res.id_respuesta) AS respuestas
+FROM lenguaje l
+INNER JOIN nivel n ON n.id_lenguaje = l.id_lenguaje
+LEFT JOIN leccion le ON le.id_nivel = n.id_nivel
+LEFT JOIN reto r ON r.id_leccion = le.id_leccion
+LEFT JOIN respuesta res ON res.id_reto = r.id_reto
+WHERE LOWER(l.nombre) = 'sql'
 GROUP BY l.nombre, n.numero_nivel, n.nombre, le.id_leccion, le.titulo,
          r.id_reto, r.tipo_reto, r.titulo
 ORDER BY n.numero_nivel, le.id_leccion, r.id_reto;

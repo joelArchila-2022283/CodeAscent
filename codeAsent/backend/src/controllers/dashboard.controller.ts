@@ -4,114 +4,46 @@ import { pool } from '../config/conexion';
 export const obtenerResumenDashboard = async (req: Request, res: Response) => {
   try {
     const idUsuario = req.usuario?.id_usuario;
+    if (!idUsuario) return res.status(401).json({ mensaje: 'Usuario no autenticado.' });
 
-    if (!idUsuario) {
-      return res.status(401).json({ mensaje: 'Usuario no autenticado.' });
-    }
+    
+    await pool.query(`UPDATE nivel SET xp_requerida = 100 WHERE id_lenguaje IN (SELECT id_lenguaje FROM lenguaje WHERE slug = 'sql' OR LOWER(nombre)='sql') AND xp_requerida != 100`);
+    await pool.query(`UPDATE usuario_xp SET xp = LEAST(1000, (SELECT COUNT(*) * 100 FROM mission_progress mp JOIN leccion l ON l.id_leccion = mp.mission_id JOIN nivel n ON n.id_nivel = l.id_nivel JOIN lenguaje lang ON lang.id_lenguaje = n.id_lenguaje WHERE mp.user_id = usuario_xp.user_id AND mp.completed = TRUE AND lang.slug='sql')) WHERE id_lenguaje IN (SELECT id_lenguaje FROM lenguaje WHERE slug='sql' OR LOWER(nombre)='sql') AND xp < LEAST(1000, (SELECT COUNT(*) * 100 FROM mission_progress mp2 JOIN leccion l2 ON l2.id_leccion = mp2.mission_id JOIN nivel n2 ON n2.id_nivel = l2.id_nivel JOIN lenguaje lang2 ON lang2.id_lenguaje = n2.id_lenguaje WHERE mp2.user_id = usuario_xp.user_id AND mp2.completed = TRUE AND lang2.slug='sql'))`);
+    await pool.query(`UPDATE usuario_xp SET xp = 1000 WHERE xp > 1000 AND id_lenguaje IN (SELECT id_lenguaje FROM lenguaje WHERE slug='sql' OR LOWER(nombre)='sql')`);
 
-    // 1. Obtener Usuario
-    const resUsuario = await pool.query(
-      'SELECT id_usuario, nombre, correo, rol, fecha_registro FROM usuario WHERE id_usuario = $1',
-      [idUsuario]
-    );
-
-    if (resUsuario.rows.length === 0) {
-      return res.status(404).json({ mensaje: 'Usuario no encontrado.' });
-    }
-
+    const resUsuario = await pool.query('SELECT id_usuario, nombre, correo, rol, fecha_registro FROM usuario WHERE id_usuario = $1', [idUsuario]);
+    if (resUsuario.rows.length === 0) return res.status(404).json({ mensaje: 'Usuario no encontrado.' });
     const usuario = resUsuario.rows[0];
 
-    // 2. Obtener Progreso General
-    let progreso = {
-      id_usuario: usuario.id_usuario,
-      id_lenguaje: 1,
-      id_nivel_actual: 1,
-      xp_actual: 0,
-      porcentaje: 0
-    };
-
-    const resProgreso = await pool.query(
-      'SELECT id_progreso, id_usuario, id_lenguaje, id_nivel_actual, xp_actual, porcentaje FROM progreso WHERE id_usuario = $1 LIMIT 1',
-      [idUsuario]
-    );
-
-    if (resProgreso.rows.length > 0) {
-      progreso = resProgreso.rows[0];
-    }
-
-    const resProgresoSql = await pool.query(`
-      SELECT p.id_progreso, p.id_usuario, p.id_lenguaje, p.id_nivel_actual, p.xp_actual, p.porcentaje
-      FROM progreso p
-      INNER JOIN lenguaje l ON l.id_lenguaje = p.id_lenguaje
-      WHERE p.id_usuario = $1 AND LOWER(l.nombre) = 'sql'
-      LIMIT 1
-    `, [idUsuario]);
+    let progreso = { id_usuario: usuario.id_usuario, id_lenguaje: 1, id_nivel_actual: 1, xp_actual: 0, porcentaje: 0 };
+    const resProgreso = await pool.query('SELECT id_progreso, id_usuario, id_lenguaje, id_nivel_actual, xp_actual, porcentaje FROM progreso WHERE id_usuario = $1 LIMIT 1', [idUsuario]);
+    if (resProgreso.rows.length > 0) progreso = resProgreso.rows[0];
+    const resProgresoSql = await pool.query(`SELECT p.id_progreso, p.id_usuario, p.id_lenguaje, p.id_nivel_actual, p.xp_actual, p.porcentaje FROM progreso p INNER JOIN lenguaje l ON l.id_lenguaje = p.id_lenguaje WHERE p.id_usuario = $1 AND LOWER(l.nombre) = 'sql' LIMIT 1`, [idUsuario]);
     const progresoSql = resProgresoSql.rows[0] || null;
-
-    // 3. Contar Logros Obtenidos Reales
-    const resLogros = await pool.query(
-      'SELECT COUNT(*)::int AS total FROM usuario_logro WHERE id_usuario = $1',
-      [idUsuario]
-    );
+    const resLogros = await pool.query('SELECT COUNT(*)::int AS total FROM usuario_logro WHERE id_usuario = $1', [idUsuario]);
     const logrosObtenidos = resLogros.rows[0]?.total || 0;
 
     const resPerfil = await pool.query(`
       SELECT
-        l.id_lenguaje,
-        l.nombre,
-        l.slug,
-        l.descripcion,
-        COALESCE(uxp.xp, 0)::int AS xp_actual,
-       COALESCE((
-         SELECT LEAST(10, COALESCE(MAX(nivel.numero_nivel), 0) + 1)
+        l.id_lenguaje, l.nombre, l.slug, l.descripcion,
+        COALESCE(p.xp_actual, uxp.xp, 0)::int AS xp_actual,
+        COALESCE((SELECT nivel_actual.numero_nivel FROM nivel nivel_actual WHERE nivel_actual.id_nivel = p.id_nivel_actual), (
+          SELECT LEAST(10, COALESCE(MAX(nivel.numero_nivel), 0) + 1)
           FROM nivel nivel
           WHERE nivel.id_lenguaje = l.id_lenguaje
-            AND (
-              SELECT COALESCE(SUM(anterior.xp_requerida), 0)
-              FROM nivel anterior
-              WHERE anterior.id_lenguaje = l.id_lenguaje
-                AND anterior.numero_nivel <= nivel.numero_nivel
-            ) <= COALESCE(uxp.xp, 0)
-         ), 1)::int AS nivel_actual,
-         COALESCE((
-           SELECT MIN(acumulado)
-           FROM (
-             SELECT SUM(siguiente.xp_requerida) OVER (ORDER BY siguiente.numero_nivel) AS acumulado
-             FROM nivel siguiente
-             WHERE siguiente.id_lenguaje = l.id_lenguaje AND siguiente.estado = TRUE
-           ) umbrales
-           WHERE acumulado > COALESCE(uxp.xp, 0)
-          ), 0)::int AS xp_siguiente_nivel,
-          COALESCE((
-            SELECT MAX(acumulado)
-            FROM (
-              SELECT SUM(actual.xp_requerida) OVER (ORDER BY actual.numero_nivel) AS acumulado
-              FROM nivel actual
-              WHERE actual.id_lenguaje = l.id_lenguaje AND actual.estado = TRUE
-            ) umbral_inicial
-            WHERE acumulado <= COALESCE(uxp.xp, 0)
-          ), 0)::int AS xp_inicio_nivel,
-           LEAST(100, ROUND((COALESCE((
-            SELECT COUNT(*)
-            FROM mission_progress mp
-            JOIN leccion ml ON ml.id_leccion = mp.mission_id
-            JOIN nivel mn ON mn.id_nivel = ml.id_nivel
-            WHERE mp.user_id = $1 AND mp.completed = TRUE AND mn.id_lenguaje = l.id_lenguaje
-          ), 0)::numeric / NULLIF(COUNT(DISTINCT n.id_nivel), 0)) * 100, 2))::float AS porcentaje,
-          COUNT(DISTINCT n.id_nivel)::int AS total_niveles,
-          COALESCE((
-            SELECT COUNT(*)
-            FROM mission_progress mp
-            JOIN leccion ml ON ml.id_leccion = mp.mission_id
-            JOIN nivel mn ON mn.id_nivel = ml.id_nivel
-            WHERE mp.user_id = $1 AND mp.completed = TRUE AND mn.id_lenguaje = l.id_lenguaje
-          ), 0)::int AS misiones_completadas
+            AND CASE WHEN l.slug = 'sql' THEN nivel.numero_nivel * 100 ELSE (SELECT COALESCE(SUM(anterior.xp_requerida), 0) FROM nivel anterior WHERE anterior.id_lenguaje = l.id_lenguaje AND anterior.numero_nivel <= nivel.numero_nivel) END <= COALESCE(p.xp_actual, uxp.xp, 0)
+        ), 1)::int AS nivel_actual,
+        COALESCE((SELECT MIN(acumulado) FROM (SELECT SUM(siguiente.xp_requerida) OVER (ORDER BY siguiente.numero_nivel) AS acumulado FROM nivel siguiente WHERE siguiente.id_lenguaje = l.id_lenguaje AND siguiente.estado = TRUE) umbrales WHERE acumulado > COALESCE(p.xp_actual, uxp.xp, 0)), 0)::int AS xp_siguiente_nivel,
+        COALESCE((SELECT MAX(acumulado) FROM (SELECT SUM(actual.xp_requerida) OVER (ORDER BY actual.numero_nivel) AS acumulado FROM nivel actual WHERE actual.id_lenguaje = l.id_lenguaje AND actual.estado = TRUE) umbral_inicial WHERE acumulado <= COALESCE(p.xp_actual, uxp.xp, 0)), 0)::int AS xp_inicio_nivel,
+        COALESCE(p.porcentaje, CASE WHEN l.slug = 'sql' THEN LEAST(100, ROUND((COALESCE(p.xp_actual, uxp.xp, 0)::numeric / 1000) * 100, 2)) ELSE LEAST(100, ROUND((COALESCE((SELECT COUNT(*) FROM mission_progress mp JOIN leccion ml ON ml.id_leccion = mp.mission_id JOIN nivel mn ON mn.id_nivel = ml.id_nivel WHERE mp.user_id = $1 AND mp.completed = TRUE AND mn.id_lenguaje = l.id_lenguaje), 0)::numeric / NULLIF(COUNT(DISTINCT n.id_nivel), 0)) * 100, 2)) END)::float AS porcentaje,
+        COUNT(DISTINCT n.id_nivel)::int AS total_niveles,
+        COALESCE((SELECT COUNT(*) FROM mission_progress mp JOIN leccion ml ON ml.id_leccion = mp.mission_id JOIN nivel mn ON mn.id_nivel = ml.id_nivel WHERE mp.user_id = $1 AND mp.completed = TRUE AND mn.id_lenguaje = l.id_lenguaje), 0)::int AS misiones_completadas
       FROM lenguaje l
-      LEFT JOIN usuario_xp uxp
-        ON uxp.id_lenguaje = l.id_lenguaje AND uxp.user_id = $1
+      LEFT JOIN usuario_xp uxp ON uxp.id_lenguaje = l.id_lenguaje AND uxp.user_id = $1
+      LEFT JOIN progreso p ON p.id_lenguaje = l.id_lenguaje AND p.id_usuario = $1
       LEFT JOIN nivel n ON n.id_lenguaje = l.id_lenguaje AND n.estado = TRUE
       WHERE l.estado = TRUE
-      GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp
+      GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp, p.xp_actual, p.porcentaje, p.id_nivel_actual
       ORDER BY l.id_lenguaje
     `, [idUsuario]);
 

@@ -5,13 +5,6 @@
   </div>
 
   <div class="rejilla-tarjetas">
-    <article class="tarjeta-nodo tarjeta-nodo--manual" (click)="irA('manual')">
-      <div class="icono-nodo" aria-hidden="true"><i class="bi bi-journal-code"></i><span class="icono-orbita"></span></div>
-      <h3>Manual de Diagramas SQL</h3>
-      <p>Aprende la estructura formal de tablas, claves primarias y sintaxis SELECT.</p>
-      <span class="enlace-nodo">Revisar manual <i class="bi bi-arrow-up-right"></i></span>
-    </article>
-
     <article class="tarjeta-nodo tarjeta-nodo--misiones" (click)="irA('misiones')">
       <div class="icono-nodo" aria-hidden="true"><i class="bi bi-bullseye"></i><span class="icono-orbita"></span></div>
       <h3>Asignaciones del Reactor</h3>
@@ -19,11 +12,11 @@
       <span class="enlace-nodo">Ver misiones <i class="bi bi-arrow-up-right"></i></span>
     </article>
 
-    <article class="tarjeta-nodo tarjeta-nodo--consola" (click)="irA('consola')">
-      <div class="icono-nodo" aria-hidden="true"><i class="bi bi-terminal-fill"></i><span class="icono-orbita"></span></div>
-      <h3>Terminal de Cobre SQL</h3>
-      <p>Ejecuta consultas en vivo y observa cómo fluye la información por los cables.</p>
-      <span class="enlace-nodo">Abrir terminal <i class="bi bi-arrow-up-right"></i></span>
+    <article class="tarjeta-nodo tarjeta-nodo--manual" (click)="irA('manual')">
+      <div class="icono-nodo" aria-hidden="true"><i class="bi bi-journal-code"></i><span class="icono-orbita"></span></div>
+      <h3>Manual de Diagramas SQL</h3>
+      <p>Aprende la estructura formal de tablas, claves primarias y sintaxis SELECT.</p>
+      <span class="enlace-nodo">Revisar manual <i class="bi bi-arrow-up-right"></i></span>
     </article>
 
     <article class="tarjeta-nodo tarjeta-nodo--quiz" (click)="irA('cuestionario')">
@@ -31,6 +24,13 @@
       <h3>Prueba de Calibración</h3>
       <p>Demuestra tu capacidad diagnóstica respondiendo el test de válvulas de datos.</p>
       <span class="enlace-nodo">Iniciar test <i class="bi bi-arrow-up-right"></i></span>
+    </article>
+
+    <article class="tarjeta-nodo tarjeta-nodo--consola" (click)="irA('consola')">
+      <div class="icono-nodo" aria-hidden="true"><i class="bi bi-terminal-fill"></i><span class="icono-orbita"></span></div>
+      <h3>Terminal de Cobre SQL</h3>
+      <p>Ejecuta consultas en vivo y observa cómo fluye la información por los cables.</p>
+      <span class="enlace-nodo">Abrir terminal <i class="bi bi-arrow-up-right"></i></span>
     </article>
   </div>
 </div>

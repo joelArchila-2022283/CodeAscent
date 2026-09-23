@@ -1,57 +1,100 @@
-import { Component, Input, OnChanges, Output, EventEmitter, signal, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  Output,
+  EventEmitter,
+  signal,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NivelSql, SeccionSql, MisionSql } from '../../../interfaces/sql.interface';
+import { NivelSql, RetoNivelSql } from '../../../interfaces/sql.interface';
+import { MISIONES_SQL, MisionSqlConfig } from '../misiones-sql.data';
+
+export interface MisionSqlSeleccionada {
+  reto: RetoNivelSql;
+  nivel: NivelSql;
+  mision: MisionSqlConfig;
+  leccionContenido: string;
+  respuestas: RetoNivelSql['respuestas'];
+}
+
+export interface MisionSqlItem extends MisionSqlSeleccionada {
+  codigoIdentificador: string;
+  idLeccion: number | null;
+  xpRecompensa: number;
+  desbloqueada: boolean;
+  completada: boolean;
+}
 
 @Component({
   selector: 'app-misiones-sql',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './misiones-sql.component.html',
-  styleUrls: ['./misiones-sql.component.scss']
+  styleUrls: ['./misiones-sql.component.scss'],
 })
 export class MisionesSqlComponent implements OnChanges {
   @Input() niveles: NivelSql[] = [];
   @Input() nivelActivo: NivelSql | null = null;
-  @Output() navegarA = new EventEmitter<SeccionSql>();
+  @Input() completadas: ReadonlySet<number> = new Set<number>();
+  @Output() back = new EventEmitter<void>();
+  @Output() missionSelected = new EventEmitter<RetoNivelSql>();
 
-  listaMisiones = signal<MisionSql[]>([
-    {
-      idMision: 'm-sql-01',
-      codigoIdentificador: 'MISIÓN 01',
-      tituloMision: 'Sintonizar Señal de Transistores',
-      descripcionMision: 'Lee la Lección SQL-DOC-01 en el Manual Técnico.',
-      recompensaExperiencia: 50,
-      estadoMision: 'completada',
-      seccionDestino: 'manual',
-      requisitoDesbloqueo: 'Completado'
-    },
-    {
-      idMision: 'm-sql-02',
-      codigoIdentificador: 'MISIÓN 02',
-      tituloMision: 'Filtrado de Voltaje de Seguridad',
-      descripcionMision: 'Ejecuta con éxito la consulta del reto en la Terminal SQL.',
-      recompensaExperiencia: 100,
-      estadoMision: 'en_progreso',
-      seccionDestino: 'consola',
-      requisitoDesbloqueo: 'Ejecutar consulta válida'
-    }
-  ]);
+  misiones = signal<MisionSqlItem[]>([]);
 
-  ngOnChanges(_changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['niveles'] && !changes['nivelActivo'] && !changes['completadas']) return;
     if (this.niveles.length === 0) return;
-    this.listaMisiones.set(this.niveles.map(nivel => ({
-      idMision: `nivel-${nivel.id_nivel}`,
-      codigoIdentificador: `NIVEL ${nivel.numero_nivel}`,
-      tituloMision: nivel.nombre,
-      descripcionMision: nivel.descripcion || 'Resuelve el problema, consulta el manual y demuestra lo aprendido.',
-      recompensaExperiencia: nivel.xp_requerida || 0,
-      estadoMision: nivel.id_nivel === this.nivelActivo?.id_nivel ? 'en_progreso' : nivel.numero_nivel === 1 ? 'en_progreso' : 'bloqueada',
-      seccionDestino: 'manual',
-      requisitoDesbloqueo: nivel.numero_nivel === 1 ? 'Disponible' : 'Completa el nivel anterior'
-    })));
+
+    this.misiones.set(
+      this.niveles.map((nivel, indice) => {
+        const mision =
+          MISIONES_SQL.find((item) => item.numero === nivel.numero_nivel) ??
+          MISIONES_SQL[Math.min(indice, MISIONES_SQL.length - 1)];
+        const leccion = nivel.lecciones[0];
+        const retoBase = nivel.retos.find((item) => item.tipo_reto === 'codigo') ?? nivel.retos[0];
+
+        const reto: RetoNivelSql = {
+          id_reto: retoBase?.id_reto ?? mision.numero,
+          id_leccion: leccion?.id_leccion ?? retoBase?.id_leccion ?? mision.numero,
+          titulo: retoBase?.titulo ?? mision.titulo,
+          descripcion: retoBase?.descripcion ?? mision.objetivoClaro,
+          tipo_reto: 'codigo',
+          xp_recompensa: Number(nivel.xp_requerida ?? 0) || mision.xpRecompensa,
+          dificultad:
+            retoBase?.dificultad ??
+            (mision.numero <= 3 ? 'facil' : mision.numero <= 7 ? 'medio' : 'dificil'),
+          respuestas: retoBase?.respuestas?.length ? retoBase.respuestas : [],
+        };
+
+        // Para pruebas: desbloquea todas las misiones SQL para poder probar el flujo completo sin bloqueo secuencial
+        const desbloqueada = true;
+
+        return {
+          reto,
+          nivel,
+          mision,
+          leccionContenido: leccion?.contenido || mision.contexto,
+          respuestas: reto.respuestas,
+          codigoIdentificador: mision.codigo,
+          idLeccion: reto.id_leccion,
+          xpRecompensa: reto.xp_recompensa,
+          desbloqueada,
+          completada: this.completadas.has(reto.id_leccion),
+        };
+      }),
+    );
   }
 
-  irAMision(seccion: SeccionSql): void {
-    this.navegarA.emit(seccion);
+  seleccionarMision(item: MisionSqlItem): void {
+    if (!item.desbloqueada || !item.reto) return;
+    const retoParaConsola: RetoNivelSql = {
+      ...item.reto,
+      numero_nivel: item.nivel.numero_nivel,
+      leccionContenido: item.leccionContenido,
+      respuestas: item.respuestas ?? item.reto.respuestas ?? [],
+    };
+    this.missionSelected.emit(retoParaConsola);
   }
 }

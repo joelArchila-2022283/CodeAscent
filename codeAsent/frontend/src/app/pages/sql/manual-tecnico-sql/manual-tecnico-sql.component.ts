@@ -1,15 +1,19 @@
-import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NivelSql } from '../../../interfaces/sql.interface';
+import { MisionSqlConfig, TemaGraficoSql } from '../misiones-sql.data';
 
-interface LeccionSql {
-  id: string;
-  codigoIdentificador: string;
-  titulo: string;
-  subtitulo: string;
-  explicacionConceptual: string;
-  ejemploConsulta: string;
-  puntosClave: string[];
+export interface PlayoSql {
+  palabra: string;
+  sub: string;
+  clase: 'copper' | 'green' | 'cyan';
 }
 
 @Component({
@@ -17,60 +21,89 @@ interface LeccionSql {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './manual-tecnico-sql.component.html',
-  styleUrls: ['./manual-tecnico-sql.component.scss']
+  styleUrls: ['./manual-tecnico-sql.component.scss'],
 })
 export class ManualTecnicoSqlComponent implements OnChanges {
-  @Input() nivelActivo: NivelSql | null = null;
-  indiceLeccionSeleccionada = signal<number>(0);
+  @Input() mision: MisionSqlConfig | null = null;
+  @Output() back = new EventEmitter<void>();
+  @Output() next = new EventEmitter<void>();
 
-  lecciones: LeccionSql[] = [
-    {
-      id: 'sql-doc-01',
-      codigoIdentificador: 'SQL-DOC-01',
-      titulo: 'Anatomía de una Consulta SELECT',
-      subtitulo: 'La tubería básica de extracción de información',
-      explicacionConceptual: 'En las bases de datos relacionales, una consulta SELECT permite extraer filamentos específicos de datos sin alterar la estructura original de las tablas.',
-      ejemploConsulta: `SELECT id_transistor, voltaje, estado\nFROM registro_valle\nWHERE estado = 'ACTIVO';`,
-      puntosClave: [
-        'SELECT: Especifica qué columnas o datos deseas extraer.',
-        'FROM: Señala la tabla donde se encuentran almacenados los registros.',
-        'WHERE: Aplica un filtro lógico para seleccionar filas específicas.'
-      ]
-    },
-    {
-      id: 'sql-doc-02',
-      codigoIdentificador: 'SQL-DOC-02',
-      titulo: 'Filtrado con Condicionales (WHERE)',
-      subtitulo: 'Aislamiento de señales y prevención de fallos',
-      explicacionConceptual: 'Utiliza comparadores (<, >, =, !=) y conectores booleanos (AND, OR) para refinar los criterios de búsqueda.',
-      ejemploConsulta: `SELECT nombre_arbol, cantidad_cables\nFROM bosque_transistores\nWHERE cantidad_cables >= 10 AND tipo = 'COBRE';`,
-      puntosClave: [
-        'Operadores de Comparación: Determinan si un valor cumple la regla.',
-        'AND / OR: Combinan múltiples reglas en un solo circuito de búsqueda.'
-      ]
-    }
-  ];
+  manual = signal<MisionSqlConfig | null>(null);
 
-  seleccionarLeccion(indice: number): void {
-    this.indiceLeccionSeleccionada.set(indice);
-  }
+  private readonly circuitos: Record<TemaGraficoSql, PlayoSql[]> = {
+    explorar: [
+      { palabra: 'FROM', sub: 'tabla origen', clase: 'copper' },
+      { palabra: 'SELECT *', sub: 'todas las columnas', clase: 'cyan' },
+    ],
+    proyectar: [
+      { palabra: 'FROM', sub: 'tabla origen', clase: 'copper' },
+      { palabra: 'SELECT', sub: 'columnas concretas', clase: 'cyan' },
+    ],
+    filtrar: [
+      { palabra: 'FROM', sub: 'tabla origen', clase: 'copper' },
+      { palabra: 'WHERE', sub: 'condición de filas', clase: 'green' },
+      { palabra: 'SELECT', sub: 'proyección', clase: 'cyan' },
+    ],
+    ordenar: [
+      { palabra: 'FROM', sub: 'tabla origen', clase: 'copper' },
+      { palabra: 'ORDER BY', sub: 'criterio DESC', clase: 'green' },
+      { palabra: 'LIMIT', sub: 'corte de filas', clase: 'cyan' },
+    ],
+    agregar: [
+      { palabra: 'FROM', sub: 'tabla origen', clase: 'copper' },
+      { palabra: 'SUM()', sub: 'total acumulado', clase: 'cyan' },
+    ],
+    agrupar: [
+      { palabra: 'FROM', sub: 'tabla origen', clase: 'copper' },
+      { palabra: 'GROUP BY', sub: 'formar grupos', clase: 'green' },
+      { palabra: 'HAVING', sub: 'filtrar grupos', clase: 'cyan' },
+    ],
+    unir: [
+      { palabra: 'FROM A', sub: 'primera tabla', clase: 'copper' },
+      { palabra: 'INNER JOIN B', sub: 'solo coincidencias', clase: 'green' },
+      { palabra: 'ON', sub: 'llaves en común', clase: 'cyan' },
+    ],
+    preservar: [
+      { palabra: 'FROM A', sub: 'tabla dominante', clase: 'copper' },
+      { palabra: 'LEFT JOIN B', sub: 'conserva A entera', clase: 'green' },
+      { palabra: 'ON', sub: 'llaves en común', clase: 'cyan' },
+    ],
+    subconsulta: [
+      { palabra: 'FROM', sub: 'tabla origen', clase: 'copper' },
+      { palabra: 'WHERE > ( )', sub: 'comparación anidada', clase: 'green' },
+      { palabra: 'AVG()', sub: 'valor escalar', clase: 'cyan' },
+    ],
+    mutar: [
+      { palabra: 'UPDATE', sub: 'tabla objetivo', clase: 'copper' },
+      { palabra: 'SET', sub: 'nuevo valor', clase: 'green' },
+      { palabra: 'WHERE', sub: 'acotar filas', clase: 'cyan' },
+    ],
+  };
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!changes['nivelActivo'] || !this.nivelActivo) return;
-
-    const leccionesDb = this.nivelActivo.lecciones.map(leccion => ({
-      id: `nivel-${this.nivelActivo!.id_nivel}-leccion-${leccion.id_leccion}`,
-      codigoIdentificador: `SQL-N${this.nivelActivo!.numero_nivel}-L${leccion.orden}`,
-      titulo: leccion.titulo,
-      subtitulo: this.nivelActivo!.nombre,
-      explicacionConceptual: leccion.contenido,
-      ejemploConsulta: leccion.ejemplos[0]?.codigo || 'SELECT * FROM tabla_objetivo;',
-      puntosClave: leccion.ejemplos.map(ejemplo => ejemplo.explicacion || ejemplo.titulo || 'Analiza el ejemplo antes de ejecutarlo.')
-    }));
-
-    if (leccionesDb.length > 0) {
-      this.lecciones = leccionesDb;
-      this.indiceLeccionSeleccionada.set(0);
+    if (changes['mision']) {
+      this.manual.set(this.mision);
     }
+  }
+
+  chips(): PlayoSql[] {
+    const tema = this.manual()?.temaGrafico ?? 'explorar';
+    return this.circuitos[tema] ?? this.circuitos['explorar'];
+  }
+
+  iconoTema(tema: TemaGraficoSql): string {
+    const iconos: Record<TemaGraficoSql, string> = {
+      explorar: 'bi-search',
+      proyectar: 'bi-view-list',
+      filtrar: 'bi-funnel-fill',
+      ordenar: 'bi-sort-numeric-down-alt',
+      agregar: 'bi-plus-circle-fill',
+      agrupar: 'bi-diagram-3-fill',
+      unir: 'bi-link-45deg',
+      preservar: 'bi-people-fill',
+      subconsulta: 'bi-braces',
+      mutar: 'bi-pencil-square',
+    };
+    return iconos[tema] ?? 'bi-diagram-3-fill';
   }
 }
