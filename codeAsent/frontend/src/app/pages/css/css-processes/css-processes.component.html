@@ -37,7 +37,7 @@
     @for (level of levels; track level.id_nivel) {
       @let mision = misionPorNivel(level);
 
-      <article class="mission">
+       <article class="mission" [class.mission--locked]="!mision?.desbloqueada" [class.mission--completed]="mision?.completada">
 
         <div class="badge">
           {{
@@ -70,8 +70,7 @@
             ·
 
             {{
-              codigo(level)?.xp_recompensa
-              || level.xp_requerida
+              xpMision(level)
             }}
             XP
           </small>

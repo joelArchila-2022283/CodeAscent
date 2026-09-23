@@ -60,6 +60,10 @@ export class CssProcessesComponent implements OnInit {
     return level.retos?.find((reto: RetoCss) => reto.tipo_reto === 'codigo');
   }
 
+  xpMision(level: NivelCss): number {
+    return level.numero_nivel * 100;
+  }
+
   misionPorNivel(level: NivelCss): CssMision | undefined {
     return this.misiones.find((mision) => mision.nivel.id_nivel === level.id_nivel);
   }
