@@ -34,18 +34,28 @@
 
     <!-- GRID DE TARJETAS DE GALERÍA -->
     <div class="row g-4">
-        <div *ngFor="let item of elementosGaleria" class="col-12 col-md-4">
-            <div class="gallery-card">
+        <div *ngFor="let item of elementosGaleria; let i = index" class="col-12 col-md-4">
+            <div class="gallery-card" [class.is-locked]="!estaDesbloqueado(i + 1)">
                 <div class="gallery-img-container">
                     <img [src]="item.imagen" [alt]="item.titulo" class="gallery-img">
                     <span class="gallery-badge">{{ item.categoria }}</span>
+                    <div *ngIf="!estaDesbloqueado(i + 1)" class="gallery-lock" aria-label="Cómic bloqueado">
+                        <i class="bi bi-lock-fill"></i>
+                        <span>BLOQUEADO</span>
+                    </div>
                 </div>
                 <div class="gallery-content">
                     <h4 class="title-font">{{ item.titulo }}</h4>
+                    <span class="gallery-module">{{ item.modulo }}</span>
                     <p>{{ item.descripcion }}</p>
-                    <a [routerLink]="item.enracesExterno" rel="noopener noreferrer" class="gallery-cta">
+                    <a *ngIf="estaDesbloqueado(i + 1); else lockedCta" [routerLink]="item.enracesExterno" rel="noopener noreferrer" class="gallery-cta">
                         EXPLORAR RECURSO <i class="bi bi-box-arrow-up-right"></i>
                     </a>
+                    <ng-template #lockedCta>
+                        <span class="gallery-cta gallery-cta--locked">
+                            <i class="bi bi-lock-fill"></i> COMPLETA EL MÓDULO
+                        </span>
+                    </ng-template>
                 </div>
             </div>
         </div>

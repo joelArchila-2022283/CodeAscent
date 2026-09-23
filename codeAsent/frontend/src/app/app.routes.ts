@@ -21,6 +21,7 @@ import { ErrorPageComponent } from './error-page/error-page.component';
 
 // Guardianes de Autenticación
 import { authGuard, guestGuard } from './core/guards/auth-guard';
+import { comicAccessGuard } from './core/guards/comic-access.guard';
 
 // Rutas de comics
 import { ComicComponent } from './pages/comics/comic_1/comic.component';
@@ -33,7 +34,6 @@ import { ComicComponent7 } from './pages/comics/comic_7/comic.component';
 import { ComicComponent8 } from './pages/comics/comic_8/comic.component';
 import { ComicComponent9 } from './pages/comics/comic_9/comic.component';
 import { ComicComponent10 } from './pages/comics/comic_10/comic.component';
-import { ComicComponent11 } from './pages/comics/comic_11/comic.component';
 
 //Ruta de galeria de comics
 import { GaleriaComponent } from './pages/galeria/galeria.component';
@@ -57,57 +57,52 @@ export const routes: Routes = [
   {
     path: 'comic/1',
     component: ComicComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/2',
     component: ComicComponent2,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/3',
     component: ComicComponent3,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/4',
     component: ComicComponent4,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/5',
     component: ComicComponent5,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/6',
     component: ComicComponent6,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/7',
     component: ComicComponent7,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/8',
     component: ComicComponent8,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/9',
     component: ComicComponent9,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
   {
     path: 'comic/10',
     component: ComicComponent10,
-    canActivate: [authGuard]
-  },
-  {
-    path: 'comic/11',
-    component: ComicComponent11,
-    canActivate: [authGuard]
+    canActivate: [authGuard, comicAccessGuard]
   },
 
   // ==========================================
