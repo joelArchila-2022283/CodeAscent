@@ -62,6 +62,7 @@ router.post('/:missionId/complete', async (req, res) => {
             [userId, missionId]
         );
         const xpAward = row.slug === 'sql' ? 100 : Number(row.xp_requerida) || 0;
+        // Adaptado a develop: solo SQL usa premio fijo 100 y tope 1000
         if (row.slug === 'sql' && Number(row.xp_requerida) !== 100) {
           await client.query(`UPDATE nivel SET xp_requerida = 100 WHERE id_lenguaje = $1`, [row.id_lenguaje]);
         }
