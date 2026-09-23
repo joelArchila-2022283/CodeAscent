@@ -11,6 +11,7 @@ import { INivel } from '../interfaces/nivel.interface';
 import { ILeccion } from '../interfaces/leccion.interface';
 import { IProgreso } from '../interfaces/progreso.interface';
 import { IReto } from '../interfaces/reto.interface';
+import { MissionProgressService } from '../core/services/mission-progress.service';
 
 interface RespuestaLenguajes { datos: ILenguaje[]; }
 interface RespuestaNiveles { data: INivel[]; }
@@ -47,6 +48,7 @@ export class HtmlDataService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
   private readonly retoService = inject(RetoService);
+  private readonly missionProgressService = inject(MissionProgressService);
   private readonly apiUrl = environment.apiUrl;
 
   obtenerContexto(): Observable<HtmlContexto> {
@@ -108,15 +110,19 @@ export class HtmlDataService {
                 catchError(() => of({ ...item, reto: null }))
               )
             )).pipe(
-              switchMap(misiones => this.retoService.obtenerRetosCompletados().pipe(
-                map(completadas => niveles.map(nivel => {
-                  const mision = misiones.find(item => item.nivel.id_nivel === nivel.id_nivel);
+              switchMap(misiones => forkJoin(misiones.map(item =>
+                item.reto?.id_leccion
+                  ? this.missionProgressService.getProgress(item.reto.id_leccion).pipe(map(res => ({ ...item, progresoMision: res.data })))
+                  : of({ ...item, progresoMision: null })
+              )).pipe(
+                map(misionesConProgreso => niveles.map(nivel => {
+                  const mision = misionesConProgreso.find(item => item.nivel.id_nivel === nivel.id_nivel);
                   const retoId = mision?.reto?.id_reto;
-                  const completada = retoId !== undefined && completadas.has(retoId);
+                  const completada = mision?.progresoMision?.completed === true;
                   const anterior = niveles.find(item => item.numero_nivel === nivel.numero_nivel - 1);
-                  const anteriorMision = misiones.find(item => item.nivel.id_nivel === anterior?.id_nivel);
+                  const anteriorMision = misionesConProgreso.find(item => item.nivel.id_nivel === anterior?.id_nivel);
                   const desbloqueada = nivel.numero_nivel === 1 ||
-                    (anteriorMision?.reto?.id_reto !== undefined && completadas.has(anteriorMision.reto.id_reto));
+                    anteriorMision?.progresoMision?.completed === true;
                   return {
                     nivel,
                     leccion: mision?.leccion ?? null,

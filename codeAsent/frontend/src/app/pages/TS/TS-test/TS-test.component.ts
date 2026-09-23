@@ -95,7 +95,7 @@ export class TSTestComponent implements OnChanges {
     const idLeccion = this.mission?.id_leccion;
     const total = this.preguntas().length;
     if (!idLeccion || total === 0) return;
-    this.missionProgressService.completeMission(idLeccion, total, total).subscribe({
+    this.missionProgressService.completeMission(idLeccion, total, total, 'quiz').subscribe({
       error: () => undefined
     });
   }

@@ -61,9 +61,9 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
         l.nombre,
         l.slug,
         l.descripcion,
-         COALESCE(p.xp_actual, uxp.xp, 0)::int AS xp_actual,
-         COALESCE((SELECT nivel_actual.numero_nivel FROM nivel nivel_actual WHERE nivel_actual.id_nivel = p.id_nivel_actual), (
-           SELECT MAX(nivel.numero_nivel)
+        COALESCE(uxp.xp, 0)::int AS xp_actual,
+       COALESCE((
+         SELECT LEAST(10, COALESCE(MAX(nivel.numero_nivel), 0) + 1)
           FROM nivel nivel
           WHERE nivel.id_lenguaje = l.id_lenguaje
             AND (
@@ -72,26 +72,69 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
               WHERE anterior.id_lenguaje = l.id_lenguaje
                 AND anterior.numero_nivel <= nivel.numero_nivel
             ) <= COALESCE(uxp.xp, 0)
-          ), 1)::int AS nivel_actual,
-         COALESCE(p.porcentaje, LEAST(100, ROUND((COALESCE(p.xp_actual, uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2)))::float AS porcentaje,
-        COUNT(DISTINCT n.id_nivel)::int AS total_niveles
+         ), 1)::int AS nivel_actual,
+         COALESCE((
+           SELECT MIN(acumulado)
+           FROM (
+             SELECT SUM(siguiente.xp_requerida) OVER (ORDER BY siguiente.numero_nivel) AS acumulado
+             FROM nivel siguiente
+             WHERE siguiente.id_lenguaje = l.id_lenguaje AND siguiente.estado = TRUE
+           ) umbrales
+           WHERE acumulado > COALESCE(uxp.xp, 0)
+          ), 0)::int AS xp_siguiente_nivel,
+          COALESCE((
+            SELECT MAX(acumulado)
+            FROM (
+              SELECT SUM(actual.xp_requerida) OVER (ORDER BY actual.numero_nivel) AS acumulado
+              FROM nivel actual
+              WHERE actual.id_lenguaje = l.id_lenguaje AND actual.estado = TRUE
+            ) umbral_inicial
+            WHERE acumulado <= COALESCE(uxp.xp, 0)
+          ), 0)::int AS xp_inicio_nivel,
+           LEAST(100, ROUND((COALESCE((
+            SELECT COUNT(*)
+            FROM mission_progress mp
+            JOIN leccion ml ON ml.id_leccion = mp.mission_id
+            JOIN nivel mn ON mn.id_nivel = ml.id_nivel
+            WHERE mp.user_id = $1 AND mp.completed = TRUE AND mn.id_lenguaje = l.id_lenguaje
+          ), 0)::numeric / NULLIF(COUNT(DISTINCT n.id_nivel), 0)) * 100, 2))::float AS porcentaje,
+          COUNT(DISTINCT n.id_nivel)::int AS total_niveles,
+          COALESCE((
+            SELECT COUNT(*)
+            FROM mission_progress mp
+            JOIN leccion ml ON ml.id_leccion = mp.mission_id
+            JOIN nivel mn ON mn.id_nivel = ml.id_nivel
+            WHERE mp.user_id = $1 AND mp.completed = TRUE AND mn.id_lenguaje = l.id_lenguaje
+          ), 0)::int AS misiones_completadas
       FROM lenguaje l
       LEFT JOIN usuario_xp uxp
         ON uxp.id_lenguaje = l.id_lenguaje AND uxp.user_id = $1
-      LEFT JOIN progreso p
-        ON p.id_lenguaje = l.id_lenguaje AND p.id_usuario = $1
       LEFT JOIN nivel n ON n.id_lenguaje = l.id_lenguaje AND n.estado = TRUE
       WHERE l.estado = TRUE
-       GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp,
-                p.xp_actual, p.porcentaje, p.id_nivel_actual
+      GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp
       ORDER BY l.id_lenguaje
     `, [idUsuario]);
+
+    // Mantener la respuesta antigua sincronizada con el perfil HTML, sin usarla
+    // como fuente global para los cuatro lenguajes.
+    const perfilHtml = resPerfil.rows.find((lenguaje: any) =>
+      String(lenguaje.nombre).toLowerCase() === 'html'
+    );
+    if (perfilHtml) {
+      progreso = {
+        ...progreso,
+        id_lenguaje: perfilHtml.id_lenguaje,
+        id_nivel_actual: perfilHtml.nivel_actual,
+        xp_actual: perfilHtml.xp_actual,
+        porcentaje: perfilHtml.porcentaje
+      };
+    }
 
     const resEstadisticas = await pool.query(`
       SELECT
         (SELECT COUNT(*)::int FROM nivel_usuario WHERE id_usuario = $1 AND completado = TRUE) AS niveles_completados,
         (SELECT COUNT(DISTINCT id_reto)::int FROM intento WHERE id_usuario = $1 AND correcto = TRUE) AS retos_superados,
-         (SELECT COALESCE(SUM(xp_actual), 0)::int FROM progreso WHERE id_usuario = $1) AS xp_total,
+        (SELECT COALESCE(SUM(xp), 0)::int FROM usuario_xp WHERE user_id = $1) AS xp_total,
         (SELECT COUNT(*)::int FROM intento WHERE id_usuario = $1) AS intentos_totales,
         (SELECT COUNT(*)::int FROM intento WHERE id_usuario = $1 AND correcto = TRUE) AS intentos_correctos
     `, [idUsuario]);
@@ -149,14 +192,8 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       'TypeScript': 'bi-filetype-tsx'
     };
 
-    // Mapear progresos por id_lenguaje
-    const resProgresosUser = await pool.query(
-      'SELECT id_lenguaje, porcentaje FROM progreso WHERE id_usuario = $1',
-      [idUsuario]
-    );
-
     const mapProgresos = new Map<number, number>();
-    resProgresosUser.rows.forEach((p: any) => mapProgresos.set(p.id_lenguaje, p.porcentaje));
+    resPerfil.rows.forEach((p: any) => mapProgresos.set(p.id_lenguaje, Number(p.porcentaje || 0)));
 
     // Construir los nodos en la secuencia exacta requerida
     const nodosMapa = resLenguajes.rows.map((lenguaje: any, index: number) => {

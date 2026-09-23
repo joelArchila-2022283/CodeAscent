@@ -12,6 +12,7 @@ export type DificultadReto =
 export interface IReto {
   id_reto?: number;
   id_leccion: number;
+  missionNumber?: number;
   titulo: string;
   descripcion: string;
   tipo_reto: TipoReto;

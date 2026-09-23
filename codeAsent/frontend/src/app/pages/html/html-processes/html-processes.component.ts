@@ -37,6 +37,7 @@ export class HtmlProcessesComponent implements OnInit {
     if (mision.desbloqueada && mision.reto) {
       const retoParaDashboard = {
         ...mision.reto,
+        missionNumber: mision.nivel.numero_nivel,
         leccionContenido: mision.leccion?.contenido || '',
         respuestas: mision.respuestas || mision.reto.respuestas || []
       };

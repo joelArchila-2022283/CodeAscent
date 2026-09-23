@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { HtmlDataService, HtmlQuizQuestion } from '../../../services/html-data.service';
-import { RetoService } from '../../../services/ts-reto.service';
+import { MissionProgressService } from '../../../core/services/mission-progress.service';
 
 @Component({
   selector: 'app-html-test',
@@ -17,7 +17,7 @@ export class HtmlTestComponent implements OnChanges {
   @Output() xpAwarded = new EventEmitter<number>();
 
   private readonly htmlDataService = inject(HtmlDataService);
-  private readonly retoService = inject(RetoService);
+  private readonly missionProgressService = inject(MissionProgressService);
 
   preguntas = signal<HtmlQuizQuestion[]>([]);
   preguntaActual = signal(0);
@@ -27,6 +27,7 @@ export class HtmlTestComponent implements OnChanges {
   cargando = signal(false);
   finalizado = signal(false);
   xpGanado = signal(0);
+  mensajeError = signal<string | null>(null);
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['retoPrediccion'] && this.retoPrediccion?.id_leccion) {
@@ -41,6 +42,7 @@ export class HtmlTestComponent implements OnChanges {
     this.seleccionada.set(null);
     this.respondida.set(false);
     this.xpGanado.set(0);
+    this.mensajeError.set(null);
     this.htmlDataService.obtenerCuestionario(idLeccion).subscribe(preguntas => {
       this.preguntas.set(preguntas.slice(0, 3));
       this.cargando.set(false);
@@ -58,17 +60,6 @@ export class HtmlTestComponent implements OnChanges {
     this.esCorrecta.set(correcta);
     this.respondida.set(true);
 
-    if (!correcta) return;
-
-    const actual = this.pregunta()!;
-    this.retoService.registrarIntentoConXp({
-      id_reto: actual.id_reto,
-      respuesta_usuario: actual.respuestas[indice]?.texto_respuesta,
-      correcto: true
-    }).subscribe(xp => {
-      this.xpGanado.update(total => total + xp);
-      if (xp > 0) this.xpAwarded.emit(xp);
-    });
   }
 
   reintentar(): void {
@@ -80,7 +71,23 @@ export class HtmlTestComponent implements OnChanges {
   siguiente(): void {
     if (!this.respondida() || !this.esCorrecta()) return;
     if (this.preguntaActual() >= this.preguntas().length - 1) {
-      this.finalizado.set(true);
+      const idLeccion = this.retoPrediccion?.id_leccion;
+      if (!idLeccion) return;
+      this.cargando.set(true);
+      this.missionProgressService.completeMission(idLeccion, this.preguntas().length, this.preguntas().length, 'quiz').subscribe({
+        next: respuesta => {
+          const xp = Number(respuesta?.data?.xp_awarded ?? 0);
+          this.xpGanado.set(xp);
+          if (xp > 0) this.xpAwarded.emit(xp);
+          this.finalizado.set(true);
+          this.cargando.set(false);
+        },
+        error: error => {
+          const mensaje = error?.error?.message || 'Recuerda realizar el ejercicio de la consola para obtener tus puntos';
+          this.mensajeError.set(mensaje);
+          this.cargando.set(false);
+        }
+      });
       return;
     }
     this.preguntaActual.update(indice => indice + 1);

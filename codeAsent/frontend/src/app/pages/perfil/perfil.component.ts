@@ -94,6 +94,13 @@ export class PerfilComponent implements OnInit {
     return Math.max(0, Math.min(100, Number(lenguaje.porcentaje || 0)));
   }
 
+  nivelPrincipal(): number {
+    const niveles = this.datos()?.perfil?.lenguajes?.map(lenguaje => lenguaje.nivel_actual) ?? [];
+    return niveles.length
+      ? Math.round(niveles.reduce((total, nivel) => total + nivel, 0) / niveles.length)
+      : 1;
+  }
+
   nombreCorto(nombre: string): string {
     return nombre.toLowerCase() === 'typescript' ? 'TYPESCRIPT' : nombre.toUpperCase();
   }
