@@ -1,17 +1,24 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path'; 
 import { probarConexion } from './config/conexion';
 import enrutadorPrincipal from './routes';
 import dotenv from 'dotenv';
 
 dotenv.config();
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000; 
  
 app.use(cors());
 app.use(express.json());
  
 app.use('/api', enrutadorPrincipal);
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
  
 const iniciar = async (): Promise<void> => {
     await probarConexion();
@@ -22,4 +29,3 @@ const iniciar = async (): Promise<void> => {
 };
  
 iniciar();
- 
