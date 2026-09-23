@@ -86,6 +86,7 @@ router.post('/:missionId/complete', async (req, res) => {
                 ) AS id_nivel_actual
              FROM nivel n
              JOIN leccion le ON le.id_nivel = n.id_nivel AND le.estado = TRUE
+             JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje
              LEFT JOIN mission_progress mp
                ON mp.mission_id = le.id_leccion AND mp.user_id = $1
              WHERE n.id_lenguaje = $2 AND n.estado = TRUE
