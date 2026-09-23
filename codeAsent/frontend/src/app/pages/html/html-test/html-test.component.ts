@@ -83,7 +83,7 @@ export class HtmlTestComponent implements OnChanges {
           this.cargando.set(false);
         },
         error: error => {
-          const mensaje = error?.error?.message || 'Realiza el ejercicio de la consola para obtener tu XP';
+          const mensaje = error?.error?.message || 'Recuerda realizar el ejercicio de la consola para obtener tus puntos';
           this.mensajeError.set(mensaje);
           this.cargando.set(false);
         }
