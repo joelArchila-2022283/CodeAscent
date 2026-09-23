@@ -90,9 +90,9 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
         l.nombre,
         l.slug,
         l.descripcion,
-        COALESCE(uxp.xp, 0)::int AS xp_actual,
-        COALESCE((
-          SELECT MAX(nivel.numero_nivel)
+         COALESCE(p.xp_actual, uxp.xp, 0)::int AS xp_actual,
+         COALESCE((SELECT nivel_actual.numero_nivel FROM nivel nivel_actual WHERE nivel_actual.id_nivel = p.id_nivel_actual), (
+           SELECT MAX(nivel.numero_nivel)
           FROM nivel nivel
           WHERE nivel.id_lenguaje = l.id_lenguaje
             AND CASE WHEN l.slug = 'sql' THEN nivel.numero_nivel * 100 ELSE (
@@ -100,17 +100,19 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
               FROM nivel anterior
               WHERE anterior.id_lenguaje = l.id_lenguaje
                 AND anterior.numero_nivel <= nivel.numero_nivel
-            ) END <= COALESCE(uxp.xp, 0)
+            ) END <= COALESCE(p.xp_actual, uxp.xp, 0)
         ), 1)::int AS nivel_actual,
-        CASE WHEN l.slug = 'sql' THEN LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / 1000) * 100, 2))
-             ELSE LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2)) END::float AS porcentaje,
+        COALESCE(p.porcentaje, CASE WHEN l.slug = 'sql' THEN LEAST(100, ROUND((COALESCE(p.xp_actual, uxp.xp, 0)::numeric / 1000) * 100, 2)) ELSE LEAST(100, ROUND((COALESCE(p.xp_actual, uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2)) END)::float AS porcentaje,
         COUNT(DISTINCT n.id_nivel)::int AS total_niveles
       FROM lenguaje l
       LEFT JOIN usuario_xp uxp
         ON uxp.id_lenguaje = l.id_lenguaje AND uxp.user_id = $1
+      LEFT JOIN progreso p
+        ON p.id_lenguaje = l.id_lenguaje AND p.id_usuario = $1
       LEFT JOIN nivel n ON n.id_lenguaje = l.id_lenguaje AND n.estado = TRUE
       WHERE l.estado = TRUE
-      GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp
+       GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp,
+                p.xp_actual, p.porcentaje, p.id_nivel_actual
       ORDER BY l.id_lenguaje
     `, [idUsuario]);
 
