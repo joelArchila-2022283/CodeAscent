@@ -13,7 +13,11 @@
       <div class="bunker-logo-stone">
         <!-- Mascota estilo cartoon 1930s con ojos de tubo de goma -->
         <div class="miner-mascot-unit bounce" [title]="mascotDialogue()">
-          <img class="miner-avatar-img" [src]="obtenerUrlAvatar(datosJugador().nombreJugador || 'default')" alt="Avatar del jugador">
+          <img
+            class="miner-avatar-img"
+            [src]="obtenerUrlAvatar(datosJugador().nombreJugador || 'default')"
+            alt="Avatar del jugador"
+          />
         </div>
         <div class="bunker-title-block">
           <h1 class="bunker-title">VALLE DE TRANSISTORES</h1>
@@ -26,14 +30,30 @@
     <div class="bunker-player-hud">
       <div class="hud-stats-box">
         <div class="hud-name-row">
-          <span class="hud-name">{{ cargandoJugador() ? 'CARGANDO...' : datosJugador().nombreJugador }}</span>
+          <span class="hud-name">{{
+            cargandoJugador() ? 'CARGANDO...' : datosJugador().nombreJugador
+          }}</span>
           <span class="hud-rank">RANGO LVL {{ datosJugador().nivelProgreso }}</span>
         </div>
-        <div class="hud-xp-rail" [attr.aria-label]="datosJugador().experienciaActual + ' XP de progreso'">
-          <div class="hud-xp-fill" [style.width.%]="(datosJugador().experienciaActual / datosJugador().experienciaSiguienteNivel) * 100"></div>
+        <div
+          class="hud-xp-rail"
+          [attr.aria-label]="datosJugador().experienciaActual + ' XP de progreso'"
+        >
+          <div
+            class="hud-xp-fill"
+            [style.width.%]="
+              (datosJugador().experienciaActual / datosJugador().experienciaSiguienteNivel) * 100
+            "
+          ></div>
         </div>
         <div class="hud-meta-row">
-          <span>{{ errorJugador() || (datosJugador().experienciaActual + '/' + datosJugador().experienciaSiguienteNivel + ' XP') }}</span>
+          <span>{{
+            errorJugador() ||
+              datosJugador().experienciaActual +
+                '/' +
+                datosJugador().experienciaSiguienteNivel +
+                ' XP'
+          }}</span>
           <span class="hud-watts">⭐ {{ datosJugador().estrellasTotales }} Estrellas</span>
         </div>
       </div>
@@ -49,42 +69,81 @@
   <nav class="bunker-nav-rock" aria-label="Módulos SQL">
     <ul class="bunker-nav__list">
       <li>
-        <button type="button" class="rock-btn rock-btn--dashboard" [class.rock-btn--active]="seccionActiva() === 'panel'" (click)="cambiarSeccion('panel')" [attr.aria-current]="seccionActiva() === 'panel' ? 'page' : null">
+        <button
+          type="button"
+          class="rock-btn rock-btn--dashboard"
+          [class.rock-btn--active]="seccionActiva() === 'panel'"
+          (click)="cambiarSeccion('panel')"
+          [attr.aria-current]="seccionActiva() === 'panel' ? 'page' : null"
+        >
           <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-speedometer2"></i></span>
           <span class="rock-btn__text">DASHBOARD</span>
           <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn rock-btn--missions" [class.rock-btn--active]="seccionActiva() === 'misiones'" (click)="cambiarSeccion('misiones')" [attr.aria-current]="seccionActiva() === 'misiones' ? 'page' : null">
+        <button
+          type="button"
+          class="rock-btn rock-btn--missions"
+          [class.rock-btn--active]="seccionActiva() === 'misiones'"
+          (click)="cambiarSeccion('misiones')"
+          [attr.aria-current]="seccionActiva() === 'misiones' ? 'page' : null"
+        >
           <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-bullseye"></i></span>
           <span class="rock-btn__text">MISIONES</span>
           <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn rock-btn--manual" [class.rock-btn--active]="seccionActiva() === 'manual'" (click)="cambiarSeccion('manual')" [attr.aria-current]="seccionActiva() === 'manual' ? 'page' : null">
+        <button
+          type="button"
+          class="rock-btn rock-btn--manual"
+          [class.rock-btn--active]="seccionActiva() === 'manual'"
+          (click)="cambiarSeccion('manual')"
+          [attr.aria-current]="seccionActiva() === 'manual' ? 'page' : null"
+        >
           <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-journal-code"></i></span>
           <span class="rock-btn__text">MANUAL TÉCNICO</span>
           <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn rock-btn--lesson" [class.rock-btn--active]="seccionActiva() === 'leccion'" (click)="cambiarSeccion('leccion')">
-          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+        <button
+          type="button"
+          class="rock-btn rock-btn--lesson"
+          [class.rock-btn--active]="seccionActiva() === 'leccion'"
+          (click)="cambiarSeccion('leccion')"
+        >
+          <span class="rock-btn__icon" aria-hidden="true"
+            ><i class="bi bi-lightbulb-fill"></i
+          ></span>
           <span class="rock-btn__text">LECCIÓN</span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn rock-btn--terminal" [class.rock-btn--active]="seccionActiva() === 'consola'" (click)="cambiarSeccion('consola')" [attr.aria-current]="seccionActiva() === 'consola' ? 'page' : null">
+        <button
+          type="button"
+          class="rock-btn rock-btn--terminal"
+          [class.rock-btn--active]="seccionActiva() === 'consola'"
+          (click)="cambiarSeccion('consola')"
+          [attr.aria-current]="seccionActiva() === 'consola' ? 'page' : null"
+        >
           <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-terminal-fill"></i></span>
           <span class="rock-btn__text">TERMINAL SQL</span>
           <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
       </li>
       <li>
-        <button type="button" class="rock-btn rock-btn--quiz" [class.rock-btn--active]="seccionActiva() === 'cuestionario'" (click)="cambiarSeccion('cuestionario')" [attr.aria-current]="seccionActiva() === 'cuestionario' ? 'page' : null">
-          <span class="rock-btn__icon" aria-hidden="true"><i class="bi bi-patch-question-fill"></i></span>
+        <button
+          type="button"
+          class="rock-btn rock-btn--quiz"
+          [class.rock-btn--active]="seccionActiva() === 'cuestionario'"
+          (click)="cambiarSeccion('cuestionario')"
+          [attr.aria-current]="seccionActiva() === 'cuestionario' ? 'page' : null"
+        >
+          <span class="rock-btn__icon" aria-hidden="true"
+            ><i class="bi bi-patch-question-fill"></i
+          ></span>
           <span class="rock-btn__text">TEST DIAGNÓSTICO</span>
           <span class="rock-btn__pulse" aria-hidden="true"></span>
         </button>
@@ -92,84 +151,129 @@
     </ul>
   </nav>
 
-  <!-- Contenedor del módulo activo -->
+  <!-- Contenedor del módulo activo (keep-alive: las secciones permanecen montadas para conservar el estado) -->
   <main class="bunker-content-stage">
-    @switch (seccionActiva()) {
-      @case ('panel') {
-        <app-panel-sql (navegarA)="cambiarSeccion($event)"></app-panel-sql>
-      }
-      @case ('misiones') {
-        <app-misiones-sql
-          [niveles]="niveles()"
-          [nivelActivo]="nivelActivo()"
-          (missionSelected)="seleccionarReto($event)"
-          (back)="cambiarSeccion('panel')">
-        </app-misiones-sql>
-      }
-      @case ('manual') {
-        <app-manual-tecnico-sql
-          [leccionRaw]="leccionActual()"
-          (back)="cambiarSeccion('misiones')"
-          (next)="cambiarSeccion('leccion')">
-        </app-manual-tecnico-sql>
-      }
-      @case ('leccion') {
-        <section class="sql-section">
-          <header>
-            <span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN DE MISIÓN</span>
-            <h2>{{ retoSeleccionado()?.titulo || 'Selecciona una misión' }}</h2>
-            <p>Analiza el manual, identifica qué datos entran y qué resultado debe devolver la consulta.</p>
-          </header>
+    <div [class]="seccionActiva() === 'panel' ? 'stage-section' : 'stage-section seccion-oculta'">
+      <app-panel-sql (navegarA)="cambiarSeccion($event)"></app-panel-sql>
+    </div>
 
-          @if (retoSeleccionado()) {
-            <div class="leccion-mision">
-              <div class="sql-concept-box">
-                <h3 class="sql-box-subtitle"><i class="bi bi-crosshair"></i> Objetivo de la misión</h3>
-                <p>{{ retoSeleccionado()?.descripcion }}</p>
-                <p class="leccion-metas">
-                  <span class="sql-tag"><i class="bi bi-star-fill"></i> Recompensa: {{ retoSeleccionado()?.xp_recompensa }} XP</span>
-                </p>
-              </div>
+    <div
+      [class]="seccionActiva() === 'misiones' ? 'stage-section' : 'stage-section seccion-oculta'"
+    >
+      <app-misiones-sql
+        [niveles]="niveles()"
+        [nivelActivo]="nivelActivo()"
+        [completadas]="misionesCompletadas()"
+        (missionSelected)="seleccionarReto($event)"
+        (back)="cambiarSeccion('panel')"
+      >
+      </app-misiones-sql>
+    </div>
 
-              <div class="sql-concept-box">
-                <h3 class="sql-box-subtitle"><i class="bi bi-broadcast-pin"></i> Orientación de la misión</h3>
-                <p>{{ leccionActual() || 'La lección se carga junto con la misión seleccionada. Comprende la estructura de tablas y relaciones antes de escribir la consulta en la terminal.' }}</p>
-              </div>
+    <div [class]="seccionActiva() === 'manual' ? 'stage-section' : 'stage-section seccion-oculta'">
+      <app-manual-tecnico-sql
+        [mision]="misionActiva()"
+        (back)="cambiarSeccion('misiones')"
+        (next)="cambiarSeccion('leccion')"
+      >
+      </app-manual-tecnico-sql>
+    </div>
 
-              <div class="sql-concept-box">
-                <h3 class="sql-box-subtitle"><i class="bi bi-tools"></i> Qué harás en la terminal</h3>
-                <p>Conecta los datos en el orden que indica el manual: primero la tabla de origen, después los filtros opcionales y por último las columnas que deseas proyectar. La consola valida tu sentencia, la ejecuta sobre el esquema real y te devuelve la tabla de resultados.</p>
-              </div>
-            </div>
-          } @else {
+    <div [class]="seccionActiva() === 'leccion' ? 'stage-section' : 'stage-section seccion-oculta'">
+      <section class="sql-section">
+        <header>
+          <span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN DE MISIÓN</span>
+          <h2>{{ misionActiva()?.titulo || 'Selecciona una misión' }}</h2>
+          <p>
+            Analiza el manual, identifica qué datos entran y qué resultado debe devolver la
+            consulta.
+          </p>
+        </header>
+
+        @if (misionActiva(); as mision) {
+          <div class="leccion-mision">
             <div class="sql-concept-box">
-              <h3 class="sql-box-subtitle"><i class="bi bi-exclamation-triangle"></i> Aún no hay misión activa</h3>
-              <p>Vuelve a la vista de MISIONES y selecciona la misión que quieres resolver para cargar su lección.</p>
+              <h3 class="sql-box-subtitle">
+                <i class="bi bi-crosshair"></i> Objetivo de la misión
+              </h3>
+              <p>{{ mision.objetivoClaro }}</p>
+              <p class="leccion-metas">
+                <span class="sql-tag"
+                  ><i class="bi bi-star-fill"></i> Recompensa:
+                  {{ retoSeleccionado()?.xp_recompensa || mision.xpRecompensa }} XP</span
+                >
+                <span class="sql-tag"
+                  ><i class="bi bi-diagram-3-fill"></i> Tema: {{ mision.tema }}</span
+                >
+              </p>
             </div>
-          }
 
-          <div class="action-buttons">
-            <button class="sql-back" (click)="cambiarSeccion('manual')"><i class="bi bi-arrow-left"></i> VOLVER AL MANUAL</button>
-            <button class="sql-next" (click)="cambiarSeccion('consola')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button>
+            <div class="sql-concept-box">
+              <h3 class="sql-box-subtitle"><i class="bi bi-lightbulb-fill"></i> Concepto clave</h3>
+              <p>{{ mision.nivelConceptual }}</p>
+            </div>
+
+            <div class="sql-concept-box">
+              <h3 class="sql-box-subtitle">
+                <i class="bi bi-terminal-fill"></i> Sintaxis de referencia
+              </h3>
+              <pre><code>{{ mision.nivelSintactico }}</code></pre>
+            </div>
+
+            <div class="sql-concept-box">
+              <h3 class="sql-box-subtitle"><i class="bi bi-tools"></i> Qué harás en la terminal</h3>
+              <p>
+                {{ mision.contexto }} El terminal valida tu sentencia contra el esquema de la misión
+                y te devuelve la tabla de resultados esperada.
+              </p>
+            </div>
           </div>
-        </section>
-      }
-      @case ('consola') {
-        <app-consola-sql
-          [retoSeleccionado]="retoSeleccionado()"
-          (back)="cambiarSeccion('misiones')"
-          (missionCompleted)="consolaCompletada()">
-        </app-consola-sql>
-      }
-      @case ('cuestionario') {
-        <app-cuestionarios-sql
-          [retoPrediccion]="retoSeleccionado()"
-          [nivelActivo]="nivelActivo()"
-          (back)="cambiarSeccion('manual')"
-          (next)="cambiarSeccion('panel')"
-          (xpAwarded)="sumarXp($event)">
-        </app-cuestionarios-sql>
-      }
-    }
+        } @else {
+          <div class="sql-concept-box">
+            <h3 class="sql-box-subtitle">
+              <i class="bi bi-exclamation-triangle"></i> Aún no hay misión activa
+            </h3>
+            <p>
+              Vuelve a la vista de MISIONES y selecciona la misión que quieres resolver para cargar
+              su lección.
+            </p>
+          </div>
+        }
+
+        <div class="action-buttons">
+          <button class="sql-back" (click)="cambiarSeccion('manual')">
+            <i class="bi bi-arrow-left"></i> VOLVER AL MANUAL
+          </button>
+          <button class="sql-next" (click)="cambiarSeccion('consola')">
+            IR A LA TERMINAL <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div [class]="seccionActiva() === 'consola' ? 'stage-section' : 'stage-section seccion-oculta'">
+      <app-consola-sql
+        [mision]="misionActiva()"
+        [idLeccion]="retoSeleccionado()?.id_leccion ?? null"
+        (back)="cambiarSeccion('misiones')"
+        (missionCompleted)="consolaCompletada($event)"
+      >
+      </app-consola-sql>
+    </div>
+
+    <div
+      [class]="
+        seccionActiva() === 'cuestionario' ? 'stage-section' : 'stage-section seccion-oculta'
+      "
+    >
+      <app-cuestionarios-sql
+        [mision]="misionActiva()"
+        [idLeccion]="retoSeleccionado()?.id_leccion ?? null"
+        (back)="cambiarSeccion('manual')"
+        (next)="cambiarSeccion('panel')"
+        (quizCompleted)="misionDiagnosticoCompletado($event)"
+      >
+      </app-cuestionarios-sql>
+    </div>
   </main>
 </main>

@@ -555,3 +555,12 @@ header, nav, .bunker-content-stage {
 
   @media (max-width: 600px) { align-items: flex-start; flex-wrap: wrap; select { width: 100%; } }
 }
+
+/* --- KEEP-ALIVE: todas las secciones permanecen montadas; solo se ocultan --- */
+.stage-section {
+  display: block;
+}
+
+.stage-section.seccion-oculta {
+  display: none !important;
+}
