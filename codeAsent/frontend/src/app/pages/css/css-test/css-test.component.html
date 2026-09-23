@@ -27,9 +27,17 @@
   } @else if (finished()) {
 
     <article class="result">
-      <span>DIAGNÓSTICO COMPLETADO</span>
+      <div class="completion-alert" role="alert">
+        <i class="bi bi-trophy-fill" aria-hidden="true"></i>
+        <div>
+          <strong>¡FELICIDADES!</strong>
+          <span>Terminaste la lección {{ mission?.nivel?.numero_nivel }}.</span>
+        </div>
+      </div>
       <h3>{{ score() }} / {{ preguntas().length }}</h3>
-      <p>XP ganado en la misión: {{ xpGanado() }}.</p>
+      <p>Tu progreso se guardó correctamente. Ve a misiones para continuar tu recorrido.</p>
+      <p>XP obtenido en el cuestionario: {{ xpGanado() }}.</p>
+      <button class="next mission-next" type="button" (click)="goToMissions.emit()"><i class="bi bi-map-fill" aria-hidden="true"></i> IR A LAS MISIONES <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
 
       <button
         class="next"
@@ -93,11 +101,14 @@
         <button
           class="next"
           type="button"
+          [disabled]="saving() || savingAnswer()"
           (click)="next()"
         >
           {{
-            pregunta.respuestas[selected()!]?.es_correcta && index() === preguntas().length - 1
-              ? 'VER RESULTADO'
+            saving() || savingAnswer()
+              ? 'GUARDANDO RESPUESTA...'
+              : pregunta.respuestas[selected()!]?.es_correcta && index() === preguntas().length - 1
+              ? 'COMPLETAR CUESTIONARIO'
               : pregunta.respuestas[selected()!]?.es_correcta ? 'SIGUIENTE →' : 'ELIGE OTRA OPCIÓN'
           }}
         </button>
