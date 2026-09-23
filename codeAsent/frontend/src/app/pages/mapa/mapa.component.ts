@@ -76,9 +76,6 @@ export class MapaComponent implements OnInit {
       next: (data: any) => {
         this.datosDashboard.set(data);
         
-        // La lógica del backend está silenciada temporalmente para pruebas.
-        // Revisa la sección comentada al final del archivo para restaurarla.
-
         this.cargando.set(false);
       },
       error: (err) => {
@@ -89,7 +86,6 @@ export class MapaComponent implements OnInit {
   }
 
   irATerritorio(territorio: PinTerritorio): void {
-    // Al estar todos en_curso, el ruteo funcionara
     if (territorio.estado !== 'bloqueado') {
       this.router.navigate([territorio.ruta]);
     }

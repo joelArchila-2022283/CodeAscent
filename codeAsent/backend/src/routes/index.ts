@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 import rutasUsuario from './usuario.routes';
 import rutasLenguaje from './lenguaje.routes';
 import rutasNivel from './nivel.routes';
@@ -13,13 +14,21 @@ import rutasLogro from './logros.routes';
 import rutasUsuarioLogro from './usuarioLogro.routes';
 import rutasDashboard from './dashboard.routes';
 import rutasSql from './sql.routes';
-
 import rutasCss from './css.routes';
+import rutasLanguage from './language.routes';
+import rutasMissionProgress from './progress.routes';
+import rutasLab from './lab.routes';
+import rutasQuiz from './quiz.routes';
+import rutasGamification from './gamification.routes';
+
 const enrutadorPrincipal = Router();
 
 enrutadorPrincipal.use('/usuarios', rutasUsuario);
 enrutadorPrincipal.use('/usuario', rutasUsuario);
+
 enrutadorPrincipal.use('/lenguajes', rutasLenguaje);
+enrutadorPrincipal.use('/lenguajes', rutasLanguage);
+
 enrutadorPrincipal.use('/niveles', rutasNivel);
 enrutadorPrincipal.use('/lecciones', rutasLeccion);
 enrutadorPrincipal.use('/ejemplos', rutasEjemplo);
@@ -32,7 +41,14 @@ enrutadorPrincipal.use('/logros', rutasLogro);
 enrutadorPrincipal.use('/usuarios-logros', rutasUsuarioLogro);
 enrutadorPrincipal.use('/dashboard', rutasDashboard);
 enrutadorPrincipal.use('/sql', rutasSql);
-
 enrutadorPrincipal.use('/css', rutasCss);
+
+enrutadorPrincipal.use('/languages', rutasLanguage);
+
+enrutadorPrincipal.use('/missions', rutasMissionProgress);
+enrutadorPrincipal.use('/missions', rutasLab);
+enrutadorPrincipal.use('/missions', rutasQuiz);
+
+enrutadorPrincipal.use('/', rutasGamification);
 
 export default enrutadorPrincipal;

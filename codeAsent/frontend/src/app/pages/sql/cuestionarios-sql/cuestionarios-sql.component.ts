@@ -1,6 +1,7 @@
-import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, signal, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NivelSql } from '../../../interfaces/sql.interface';
+import { RetoService } from '../../../services/ts-reto.service';
 
 interface PreguntaSql {
   id: number;
@@ -19,11 +20,14 @@ interface PreguntaSql {
 })
 export class CuestionariosSqlComponent implements OnChanges {
   @Input() nivelActivo: NivelSql | null = null;
+  @Output() xpAwarded = new EventEmitter<number>();
+  private readonly retoService = inject(RetoService);
   indicePreguntaActual = signal<number>(0);
   opcionSeleccionada = signal<number | null>(null);
   respuestaVerificada = signal<boolean>(false);
   puntuacion = signal<number>(0);
   quizFinalizado = signal<boolean>(false);
+  xpGanado = signal<number>(0);
 
   preguntas: PreguntaSql[] = [
     {
@@ -67,6 +71,7 @@ export class CuestionariosSqlComponent implements OnChanges {
     this.respuestaVerificada.set(false);
     this.puntuacion.set(0);
     this.quizFinalizado.set(false);
+    this.xpGanado.set(0);
   }
 
   seleccionarRespuesta(indice: number): void {
@@ -81,7 +86,25 @@ export class CuestionariosSqlComponent implements OnChanges {
 
     if (this.opcionSeleccionada() === this.preguntas[this.indicePreguntaActual()].indiceCorrecto) {
       this.puntuacion.update(p => p + 1);
+      const reto = this.nivelActivo?.retos.find(
+        item => item.id_reto === this.preguntas[this.indicePreguntaActual()].id
+      );
+      if (reto) {
+        this.retoService.registrarIntentoConXp({
+          id_reto: reto.id_reto,
+          respuesta_usuario: reto.respuestas[this.opcionSeleccionada()!]?.contenido,
+          correcto: true
+        }).subscribe(xp => {
+          this.xpGanado.update(total => total + xp);
+          if (xp > 0) this.xpAwarded.emit(xp);
+        });
+      }
     }
+  }
+
+  reintentar(): void {
+    this.respuestaVerificada.set(false);
+    this.opcionSeleccionada.set(null);
   }
 
   siguientePregunta(): void {

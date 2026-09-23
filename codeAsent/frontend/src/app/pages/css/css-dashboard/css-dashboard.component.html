@@ -47,19 +47,21 @@
   <nav class="bunker-nav-rock" aria-label="Módulos CSS">
     <ul class="bunker-nav__list">
       <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'dashboard'" (click)="navigateTo('dashboard')"><span class="rock-btn__icon"><i class="bi bi-hdd-rack-fill"></i></span><span class="rock-btn__text">DASHBOARD</span></button></li>
-      <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'data'" (click)="navigateTo('data')"><span class="rock-btn__icon"><i class="bi bi-file-earmark-binary"></i></span><span class="rock-btn__text">DATA</span></button></li>
-      <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'processes'" (click)="navigateTo('processes')"><span class="rock-btn__icon"><i class="bi bi-gear-wide-connected"></i></span><span class="rock-btn__text">PROCESSES</span><span class="rock-badge">10</span></button></li>
+       <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'data'" (click)="navigateTo('data')"><span class="rock-btn__icon"><i class="bi bi-file-earmark-binary"></i></span><span class="rock-btn__text">MANUAL</span></button></li>
+       <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'lesson'" (click)="navigateTo('lesson')"><span class="rock-btn__icon"><i class="bi bi-lightbulb"></i></span><span class="rock-btn__text">LECCIÓN</span></button></li>
+       <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'processes'" (click)="navigateTo('processes')"><span class="rock-btn__icon"><i class="bi bi-gear-wide-connected"></i></span><span class="rock-btn__text">MISIONES</span><span class="rock-badge">10</span></button></li>
       <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'terminal'" (click)="navigateTo('terminal')"><span class="rock-btn__icon"><i class="bi bi-terminal-fill"></i></span><span class="rock-btn__text">TERMINAL</span></button></li>
-      <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')"><span class="rock-btn__icon"><i class="bi bi-floppy-fill"></i></span><span class="rock-btn__text">TEST</span></button></li>
+       <li><button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')"><span class="rock-btn__icon"><i class="bi bi-floppy-fill"></i></span><span class="rock-btn__text">CUESTIONARIO</span></button></li>
     </ul>
   </nav>
 
   <div class="bunker-content-stage">
     @switch (activeSection()) {
       @case ('dashboard') { <app-css-dashboard-section (sectionSelected)="navigateTo($event)" /> }
-      @case ('data') { <app-css-data (back)="navigateTo('dashboard')" (practice)="openPractice($event)" /> }
+       @case ('data') { <app-css-data (back)="navigateTo('dashboard')" (practice)="openPractice($event)" /> }
+       @case ('lesson') { <section class="css-section"><header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN</span><h2>Lección de la misión</h2><p>Relaciona el concepto, la regla visual y el resultado esperado antes de escribir CSS.</p></header><div class="concept-box"><h3>Cómo avanzar</h3><p>Revisa la misión elegida, identifica el selector o propiedad que la resuelve y comprueba el cambio en la terminal. La lección no sustituye la práctica: te orienta para tomar una decisión razonada.</p></div><button class="html-next" (click)="navigateTo('terminal')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></section> }
       @case ('processes') { <app-css-processes (back)="navigateTo('dashboard')" (openTerminal)="openPractice($event)" /> }
-      @case ('terminal') { <app-css-terminal [selectedLevel]="selectedPedagogyLevel()" (back)="navigateTo('dashboard')" (progressUpdated)="recargarProgreso()" /> }
+       @case ('terminal') { <app-css-terminal [selectedLevel]="selectedPedagogyLevel()" (back)="navigateTo('dashboard')" (progressUpdated)="terminalCompletado()" /> }
       @case ('test') { <app-css-test (back)="navigateTo('dashboard')" /> }
     }
   </div>

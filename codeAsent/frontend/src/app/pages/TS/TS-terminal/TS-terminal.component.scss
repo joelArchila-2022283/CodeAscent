@@ -228,4 +228,31 @@ header p {
   .terminal-actions {
     flex-wrap: wrap;
   }
+
+  .flow-steps {
+    overflow-x: auto;
+  }
+
+  .flow-step {
+    flex: 0 0 auto;
+  }
 }
+
+.flow-steps { display: flex; align-items: center; gap: .55rem; margin: 0 0 1rem; color: #8998ad; font: 700 .65rem monospace; }
+.flow-step { padding: .42rem .65rem; border: 1px solid #293b55; border-radius: 999px; }
+.flow-step--done { color: #00d9ff; border-color: #168cff; }
+.flow-step--active { color: #42b5ff; border-color: #168cff; box-shadow: 0 0 10px rgba(22,140,255,.25); }
+.flow-line { width: 1.5rem; height: 1px; background: #293b55; }
+.terminal-challenge { position: relative; margin-bottom: 1rem; padding: 2.6rem 1rem 1rem; color: #e1e9f5; background: #111b28e8; border: 2px solid #293b55; border-radius: 10px; }
+.terminal-challenge h3 { margin: 0 0 .55rem; color: #42b5ff; font: 1.35rem 'Bangers', cursive; }
+.terminal-challenge p { color: #8998ad; }
+.terminal-challenge details { margin-top: .75rem; color: #42b5ff; }
+.terminal-challenge details p { margin: .55rem 0 0; color: #e1e9f5; }
+.html-hints { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: .8rem; color: #42b5ff; font: 700 .7rem monospace; }
+.html-hints button { padding: .55rem .7rem; color: #e1e9f5; background: #172b42; border: 1px solid #168cff; border-radius: 6px; cursor: pointer; font: 700 .75rem monospace; }
+.html-hints button:disabled { cursor: not-allowed; opacity: .45; }
+.html-hints p { flex: 1 1 100%; margin: 0; padding: .6rem; color: #e1e9f5; background: #102235; border-left: 3px solid #168cff; font-weight: 400; }
+.lesson-strip { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin: 1rem 0; padding: .85rem 1rem; color: #e1e9f5; background: #111b28e8; border: 1px solid #293b55; border-radius: 8px; }
+.lesson-strip span { color: #42b5ff; font: 700 .72rem monospace; }
+.lesson-strip p { margin: 0; color: #8998ad; }
+.lesson-strip input { flex: 1 1 220px; min-width: 0; padding: .65rem; color: #e1e9f5; background: #07101a; border: 1px solid #36516f; border-radius: 6px; }

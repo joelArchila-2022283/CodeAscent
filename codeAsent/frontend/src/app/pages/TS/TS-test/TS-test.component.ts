@@ -1,18 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
-
-import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
-
-import { TsDataService } from '../../../services/ts-data.service';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
+import { HtmlDataService, HtmlQuizQuestion } from '../../../services/html-data.service';
 import { RetoService } from '../../../services/ts-reto.service';
-import { IReto } from '../../../interfaces/reto.interface';
-
-interface PreguntaTS {
-  reto: IReto;
-  opciones: string[];
-  correctIndex: number;
-}
+import { MissionProgressService } from '../../../core/services/mission-progress.service';
 
 @Component({
   selector: 'app-ts-test',
@@ -21,253 +11,105 @@ interface PreguntaTS {
   templateUrl: './TS-test.component.html',
   styleUrl: './TS-test.component.scss'
 })
-export class TSTestComponent implements OnInit {
-
+export class TSTestComponent implements OnChanges {
+  @Input() mission: any = null;
   @Output() back = new EventEmitter<void>();
+  @Output() next = new EventEmitter<void>();
+  @Output() xpAwarded = new EventEmitter<number>();
 
-  private tsDataService = inject(TsDataService);
-  private retoService = inject(RetoService);
+  private readonly htmlDataService = inject(HtmlDataService);
+  private readonly retoService = inject(RetoService);
+  private readonly missionProgressService = inject(MissionProgressService);
 
-  cargando = signal(true);
+  preguntas = signal<HtmlQuizQuestion[]>([]);
+  preguntaActual = signal(0);
+  seleccionada = signal<number | null>(null);
+  respondida = signal(false);
+  esCorrecta = signal(false);
+  cargando = signal(false);
+  finalizado = signal(false);
+  xpGanado = signal(0);
   errorCarga = signal<string | null>(null);
 
-  preguntas = signal<PreguntaTS[]>([]);
-  preguntaActual = signal(0);
-
-  selected = signal<number | null>(null);
-  answered = signal(false);
-
-  question = signal('');
-  options = signal<string[]>([]);
-  correctIndex = signal(0);
-  totalPreguntas = signal(0);
-  xpRecompensa = signal(0);
-
-  private retoActual: IReto | null = null;
-
-  ngOnInit(): void {
-    this.cargarPreguntas();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mission'] && this.mission?.id_leccion) {
+      this.missionProgressService.updateProgress(this.mission.id_leccion, 'quiz').subscribe({
+        error: () => undefined
+      });
+      this.cargarCuestionario(this.mission.id_leccion);
+    }
   }
 
-  cargarPreguntas(): void {
+  private cargarCuestionario(idLeccion: number): void {
     this.cargando.set(true);
     this.errorCarga.set(null);
-
-    this.tsDataService.obtenerTodasLasLecciones().subscribe({
-      next: (grupos) => {
-
-        const idsLeccion = grupos
-          .flatMap(grupo => grupo.lecciones)
-          .map(leccion => leccion.id_leccion)
-          .filter((id): id is number => !!id);
-
-        if (idsLeccion.length === 0) {
-          this.preguntas.set([]);
-          this.totalPreguntas.set(0);
-          this.cargando.set(false);
-          return;
-        }
-
-        this.retoService
-          .obtenerRetosDeLecciones(idsLeccion)
-          .subscribe({
-            next: (retos) => {
-
-              const cuestionarios = retos.filter(
-                reto => reto.tipo_reto === 'opcion_multiple'
-              );
-
-              if (cuestionarios.length === 0) {
-                this.preguntas.set([]);
-                this.totalPreguntas.set(0);
-                this.cargando.set(false);
-                return;
-              }
-
-              const peticiones = cuestionarios.map(reto =>
-                this.retoService
-                  .obtenerRespuestasDeReto(reto.id_reto!)
-                  .pipe(
-                    map(respuestas => {
-
-                      const correctIndex =
-                        respuestas.findIndex(
-                          respuesta => respuesta.es_correcta
-                        );
-
-                      return {
-                        reto,
-                        opciones: respuestas.map(
-                          respuesta => respuesta.contenido
-                        ),
-                        correctIndex:
-                          correctIndex >= 0
-                            ? correctIndex
-                            : 0
-                      };
-                    })
-                  )
-              );
-
-              forkJoin(peticiones).subscribe({
-                next: (preguntas) => {
-
-                  this.preguntas.set(preguntas);
-                  this.totalPreguntas.set(preguntas.length);
-
-                  this.mostrarPregunta(0);
-
-                  this.cargando.set(false);
-                },
-
-                error: (err) => {
-
-                  console.error(
-                    'Error al cargar las respuestas:',
-                    err
-                  );
-
-                  this.errorCarga.set(
-                    'No se pudieron cargar los cuestionarios.'
-                  );
-
-                  this.cargando.set(false);
-                }
-              });
-            },
-
-            error: (err) => {
-
-              console.error(
-                'Error al cargar los cuestionarios:',
-                err
-              );
-
-              this.errorCarga.set(
-                'No se pudieron cargar los cuestionarios.'
-              );
-
-              this.cargando.set(false);
-            }
-          });
+    this.finalizado.set(false);
+    this.preguntaActual.set(0);
+    this.seleccionada.set(null);
+    this.respondida.set(false);
+    this.xpGanado.set(0);
+    this.htmlDataService.obtenerCuestionario(idLeccion).subscribe({
+      next: preguntas => {
+        this.preguntas.set(preguntas.slice(0, 3));
+        this.cargando.set(false);
       },
-
-      error: (err) => {
-
-        console.error(
-          'Error al cargar las lecciones:',
-          err
-        );
-
-        this.errorCarga.set(
-          'No se pudieron cargar los cuestionarios.'
-        );
-
+      error: error => {
+        console.error(error);
+        this.errorCarga.set('No se pudieron cargar los cuestionarios.');
         this.cargando.set(false);
       }
     });
   }
 
-  mostrarPregunta(index: number): void {
-
-    const preguntas = this.preguntas();
-
-    if (!preguntas[index]) {
-      return;
-    }
-
-    const pregunta = preguntas[index];
-
-    this.preguntaActual.set(index);
-
-    this.retoActual = pregunta.reto;
-
-    this.question.set(
-      pregunta.reto.descripcion ||
-      pregunta.reto.titulo
-    );
-
-    this.options.set(
-      pregunta.opciones
-    );
-
-    this.correctIndex.set(
-      pregunta.correctIndex
-    );
-
-    this.xpRecompensa.set(
-      pregunta.reto.xp_recompensa ?? 0
-    );
-
-    this.selected.set(null);
-    this.answered.set(false);
+  pregunta(): HtmlQuizQuestion | null {
+    return this.preguntas()[this.preguntaActual()] ?? null;
   }
 
-  siguientePregunta(): void {
+  responder(indice: number, correcta: boolean): void {
+    if (this.respondida() || !this.pregunta()) return;
 
-    if (!this.answered()) {
-      return;
-    }
+    this.seleccionada.set(indice);
+    this.esCorrecta.set(correcta);
+    this.respondida.set(true);
 
-    const siguiente =
-      this.preguntaActual() + 1;
+    if (!correcta) return;
 
-    if (
-      siguiente >=
-      this.preguntas().length
-    ) {
-      return;
-    }
-
-    this.mostrarPregunta(siguiente);
+    const actual = this.pregunta()!;
+    this.retoService.registrarIntentoConXp({
+      id_reto: actual.id_reto,
+      respuesta_usuario: actual.respuestas[indice]?.texto_respuesta,
+      correcto: true
+    }).subscribe(xp => {
+      this.xpGanado.update(total => total + xp);
+      if (xp > 0) this.xpAwarded.emit(xp);
+    });
   }
 
-  choose(index: number): void {
+  reintentar(): void {
+    this.seleccionada.set(null);
+    this.respondida.set(false);
+    this.esCorrecta.set(false);
+  }
 
-    /*
-     * Si ya respondió correctamente,
-     * no permitimos volver a seleccionar.
-     */
-    if (
-      this.answered() &&
-      this.selected() === this.correctIndex()
-    ) {
+  private marcarMisionCompletada(): void {
+    const idLeccion = this.mission?.id_leccion;
+    const total = this.preguntas().length;
+    if (!idLeccion || total === 0) return;
+    this.missionProgressService.completeMission(idLeccion, total, total).subscribe({
+      error: () => undefined
+    });
+  }
+
+  siguiente(): void {
+    if (!this.respondida() || !this.esCorrecta()) return;
+    if (this.preguntaActual() >= this.preguntas().length - 1) {
+      this.finalizado.set(true);
+      this.marcarMisionCompletada();
       return;
     }
-
-    this.selected.set(index);
-
-    const esCorrecta =
-      index === this.correctIndex();
-
-    /*
-     * answered solamente se activa
-     * cuando la respuesta es correcta.
-     *
-     * Si falla:
-     * - puede volver a intentar
-     * - no puede pasar a la siguiente pregunta
-     */
-    this.answered.set(esCorrecta);
-
-    if (!this.retoActual?.id_reto) {
-      return;
-    }
-
-    this.retoService
-      .registrarIntento({
-        id_reto: this.retoActual.id_reto,
-        respuesta_usuario: this.options()[index] ?? null,
-        correcto: esCorrecta,
-        xp_obtenida: 0
-      })
-      .subscribe({
-        error: (err) => {
-          console.error(
-            'Error al registrar intento:',
-            err
-          );
-        }
-      });
+    this.preguntaActual.update(indice => indice + 1);
+    this.seleccionada.set(null);
+    this.respondida.set(false);
+    this.esCorrecta.set(false);
   }
 }

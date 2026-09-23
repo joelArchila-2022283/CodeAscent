@@ -32,11 +32,7 @@ export class IntentoService {
         datosIntento: IIntento
     ): Promise<IIntento> {
 
-        await ModeloIntento.crear(
-            datosIntento
-        );
-
-        return datosIntento;
+        return await ModeloIntento.crear(datosIntento);
     }
 
     static async actualizar(

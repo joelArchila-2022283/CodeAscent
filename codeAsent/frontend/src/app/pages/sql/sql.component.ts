@@ -30,7 +30,7 @@ export class SqlComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   private sqlService = inject(SqlService);
 
-  seccionActiva = signal<SeccionSql>('panel');
+  seccionActiva = signal<SeccionSql | 'leccion'>('panel');
   cargandoJugador = signal(true);
   errorJugador = signal<string | null>(null);
   niveles = signal<NivelSql[]>([]);
@@ -105,7 +105,15 @@ export class SqlComponent implements OnInit {
     if (nivel) this.nivelActivo.set(nivel);
   }
 
-  cambiarSeccion(nuevaSeccion: SeccionSql): void {
+  cambiarSeccion(nuevaSeccion: SeccionSql | 'leccion'): void {
     this.seccionActiva.set(nuevaSeccion);
+  }
+
+  sumarXp(xp: number): void {
+    if (xp <= 0) return;
+    this.datosJugador.update(jugador => ({
+      ...jugador,
+      experienciaActual: jugador.experienciaActual + xp
+    }));
   }
 }

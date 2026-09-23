@@ -239,4 +239,23 @@ export class RetoService {
 
             );
     }
+
+    registrarIntentoConXp(
+        datos: {
+            id_reto: number;
+            respuesta_usuario?: string | null;
+            correcto: boolean;
+        }
+    ): Observable<number> {
+        const idUsuario = this.authService.obtenerIdUsuario();
+        if (!idUsuario) return of(0);
+
+        return this.http.post<{ datos?: IIntento }>(
+            `${this.apiUrl}/intentos`,
+            { id_usuario: idUsuario, ...datos }
+        ).pipe(
+            map(respuesta => Number(respuesta.datos?.xp_obtenida ?? 0)),
+            catchError(() => of(0))
+        );
+    }
 }

@@ -31,6 +31,17 @@ export interface HtmlMision {
   desbloqueada: boolean;
 }
 
+export interface HtmlQuizQuestion {
+  id_reto: number;
+  enunciado: string;
+  xp_recompensa: number;
+  respuestas: Array<{
+    id_respuesta: number;
+    texto_respuesta: string;
+    es_correcta: boolean;
+  }>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class HtmlDataService {
   private readonly http = inject(HttpClient);
@@ -133,6 +144,15 @@ export class HtmlDataService {
           catchError(() => of(null))
         );
       })
+    );
+  }
+
+  obtenerCuestionario(idLeccion: number): Observable<HtmlQuizQuestion[]> {
+    return this.http.get<{ status: string; data: HtmlQuizQuestion[] }>(
+      `${this.apiUrl}/missions/${idLeccion}/quiz`
+    ).pipe(
+      map(respuesta => respuesta.data ?? []),
+      catchError(() => of([]))
     );
   }
 }

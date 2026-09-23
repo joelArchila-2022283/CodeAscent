@@ -63,15 +63,21 @@
         </button>
       </li>
       <li>
-        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')">
-          <span class="rock-btn__icon"><i class="bi bi-patch-question"></i></span>
-          <span class="rock-btn__text">CUESTIONARIO</span>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'lesson'" (click)="navigateTo('lesson')">
+          <span class="rock-btn__icon"><i class="bi bi-lightbulb"></i></span>
+          <span class="rock-btn__text">LECCIÓN</span>
         </button>
       </li>
       <li>
         <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'terminal'" (click)="navigateTo('terminal')">
           <span class="rock-btn__icon"><i class="bi bi-terminal-fill"></i></span>
           <span class="rock-btn__text">LABORATORIO</span>
+        </button>
+      </li>
+      <li>
+        <button class="rock-btn" [class.rock-btn--active]="activeSection() === 'test'" (click)="navigateTo('test')">
+          <span class="rock-btn__icon"><i class="bi bi-patch-question"></i></span>
+          <span class="rock-btn__text">CUESTIONARIO</span>
         </button>
       </li>
     </ul>
@@ -83,16 +89,23 @@
         <app-html-dashboard-section (sectionSelected)="navigateTo($event)" />
       }
       @case ('data') {
-        <app-html-data [leccionRaw]="leccionActual()" (back)="navigateTo('processes')" (next)="navigateTo('test')" />
+        <app-html-data [leccionRaw]="leccionActual()" (back)="navigateTo('processes')" (next)="navigateTo('lesson')" />
+      }
+      @case ('lesson') {
+        <section class="html-section data-section">
+          <header><span class="section-kicker"><i class="bi bi-lightbulb-fill"></i> LECCIÓN DE MISIÓN</span><h2>{{ retoSeleccionado()?.titulo || 'Selecciona una misión' }}</h2><p>Relaciona la explicación del manual con el resultado que debes conseguir.</p></header>
+          <div class="manual-content"><div class="concept-box"><h3 class="box-subtitle">¿Qué debes observar?</h3><p>{{ leccionActual() || 'La lección se carga junto con la misión seleccionada. Identifica la estructura, el propósito y la sintaxis antes de programar.' }}</p></div></div>
+          <div class="action-buttons"><button class="html-back" (click)="navigateTo('data')">VOLVER AL MANUAL</button><button class="html-next" (click)="navigateTo('terminal')">IR A LA TERMINAL <i class="bi bi-arrow-right"></i></button></div>
+        </section>
       }
       @case ('processes') {
         <app-html-processes (missionSelected)="seleccionarReto($event)" (back)="navigateTo('dashboard')" />
       }
       @case ('terminal') {
-        <app-html-terminal [retoSeleccionado]="retoSeleccionado()" (missionCompleted)="sumarExperiencia($event)" (back)="navigateTo('dashboard')" />
+        <app-html-terminal [retoSeleccionado]="retoSeleccionado()" (missionCompleted)="terminalCompletado()" (back)="navigateTo('dashboard')" />
       }
       @case ('test') {
-        <app-html-test [retoPrediccion]="retoSeleccionado()" (back)="navigateTo('data')" (next)="navigateTo('terminal')" />
+        <app-html-test [retoPrediccion]="retoSeleccionado()" (back)="navigateTo('data')" (next)="navigateTo('dashboard')" (xpAwarded)="sumarExperiencia($event)" />
       }
     }
   </div>

@@ -22,7 +22,7 @@ import { ErrorPageComponent } from './error-page/error-page.component';
 // Guardianes de Autenticación
 import { authGuard, guestGuard } from './core/guards/auth-guard';
 
-//Rutas de comics
+// Rutas de comics
 import { ComicComponent } from './pages/comics/comic_1/comic.component';
 import { ComicComponent2 } from './pages/comics/comic_2/comic.component';
 import { ComicComponent3 } from './pages/comics/comic_3/comic.component';
@@ -111,8 +111,7 @@ export const routes: Routes = [
   },
 
   // ==========================================
-  // RUTAS PÚBLICas (Protegidas con guestGuard)
-  // Si ya tienes sesión o "Recordarme", te redirigen al dashboard
+  // RUTAS PÚBLICAS (Protegidas con guestGuard)
   // ==========================================
   {
     path: 'login',
@@ -143,11 +142,15 @@ export const routes: Routes = [
 
   // ==========================================
   // RUTAS PRIVADAS (Protegidas con authGuard)
-  // Exigen token activo para poder ingresar
   // ==========================================
   {
     path: 'dashboard',
     component: DashboardComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'profile',
+    component: PerfilComponent,
     canActivate: [authGuard]
   },
   {
@@ -160,6 +163,10 @@ export const routes: Routes = [
     component: MapaComponent,
     canActivate: [authGuard]
   },
+
+  // ==========================================
+  // VISTAS DE CURSOS Y DASHBOARDS POR LENGUAJE (Desde el Mapa)
+  // ==========================================
   {
     path: 'curso/html',
     component: HtmlDashboardComponent,
@@ -171,9 +178,24 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'html',
+    redirectTo: 'curso/html',
+    pathMatch: 'full'
+  },
+  {
+    path: 'css',
+    redirectTo: 'curso/css',
+    pathMatch: 'full'
+  },
+  {
     path: 'sql',
-    component: SqlComponent,
-    canActivate: [authGuard]
+    redirectTo: 'curso/sql',
+    pathMatch: 'full'
+  },
+  {
+    path: 'typescript',
+    redirectTo: 'curso/typescript',
+    pathMatch: 'full'
   },
   {
     path: 'curso/sql',

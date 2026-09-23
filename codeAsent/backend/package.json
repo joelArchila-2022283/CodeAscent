@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch -r dotenv/config src/server.ts",
     "construir": "tsc",
-    "iniciar": "node dist/server.js"
+    "iniciar": "node dist/server.js",
+    "sembrar": "tsx src/seed.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

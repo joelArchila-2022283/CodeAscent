@@ -10,7 +10,7 @@ import { HtmlTestComponent } from '../html-test/html-test.component';
 import { HtmlDashboardSectionComponent } from './html-dashboard-section.component';
 import { IReto } from '../../../interfaces/reto.interface';
 
-export type HTMLSection = 'dashboard' | 'data' | 'processes' | 'terminal' | 'test';
+export type HTMLSection = 'dashboard' | 'data' | 'lesson' | 'processes' | 'terminal' | 'test';
 
 @Component({
   selector: 'app-html-dashboard',
@@ -66,6 +66,7 @@ export class HtmlDashboardComponent implements OnInit {
     const dialogos = {
       dashboard: 'Panel HTML principal listo.',
       data: 'Estudia el Manual Técnico antes de operar.',
+      lesson: 'Lee la lección y relaciona el concepto con la misión.',
       processes: 'Selecciona una misión para comenzar.',
       terminal: 'El laboratorio CRT está listo para recibir tus etiquetas.',
       test: 'Demuestra lo aprendido en el cuestionario.'
@@ -79,6 +80,10 @@ export class HtmlDashboardComponent implements OnInit {
     this.retoSeleccionado.set(reto);
     this.leccionActual.set(reto.leccionContenido || ''); 
     this.navigateTo('data');
+  }
+
+  terminalCompletado(): void {
+    this.navigateTo('test');
   }
 
   sumarExperiencia(xp: number): void {
