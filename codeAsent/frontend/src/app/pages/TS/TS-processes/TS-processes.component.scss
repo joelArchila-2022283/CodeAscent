@@ -41,12 +41,16 @@ header p {
     border: 2px solid #293b55;
     border-radius: 10px;
     cursor: pointer;
-    transition: .2s;
+    transition: all .15s ease;
+    box-shadow: 0 6px 0 #070a0f, 0 8px 15px rgba(0, 0, 0, .6);
 }
 
 .mission:hover {
+    background: linear-gradient(145deg, #263a52, #111b28);
     border-color: #168cff;
-    transform: translateX(5px);
+    color: #168cff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #070a0f, 0 10px 20px rgba(22, 140, 255, .25);
 }
 
 .mission.done {
@@ -110,15 +114,20 @@ header p {
 .ts-back {
     padding: .7rem 1rem;
     color: #42b5ff;
-    background: #101a29;
-    border: 2px solid #36516f;
+    background: linear-gradient(145deg, #1d2a3a, #0d121a);
+    border: 3px solid #334a64;
     border-radius: 8px;
     font: 1rem 'Bangers', cursive;
     cursor: pointer;
+    box-shadow: 0 6px 0 #070a0f, 0 8px 15px rgba(0, 0, 0, .6);
+    transition: all .15s ease;
 }
 
 .ts-back:hover {
-    background: #172b42;
+    background: linear-gradient(145deg, #263a52, #111b28);
+    border-color: #168cff;
+    color: #168cff;
+    transform: translateY(-2px);
 }
 
 @keyframes tsReveal {

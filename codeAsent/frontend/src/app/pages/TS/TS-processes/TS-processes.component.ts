@@ -35,17 +35,21 @@ export class TSProcessesComponent implements OnInit {
   ngOnInit(): void {
     this.languageService.obtenerMisionesPorSlug('typescript').subscribe({
       next: respuesta => {
-        const misiones = respuesta.data || [];
+        const misiones = [...(respuesta.data || [])].sort((a, b) =>
+          (a.numero_nivel ?? a.orden) - (b.numero_nivel ?? b.orden)
+        );
         this.missions.set(
           misiones.map((mision, index) => {
             const numero = mision.numero_nivel ?? index + 1;
+            const completada = mision.estado === 'completed';
+            const anteriorCompletada = index === 0 || misiones[index - 1].estado === 'completed';
             return {
               id: numero,
               code: `TS-${String(numero).padStart(2, '0')}`,
               title: mision.titulo,
               detail: this.resumirContenido(mision.contenido),
-              desbloqueada: mision.estado !== 'locked',
-              completada: mision.estado === 'completed',
+              desbloqueada: anteriorCompletada,
+              completada,
               mision
             };
           })
@@ -62,7 +66,7 @@ export class TSProcessesComponent implements OnInit {
 
   private resumirContenido(contenido: string): string {
     if (!contenido) return 'Completa esta misión de TypeScript.';
-    const primeraOracion = contenido.trim().split(/(?<=[.!?])\s\/?\s?(?=(?:[^`]*`[^`]*`)*[^`]*$)/)[0];
+    const primeraOracion = contenido.trim().split(/(?<=[.!?])\s+/)[0];
     const resumen = primeraOracion || contenido.trim();
     return resumen.length > 90 ? `${resumen.slice(0, 90)}...` : resumen;
   }

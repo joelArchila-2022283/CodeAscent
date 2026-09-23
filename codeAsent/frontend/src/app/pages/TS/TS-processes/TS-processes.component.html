@@ -22,8 +22,8 @@
 
   <div class="mission-list">
 
-    <button
-      class="mission"
+       <button
+         class="mission rock-style-button"
       *ngFor="let mission of missions()"
       type="button"
       [class.done]="mission.completada"
@@ -61,7 +61,7 @@
   </div>
 
   <button
-    class="ts-back"
+     class="ts-back rock-style-button"
     type="button"
     (click)="back.emit()"
   >
