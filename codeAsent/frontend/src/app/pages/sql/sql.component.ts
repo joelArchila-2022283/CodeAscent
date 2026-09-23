@@ -145,6 +145,10 @@ export class SqlComponent implements OnInit {
     return Math.min(100, Math.max(0, (jugador.experienciaActual / jugador.experienciaSiguienteNivel) * 100));
   }
 
+  xpTotalSql(): number {
+    return Number(this.infoPerfilSql()?.xp_actual || 0);
+  }
+
   private nivelPorXp(xp: number): number {
     let acumulado = 0;
     let nivel = 1;

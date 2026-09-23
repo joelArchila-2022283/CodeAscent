@@ -37,7 +37,7 @@
         </div>
         <div
           class="hud-xp-rail"
-          [attr.aria-label]="datosJugador().experienciaActual + ' XP de progreso'"
+          [attr.aria-label]="xpTotalSql() + ' XP total de SQL'"
         >
             <div
               class="hud-xp-fill"
@@ -47,10 +47,12 @@
         <div class="hud-meta-row">
           <span>{{
             errorJugador() ||
-              datosJugador().experienciaActual +
+            xpTotalSql() +
+                ' XP total · ' +
+                datosJugador().experienciaActual +
                 '/' +
                 datosJugador().experienciaSiguienteNivel +
-                ' XP'
+                ' XP del nivel'
           }}</span>
           <span class="hud-watts">⭐ {{ datosJugador().estrellasTotales }} Estrellas</span>
         </div>
