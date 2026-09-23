@@ -4,7 +4,7 @@ WORKDIR /app/frontend
 
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 
-RUN corepack enable && pnpm config set pnpm-ignore-scripts false && pnpm install --frozen-lockfile
+RUN corepack enable && pnpm install --frozen-lockfile --config.ignore-scripts=false
 
 COPY frontend/ ./
 
@@ -19,7 +19,7 @@ WORKDIR /app/backend
 
 COPY backend/package.json backend/pnpm-lock.yaml ./
 
-RUN corepack enable && pnpm config set pnpm-ignore-scripts false && pnpm install --frozen-lockfile
+RUN corepack enable && pnpm install --frozen-lockfile --config.ignore-scripts=false
 
 COPY backend/ ./
 
@@ -36,7 +36,7 @@ RUN corepack enable
 
 COPY backend/package.json backend/pnpm-lock.yaml ./backend/
 
-RUN cd backend && pnpm config set pnpm-ignore-scripts false && pnpm install --prod --frozen-lockfile
+RUN cd backend && pnpm install --prod --frozen-lockfile --config.ignore-scripts=false
 
 COPY --from=backend-build /app/backend/dist ./backend/dist
 
