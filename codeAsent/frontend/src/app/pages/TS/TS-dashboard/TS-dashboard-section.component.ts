@@ -1,42 +1,17 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output
-} from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
-import { IMisionTS } from '../../../interfaces/usuario.interface';
-
-export type TSSection =
-  | 'dashboard'
-  | 'data'
-  | 'processes'
-  | 'terminal'
-  | 'test';
+export type TSSection = 'dashboard' | 'data' | 'processes' | 'terminal' | 'test';
 
 @Component({
   selector: 'app-ts-dashboard-section',
   standalone: true,
-
-  templateUrl:
-    './TS-dashboard-section.component.html',
-
-  styleUrl:
-    './TS-dashboard.component.scss'
+  templateUrl: './TS-dashboard-section.component.html',
+  styleUrl: './TS-dashboard.component.scss'
 })
 export class TSDashboardSectionComponent {
+  @Output() sectionSelected = new EventEmitter<TSSection>();
 
-  @Input()
-  misiones: IMisionTS[] = [];
-
-  @Output()
-  sectionSelected =
-    new EventEmitter<TSSection>();
-
-  selectSection(
-    section: TSSection
-  ): void {
-
+  selectSection(section: TSSection) {
     this.sectionSelected.emit(section);
   }
 }

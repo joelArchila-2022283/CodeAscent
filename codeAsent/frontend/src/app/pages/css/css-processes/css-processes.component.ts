@@ -7,7 +7,7 @@ import {
   signal
 } from '@angular/core';
 
-import { CssDataService } from '../../../services/css-data.service';
+import { CssDataService, CssMision } from '../../../services/css-data.service';
 import { NivelCss, RetoCss } from '../../../interfaces/css.interface';
 
 @Component({
@@ -19,11 +19,12 @@ import { NivelCss, RetoCss } from '../../../interfaces/css.interface';
 export class CssProcessesComponent implements OnInit {
 
   @Output() back = new EventEmitter<void>();
-  @Output() openTerminal = new EventEmitter<number>();
+  @Output() missionSelected = new EventEmitter<CssMision>();
 
   private cssData = inject(CssDataService);
 
   levels: NivelCss[] = [];
+  misiones: CssMision[] = [];
 
   loading = signal(true);
   error = signal<string | null>(null);
@@ -36,54 +37,42 @@ export class CssProcessesComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.cssData.obtenerNivelesPedagogicos().subscribe({
-      next: (levels: NivelCss[]) => {
-
-        console.log(
-          'PROCESSES - Niveles recibidos:',
-          levels
-        );
-
-        this.levels = levels ?? [];
-
+    this.cssData.obtenerMisionesCss().subscribe({
+      next: (misiones: CssMision[]) => {
+        this.misiones = misiones ?? [];
+        this.levels = this.misiones.map((mision) => mision.nivel);
         this.loading.set(false);
 
         if (this.levels.length === 0) {
-          this.error.set(
-            'PostgreSQL no devolvió misiones CSS.'
-          );
-
+          this.error.set('PostgreSQL no devolvió misiones CSS.');
           return;
         }
-
-        console.log(
-          `PROCESSES - ${this.levels.length} niveles cargados`
-        );
       },
-
       error: (error) => {
-
-        console.error(
-          'PROCESSES - Error cargando CSS:',
-          error
-        );
-
+        console.error('PROCESSES - Error cargando CSS:', error);
         this.loading.set(false);
-
-        this.error.set(
-          'No se pudieron cargar las misiones CSS.'
-        );
+        this.error.set('No se pudieron cargar las misiones CSS.');
       }
     });
   }
 
   codigo(level: NivelCss): RetoCss | undefined {
-    return level.retos?.find(
-      (reto: RetoCss) => reto.tipo_reto === 'codigo'
-    );
+    return level.retos?.find((reto: RetoCss) => reto.tipo_reto === 'codigo');
+  }
+
+  xpMision(level: NivelCss): number {
+    return level.numero_nivel * 100;
+  }
+
+  misionPorNivel(level: NivelCss): CssMision | undefined {
+    return this.misiones.find((mision) => mision.nivel.id_nivel === level.id_nivel);
   }
 
   iniciarMision(level: NivelCss): void {
-    this.openTerminal.emit(level.numero_nivel);
+    const mision = this.misionPorNivel(level);
+    if (!mision?.desbloqueada) {
+      return;
+    }
+    this.missionSelected.emit(mision);
   }
 }

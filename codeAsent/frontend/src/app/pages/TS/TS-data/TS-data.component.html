@@ -1,89 +1,48 @@
 <section class="ts-section data-section">
+  <header>
+    <span class="section-kicker"><i class="bi bi-book-half"></i> ARCH-01 / LECTURA</span>
+    <h2>MANUAL TÉCNICO</h2>
+    <p>Analiza la teoría, comprende la lógica y estudia la sintaxis TypeScript.</p>
+  </header>
 
-    <header>
-        <span class="section-kicker">
-            <i class="bi bi-journal-richtext"></i>
-            ARCHIVO DE MEMORIA
-        </span>
-
-        <h2>DATOS DEL SECTOR TYPESCRIPT</h2>
-
-        <p>
-            Lecturas y conceptos esenciales para avanzar por el núcleo TypeScript.
-        </p>
-    </header>
-
-    <div *ngIf="cargando()" class="text-center py-4">
-        <div class="spinner-border text-info" role="status"></div>
-        <p class="mt-2">Cargando lecciones...</p>
-    </div>
-
-    <div *ngIf="!cargando() && errorCarga()" class="lesson-strip">
-        <span>
-            <i class="bi bi-exclamation-triangle"></i>
-            ERROR DE CONEXIÓN
-        </span>
-
-        <p>{{ errorCarga() }}</p>
-    </div>
-
-    <div class="lessons-list" *ngIf="!cargando() && !errorCarga() && lecciones().length > 0">
-
-        <article class="lesson-card" *ngFor="let grupo of lecciones()">
-
-            <div class="lesson-level">
-
-                <span class="lesson-code">
-                    TS / {{ grupo.nivel.numero_nivel | number:'2.0-0' }}
-                </span>
-
-                <h3>
-                    {{ grupo.nivel.nombre }}
-                </h3>
-
-                <p>
-                    {{ grupo.nivel.descripcion }}
-                </p>
-
+  @if (mission) {
+    <div class="manual-grid">
+      <div class="manual-content">
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-lightbulb-fill"></i> Nivel Conceptual</h3>
+          <p>{{ manual().conceptual }}</p>
+        </div>
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-gear-fill"></i> Nivel Lógico</h3>
+          <p>{{ manual().logico }}</p>
+        </div>
+        <div class="concept-box">
+          <h3 class="box-subtitle"><i class="bi bi-code-slash"></i> Nivel Sintáctico</h3>
+          <pre><code>{{ manual().sintactico }}</code></pre>
+        </div>
+      </div>
+      <div class="manual-graphic">
+        <div class="graphic-placeholder">
+          <i class="bi bi-diagram-3"></i>
+          <span>{{ mission.titulo }}</span>
+          <div class="wireframe-box">
+            <div class="w-head"></div>
+            <div class="w-body">
+              <div class="w-element"></div>
+              <div class="w-element short"></div>
             </div>
-
-            <div class="lesson-item" *ngFor="let leccion of grupo.lecciones">
-
-                <div class="lesson-icon">
-                    <i class="bi bi-book-half"></i>
-                </div>
-
-                <div class="lesson-content">
-
-                    <span>LECCIÓN</span>
-
-                    <h4>
-                        {{ leccion.titulo }}
-                    </h4>
-
-                    <p>
-                        {{ leccion.contenido }}
-                    </p>
-
-                </div>
-
-            </div>
-
-        </article>
-
+          </div>
+        </div>
+      </div>
     </div>
+  } @else {
+    <div class="concept-box">
+      <p>Selecciona una misión para cargar el manual.</p>
+    </div>
+  }
 
-    <p *ngIf="!cargando() && !errorCarga() && lecciones().length === 0">
-
-        No hay lecciones registradas todavía para TypeScript.
-
-    </p>
-
-    <button class="ts-back" type="button" (click)="back.emit()">
-
-        <i class="bi bi-arrow-left"></i>
-        VOLVER AL PANEL
-
-    </button>
-
+  <div class="action-buttons">
+    <button class="ts-back" type="button" (click)="back.emit()"><i class="bi bi-arrow-left"></i> ELEGIR OTRA MISIÓN</button>
+    <button class="html-next" type="button" [disabled]="!mission" (click)="next.emit()">IR A LA LECCIÓN <i class="bi bi-arrow-right"></i></button>
+  </div>
 </section>
