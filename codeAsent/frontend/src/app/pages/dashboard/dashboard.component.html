@@ -33,7 +33,7 @@
         <img [src]="obtenerUrlAvatar(data.usuario.nombre)" alt="Avatar de Operador" class="profile-avatar-img">
         <div>
           <div class="profile-name">{{ data.usuario.nombre }}</div>
-          <div class="profile-level">Nivel {{ data.progreso.id_nivel_actual || 1 }} · Infección Detectada</div>
+           <div class="profile-level">Promedio · Nivel {{ nivelPromedio(data) }} · Infección Detectada</div>
         </div>
       </div>
 
@@ -79,7 +79,7 @@
         <div class="holo-title"><i class="bi bi-shield-exclamation"></i> ESTADO DEL REPOSITORIO</div>
         <div class="holo-row"><span>Núcleo Tinta</span><span class="status-warn">INESTABLE</span></div>
         <div class="holo-row"><span>Infección Virus</span><span class="status-danger">ACTIVA</span></div>
-        <div class="holo-row"><span>Depuración</span><span>{{ data.progreso.porcentaje || 0 }}%</span></div>
+         <div class="holo-row"><span>Depuración promedio</span><span>{{ porcentajePromedio(data) }}%</span></div>
       </div>
     </div>
   </section>
@@ -90,7 +90,7 @@
       <div class="stat-card">
         <div class="stat-icon"><i class="bi bi-star-fill"></i></div>
         <div>
-          <div class="stat-value">{{ (data.progreso.xp_actual || 0) | number }}</div>
+           <div class="stat-value">{{ xpTotal(data) | number }}</div>
           <div class="stat-label">Puntos XP</div>
         </div>
       </div>
@@ -109,11 +109,11 @@
     <div class="col-md-4">
       <div class="stat-card" style="flex-direction:column; align-items:flex-start;">
         <div style="display:flex; justify-content:space-between; width:100%;">
-          <span class="stat-label">Nivel {{ data.progreso.id_nivel_actual || 1 }} → {{ (data.progreso.id_nivel_actual || 1) + 1 }}</span>
-          <span class="stat-label">{{ data.progreso.porcentaje || 0 }}%</span>
+           <span class="stat-label">PROMEDIO NIVEL {{ nivelPromedio(data) }}</span>
+           <span class="stat-label">{{ porcentajePromedio(data) }}%</span>
         </div>
         <div class="xp-bar-track">
-          <div class="xp-bar-fill" [style.width.%]="data.progreso.porcentaje || 0"></div>
+           <div class="xp-bar-fill" [style.width.%]="porcentajePromedio(data)"></div>
         </div>
       </div>
     </div>

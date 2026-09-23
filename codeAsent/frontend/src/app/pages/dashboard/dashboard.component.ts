@@ -46,6 +46,22 @@ export class DashboardComponent implements OnInit {
     return obtenerUrlAvatar(nombre);
   }
 
+  nivelPromedio(data: DashboardData): number {
+    const niveles = data.perfil?.lenguajes?.map(lenguaje => lenguaje.nivel_actual) ?? [];
+    return niveles.length ? Math.round(niveles.reduce((total, nivel) => total + nivel, 0) / niveles.length) : 1;
+  }
+
+  porcentajePromedio(data: DashboardData): number {
+    const porcentajes = data.perfil?.lenguajes?.map(lenguaje => lenguaje.porcentaje) ?? [];
+    return porcentajes.length
+      ? Math.round(porcentajes.reduce((total, porcentaje) => total + porcentaje, 0) / porcentajes.length)
+      : 0;
+  }
+
+  xpTotal(data: DashboardData): number {
+    return data.perfil?.estadisticas?.xpTotal ?? data.progreso.xp_actual ?? 0;
+  }
+
   irAlMapa(): void {
     this.router.navigate(['/mapa']);
   }
