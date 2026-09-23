@@ -12,6 +12,7 @@ import { IProgreso } from '../interfaces/progreso.interface';
 import { ILeccion } from '../interfaces/leccion.interface';
 import { LeccionCss, NivelCss } from '../interfaces/css.interface';
 import { IReto } from '../interfaces/reto.interface';
+import { CssLocalProgressService } from '../core/services/css-local-progress.service';
 
 const NOMBRE_LENGUAJE_CSS = 'css';
 
@@ -72,6 +73,7 @@ export class CssDataService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
   private retoService = inject(RetoService);
+  private localProgress = inject(CssLocalProgressService);
   private apiUrl = environment.apiUrl;
 
   obtenerContexto(): Observable<ContextoCSS> {
@@ -142,14 +144,17 @@ export class CssDataService {
     }).pipe(
       map(({ niveles, completadas }) => {
           const ordenados = [...niveles].sort((a, b) => a.numero_nivel - b.numero_nivel);
+          const local = this.localProgress.read();
           return ordenados.map((nivel, index) => {
             const leccion = nivel.lecciones?.[0] ?? null;
             const reto = nivel.retos?.find(item => item.tipo_reto === 'codigo') ?? null;
             const cuestionarios = nivel.retos?.filter(item => item.tipo_reto === 'opcion_multiple') ?? [];
-            const completada = cuestionarios.length > 0 && cuestionarios.every(item => item.id_reto !== undefined && completadas.has(item.id_reto));
+            const completadaServidor = cuestionarios.length > 0 && cuestionarios.every(item => item.id_reto !== undefined && completadas.has(item.id_reto));
+            const completada = completadaServidor || local.completedMissionIds.includes(nivel.id_nivel);
             const anterior = ordenados[index - 1];
             const anteriorCuestionarios = anterior?.retos?.filter(item => item.tipo_reto === 'opcion_multiple') ?? [];
-            const anteriorCompletada = anteriorCuestionarios.length > 0 && anteriorCuestionarios.every(item => item.id_reto !== undefined && completadas.has(item.id_reto));
+            const anteriorCompletadaServidor = anteriorCuestionarios.length > 0 && anteriorCuestionarios.every(item => item.id_reto !== undefined && completadas.has(item.id_reto));
+            const anteriorCompletada = anteriorCompletadaServidor || local.completedMissionIds.includes(anterior?.id_nivel ?? 0);
             return {
               nivel,
               leccion,
@@ -180,8 +185,22 @@ export class CssDataService {
     );
   }
 
-  completarCuestionario(idLeccion: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/css/lecciones/${idLeccion}/completar-cuestionario`, {});
+  completarCuestionario(idLeccion: number): Observable<{
+    completada: boolean;
+    siguiente_nivel: number | null;
+    xp_mision: number;
+    xp_obtenida: number;
+    porcentaje: number;
+  }> {
+    return this.http.post<{ status: string; data: {
+      completada: boolean;
+      siguiente_nivel: number | null;
+      xp_mision: number;
+      xp_obtenida: number;
+      porcentaje: number;
+    } }>(`${this.apiUrl}/css/lecciones/${idLeccion}/completar-cuestionario`, {}).pipe(
+      map(respuesta => respuesta.data)
+    );
   }
 
   registrarIntentoCss(idReto: number, codigo: string): Observable<ResultadoIntentoCss> {
