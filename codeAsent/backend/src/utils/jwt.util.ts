@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { IPayloadToken } from '../interfaces/jwt.interface';
 
-const CLAVE_SECRETA = process.env.JWT_SECRET || 'clave_secreta_codeasent';
+export const CLAVE_SECRETA = process.env.JWT_SECRET || 'clave_secreta_codeasent';
 const TIEMPO_EXPIRACION = '24h';
 
 export const generarToken = (payload: IPayloadToken): string => {
