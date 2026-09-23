@@ -238,6 +238,26 @@ async function runSeed() {
       }
     }
 
+    // Garantiza una misión real por nivel SQL. Las pantallas SQL necesitan el
+    // id_leccion para guardar progreso, completar la misión y entregar XP.
+    await client.query(`
+      INSERT INTO leccion (id_nivel, titulo, contenido, orden, estado)
+      SELECT n.id_nivel,
+             n.nombre,
+             COALESCE(n.descripcion, 'Completa la misión SQL de este nivel.'),
+             1,
+             TRUE
+      FROM nivel n
+      JOIN lenguaje l ON l.id_lenguaje = n.id_lenguaje
+      WHERE LOWER(l.nombre) = 'sql'
+        AND n.estado = TRUE
+        AND NOT EXISTS (
+          SELECT 1 FROM leccion existente
+          WHERE existente.id_nivel = n.id_nivel
+            AND existente.estado = TRUE
+        )
+    `);
+
     // 8. Sembrar pistas y predicciones
     console.log('8. Sembrando pistas, predicciones y opciones...');
 

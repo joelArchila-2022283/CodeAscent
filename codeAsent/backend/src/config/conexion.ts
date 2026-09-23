@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
+const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT, DB_SSL } = process.env;
 
 if (!DB_USER || !DB_PASSWORD || !DB_NAME) {
   console.error('❌ ERROR CRÍTICO DE CONFIGURACIÓN:');
@@ -17,9 +17,11 @@ export const pool = new Pool({
   password: DB_PASSWORD,
   database: DB_NAME,
   port: Number(DB_PORT) || 5432,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: DB_SSL === 'true' || (
+    DB_SSL !== 'false' &&
+    !!DB_HOST &&
+    !['localhost', '127.0.0.1', '::1'].includes(DB_HOST)
+  ) ? { rejectUnauthorized: false } : undefined
 });
 
 export const probarConexion = async (): Promise<void> => {

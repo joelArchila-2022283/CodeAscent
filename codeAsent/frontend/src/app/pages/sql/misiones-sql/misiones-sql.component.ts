@@ -39,7 +39,7 @@ export class MisionesSqlComponent implements OnChanges {
   @Input() nivelActivo: NivelSql | null = null;
   @Input() completadas: ReadonlySet<number> = new Set<number>();
   @Output() back = new EventEmitter<void>();
-  @Output() missionSelected = new EventEmitter<RetoNivelSql>();
+  @Output() missionSelected = new EventEmitter<MisionSqlItem>();
 
   misiones = signal<MisionSqlItem[]>([]);
 
@@ -98,12 +98,6 @@ export class MisionesSqlComponent implements OnChanges {
 
   seleccionarMision(item: MisionSqlItem): void {
     if (!item.desbloqueada || !item.reto || !item.idLeccion) return;
-    const retoParaConsola: RetoNivelSql = {
-      ...item.reto,
-      numero_nivel: item.nivel.numero_nivel,
-      leccionContenido: item.leccionContenido,
-      respuestas: item.respuestas ?? item.reto.respuestas ?? [],
-    };
-    this.missionSelected.emit(retoParaConsola);
+    this.missionSelected.emit(item);
   }
 }

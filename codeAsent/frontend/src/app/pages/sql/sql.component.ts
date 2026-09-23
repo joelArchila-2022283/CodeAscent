@@ -1,12 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { catchError, of, switchMap } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { NivelSql, SeccionSql, JugadorSql, RetoNivelSql } from '../../interfaces/sql.interface';
 import { PerfilLenguaje } from '../../interfaces/usuario.interface';
 import { PanelSqlComponent } from './panel-sql/panel-sql.component';
 import { ManualTecnicoSqlComponent } from './manual-tecnico-sql/manual-tecnico-sql.component';
-import { MisionesSqlComponent } from './misiones-sql/misiones-sql.component';
+import { MisionesSqlComponent, MisionSqlItem } from './misiones-sql/misiones-sql.component';
 import { ConsolaSqlComponent, ResultadoConsolaSql } from './consola-sql/consola-sql.component';
 import {
   CuestionariosSqlComponent,
@@ -15,7 +15,7 @@ import {
 import { DashboardService } from '../../services/dashboard.service';
 import { SqlService } from '../../services/sql.service';
 import { MissionProgressService } from '../../core/services/mission-progress.service';
-import { MISIONES_SQL, MisionSqlConfig } from './misiones-sql.data';
+import { MisionSqlConfig } from './misiones-sql.data';
 import { obtenerUrlAvatar } from '../../utils/avatar.util';
 
 @Component({
@@ -255,21 +255,25 @@ export class SqlComponent implements OnInit {
     this.missionProgressService.updateProgress(missionId, paso).subscribe({ error: () => {} });
   }
 
-  seleccionarReto(reto: RetoNivelSql): void {
-    const numeroMision = Number(reto.numero_nivel ?? this.nivelActivo()?.numero_nivel ?? 1);
-    const nivelMision = this.niveles().find((nivel) => Number(nivel.numero_nivel) === numeroMision);
-    const mision = MISIONES_SQL.find((item) => item.numero === numeroMision);
-    const missionId = Number(reto.id_leccion);
-    if (!mision || !nivelMision || !Number.isInteger(missionId) || missionId <= 0) {
+  seleccionarReto(item: MisionSqlItem): void {
+    const missionId = Number(item.idLeccion);
+    if (!Number.isInteger(missionId) || missionId <= 0) {
       this.mascotDialogue.set('Esta misión todavía no tiene una lección activa en el servidor.');
       return;
     }
 
-    this.retoSeleccionado.set({ ...reto, numero_nivel: numeroMision, id_leccion: missionId });
-    this.nivelActivo.set(nivelMision);
+    const reto = {
+      ...item.reto,
+      numero_nivel: Number(item.nivel.numero_nivel),
+      id_leccion: missionId,
+      leccionContenido: item.leccionContenido,
+      respuestas: item.respuestas ?? item.reto.respuestas ?? [],
+    };
+    this.retoSeleccionado.set(reto);
+    this.nivelActivo.set(item.nivel);
     this.misionActiva.set({
-      ...mision,
-      xpRecompensa: Number(nivelMision.xp_requerida ?? mision.xpRecompensa),
+      ...item.mision,
+      xpRecompensa: Number(item.nivel.xp_requerida ?? item.mision.xpRecompensa),
     });
     this.missionProgressService.updateProgress(missionId, 'manual').subscribe({ error: () => {} });
     this.cambiarSeccion('manual');
@@ -287,7 +291,7 @@ export class SqlComponent implements OnInit {
         prediccion_correcta: resultado.prediccionCorrecta,
         pistas_usadas: resultado.pistasUsadas,
         codigo: resultado.codigo,
-      }).pipe(catchError(() => of(null)))),
+      })),
       switchMap(() => this.missionProgressService.updateProgress(missionId, 'quiz')),
     ).subscribe({
       next: () => this.cambiarSeccion('cuestionario'),
@@ -315,13 +319,13 @@ export class SqlComponent implements OnInit {
           const completada = !!respuesta?.data?.completed;
           if (completada) {
             this.marcarMisionCompletada(missionId);
-            // Optimista: 100 XP fijo por misión SQL (máximo 1000), evita 5500 y resta fantasma
+            // El backend calcula la XP como número de nivel * 100, igual que CSS.
           } else if (respuesta?.data && !completada && esPerfect === false) {
             this.mascotDialogue.set(
               'Necesitas acertar todo el diagnóstico para reclamar el XP y desbloquear la siguiente misión.',
             );
           }
-          // Siempre recarga el progreso real para sincronizar con el backend (corrige 5500→1000)
+          // Recarga el progreso real para sincronizar el HUD y el perfil.
           this.cargarProgresoReal();
         },
         error: (err) => {

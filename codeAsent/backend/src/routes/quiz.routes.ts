@@ -35,7 +35,7 @@ router.post('/:missionId/complete', async (req, res) => {
         const total = Number(req.body.total ?? 0);
         const source = req.body.source === 'terminal' ? 'terminal' : 'quiz';
         const progress = await client.query(
-            `SELECT mp.*, n.xp_requerida, n.numero_nivel, n.id_lenguaje, l.slug
+             `SELECT mp.*, n.id_nivel, n.xp_requerida, n.numero_nivel, n.id_lenguaje, l.slug
              FROM mission_progress mp
              JOIN leccion le ON le.id_leccion = mp.mission_id
              JOIN nivel n ON n.id_nivel = le.id_nivel
@@ -45,15 +45,20 @@ router.post('/:missionId/complete', async (req, res) => {
             [userId, missionId]
         );
         const row = progress.rows[0];
-        if (!row) return res.status(404).json({ status: 'error', message: 'Progreso no encontrado.' });
+        if (!row) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ status: 'error', message: 'Progreso no encontrado.' });
+        }
         if (source === 'terminal') {
             await client.query('COMMIT');
             return res.json({ status: 'success', data: { completed: false, xp_awarded: 0, message: 'La consola quedó registrada. Completa el cuestionario para obtener tus puntos.' } });
         }
         if (!row.terminal_code || !row.prediccion_correcta) {
+            await client.query('ROLLBACK');
             return res.status(409).json({ status: 'error', message: 'Recuerda realizar el ejercicio de la consola para obtener tus puntos' });
         }
         if (source === 'quiz' && row.reached_step !== 'quiz') {
+            await client.query('ROLLBACK');
             return res.status(409).json({ status: 'error', message: 'El cuestionario aún no está desbloqueado.' });
         }
 
@@ -63,7 +68,7 @@ router.post('/:missionId/complete', async (req, res) => {
             return res.json({ status: 'success', data: { completed: false, xp_awarded: 0, correct, total, perfect: false, newAchievements: [] } });
         }
 
-        if (row.completed) {
+        if (row.completed && row.slug !== 'sql') {
             await client.query('COMMIT');
             return res.json({ status: 'success', data: { completed: true, xp_awarded: 0, correct, total, perfect: true, newAchievements: [] } });
         }
@@ -101,7 +106,7 @@ router.post('/:missionId/complete', async (req, res) => {
                 [userId, row.id_lenguaje, row.numero_nivel]
             );
         }
-        const xpAward = Number(row.numero_nivel) * 100;
+        const xpAward = row.completed ? 0 : Number(row.numero_nivel) * 100;
         const progresoLenguaje = await client.query(
             `SELECT
                 n.id_lenguaje,
