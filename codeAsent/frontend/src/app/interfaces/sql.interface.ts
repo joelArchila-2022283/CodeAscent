@@ -30,6 +30,8 @@ export interface RetoNivelSql {
   xp_recompensa: number;
   dificultad: 'facil' | 'medio' | 'dificil';
   respuestas: RespuestaNivelSql[];
+  numero_nivel?: number;
+  leccionContenido?: string;
 }
 
 export interface NivelSql {
