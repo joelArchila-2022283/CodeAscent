@@ -61,9 +61,9 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
         l.nombre,
         l.slug,
         l.descripcion,
-        COALESCE(uxp.xp, 0)::int AS xp_actual,
-        COALESCE((
-          SELECT MAX(nivel.numero_nivel)
+         COALESCE(p.xp_actual, uxp.xp, 0)::int AS xp_actual,
+         COALESCE((SELECT nivel_actual.numero_nivel FROM nivel nivel_actual WHERE nivel_actual.id_nivel = p.id_nivel_actual), (
+           SELECT MAX(nivel.numero_nivel)
           FROM nivel nivel
           WHERE nivel.id_lenguaje = l.id_lenguaje
             AND (
@@ -72,15 +72,18 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
               WHERE anterior.id_lenguaje = l.id_lenguaje
                 AND anterior.numero_nivel <= nivel.numero_nivel
             ) <= COALESCE(uxp.xp, 0)
-        ), 1)::int AS nivel_actual,
-        LEAST(100, ROUND((COALESCE(uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2))::float AS porcentaje,
+          ), 1)::int AS nivel_actual,
+         COALESCE(p.porcentaje, LEAST(100, ROUND((COALESCE(p.xp_actual, uxp.xp, 0)::numeric / NULLIF(SUM(n.xp_requerida), 0)) * 100, 2)))::float AS porcentaje,
         COUNT(DISTINCT n.id_nivel)::int AS total_niveles
       FROM lenguaje l
       LEFT JOIN usuario_xp uxp
         ON uxp.id_lenguaje = l.id_lenguaje AND uxp.user_id = $1
+      LEFT JOIN progreso p
+        ON p.id_lenguaje = l.id_lenguaje AND p.id_usuario = $1
       LEFT JOIN nivel n ON n.id_lenguaje = l.id_lenguaje AND n.estado = TRUE
       WHERE l.estado = TRUE
-      GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp
+       GROUP BY l.id_lenguaje, l.nombre, l.slug, l.descripcion, uxp.xp,
+                p.xp_actual, p.porcentaje, p.id_nivel_actual
       ORDER BY l.id_lenguaje
     `, [idUsuario]);
 
@@ -88,7 +91,7 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       SELECT
         (SELECT COUNT(*)::int FROM nivel_usuario WHERE id_usuario = $1 AND completado = TRUE) AS niveles_completados,
         (SELECT COUNT(DISTINCT id_reto)::int FROM intento WHERE id_usuario = $1 AND correcto = TRUE) AS retos_superados,
-        (SELECT COALESCE(SUM(xp), 0)::int FROM usuario_xp WHERE user_id = $1) AS xp_total,
+         (SELECT COALESCE(SUM(xp_actual), 0)::int FROM progreso WHERE id_usuario = $1) AS xp_total,
         (SELECT COUNT(*)::int FROM intento WHERE id_usuario = $1) AS intentos_totales,
         (SELECT COUNT(*)::int FROM intento WHERE id_usuario = $1 AND correcto = TRUE) AS intentos_correctos
     `, [idUsuario]);
