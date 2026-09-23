@@ -2,7 +2,10 @@
   <header>
     <span class="section-kicker"><i class="bi bi-terminal-fill"></i> CRT-SQL / PUERTO 03</span>
     <h2>TERMINAL DE COBRE SQL</h2>
-    <p>Predice la solución, escribe tu consulta en el monitor de fósforo y observa el resultado fluir.</p>
+    <p>
+      Predice la solución, escribe tu consulta en el monitor de fósforo y observa el resultado
+      fluir.
+    </p>
   </header>
 
   <div class="flow-steps" aria-label="Flujo de la misión">
@@ -10,125 +13,235 @@
     <span class="flow-line"></span>
     <span class="flow-step" [class.flow-step--done]="etapaActual() >= 3">02 PREDICCIÓN</span>
     <span class="flow-line"></span>
-    <span class="flow-step" [class.flow-step--active]="etapaActual() >= 3" [class.flow-step--done]="etapaActual() >= 4">03 TERMINAL</span>
+    <span
+      class="flow-step"
+      [class.flow-step--active]="etapaActual() >= 3"
+      [class.flow-step--done]="etapaActual() >= 4"
+      >03 TERMINAL</span
+    >
   </div>
 
-  <div class="panel-consola-valle">
-    <div class="barra-andamiaje">
-      <span class="desafio-titulo">RETO: {{ desafioActivo().tituloDesafio }}</span>
-      <div class="estrellas-recompensa">
-        ESTRELLAS EN JUEGO:
-        @for (e of [1,2,3,4]; track $index) {
-          <span>{{ $index < estrellasRestantes() ? '⭐' : 'E' }}</span>
-        }
+  @if (mision) {
+    <div class="panel-consola-valle">
+      <div class="barra-andamiaje">
+        <span class="desafio-titulo">RETO: {{ mision.codigo }} · {{ mision.titulo }}</span>
+        <div class="estrellas-recompensa">
+          ESTRELLAS EN JUEGO:
+          @for (e of [1, 2, 3, 4]; track $index) {
+            <span>{{ $index < estrellasRestantes() ? '⭐' : 'E' }}</span>
+          }
+        </div>
       </div>
-    </div>
 
-    @if (etapaActual() === 1 || etapaActual() === 2) {
-      <div class="caja-etapa">
-        <h3>1. Planteamiento del Problema</h3>
-        <p>{{ desafioActivo().planteamientoProblema }}</p>
+      @if (etapaActual() === 1 || etapaActual() === 2) {
+        <div class="caja-etapa">
+          <h3>1. Planteamiento del Problema</h3>
+          <p>{{ mision.contexto }}</p>
+          <div class="caja-objetivo">
+            <strong><i class="bi bi-crosshair"></i> Objetivo:</strong>
+            <p>{{ mision.objetivoClaro }}</p>
+          </div>
 
-        <hr>
+          <hr />
 
-        <h3>2. Predicción Heurística</h3>
-        <p><strong>{{ desafioActivo().preguntaRazonamiento }}</strong></p>
+          <h3>2. Predicción Heurística</h3>
+          <p>
+            <strong>{{ mision.preguntaRazonamiento }}</strong>
+          </p>
 
-        <div class="opciones-prediccion">
-          @for (opcion of desafioActivo().opcionesPrediccion; track $index) {
+          <div class="opciones-prediccion">
+            @for (opcion of mision.opcionesPrediccion; track $index) {
+              <button
+                type="button"
+                class="boton-opcion"
+                [class.correcta]="
+                  prediccionSeleccionada() === $index && prediccionCorrecta() === true
+                "
+                [class.incorrecta]="
+                  prediccionSeleccionada() === $index && prediccionCorrecta() === false
+                "
+                (click)="validarPrediccion($index)"
+              >
+                {{ opcion }}
+              </button>
+            }
+          </div>
+
+          @if (prediccionCorrecta() !== null) {
+            <div
+              class="mensaje-prediccion"
+              [class.mensaje-prediccion--exito]="prediccionCorrecta()"
+              [class.mensaje-prediccion--fallo]="!prediccionCorrecta()"
+              role="status"
+            >
+              <div class="mensaje-prediccion__icono" aria-hidden="true">
+                <i
+                  class="bi"
+                  [class.bi-check2-circle]="prediccionCorrecta()"
+                  [class.bi-lightning-charge-fill]="!prediccionCorrecta()"
+                ></i>
+              </div>
+              <div class="mensaje-prediccion__contenido">
+                <span class="mensaje-prediccion__eyebrow">{{
+                  prediccionCorrecta() ? 'SEÑAL CONFIRMADA' : 'SEÑAL INESTABLE'
+                }}</span>
+                <p>
+                  {{
+                    prediccionCorrecta()
+                      ? '¡Correcto! El concepto elegido es el que resuelve esta misión.'
+                      : '¡Casi! Revisa el manual técnico para elegir el concepto adecuado.'
+                  }}
+                </p>
+              </div>
+              <button type="button" class="boton-avanzar" (click)="avanzarAEditor()">
+                PROBAR EN LA CONSOLA →
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      @if (etapaActual() === 3) {
+        <div class="caja-etapa">
+          <h3>3. Construye tu Consulta SQL</h3>
+
+          <div class="esquema-tablas">
+            @for (tabla of mision.tablas; track tabla.nombre) {
+              <div class="esquema-tabla">
+                <span class="esquema-tabla__nombre"
+                  ><i class="bi bi-table"></i> {{ tabla.nombre }}</span
+                >
+                <div class="esquema-tabla__columnas">
+                  @for (columna of tabla.columnas; track columna.nombre) {
+                    <span
+                      ><strong>{{ columna.nombre }}</strong> <em>{{ columna.tipo }}</em></span
+                    >
+                  }
+                </div>
+                <small>{{ tabla.filas.length }} filas de ejemplo</small>
+              </div>
+            }
+          </div>
+
+          <div class="seccion-pistas">
             <button
               type="button"
-              class="boton-opcion"
-              [class.correcta]="prediccionSeleccionada() === $index && prediccionCorrecta() === true"
-              [class.incorrecta]="prediccionSeleccionada() === $index && prediccionCorrecta() === false"
-              (click)="validarPrediccion($index)">
-              {{ opcion }}
+              class="boton-pista"
+              (click)="solicitarPista()"
+              [disabled]="pistasSolicitadas() >= mision.pistas.length"
+            >
+              <i class="bi bi-lightbulb-fill" aria-hidden="true"></i> SOLICITAR PISTA ({{
+                nombrePista(pistasSolicitadas() + 1)
+              }})
+            </button>
+
+            @for (pista of mision.pistas.slice(0, pistasSolicitadas()); track $index) {
+              <div class="tarjeta-pista">
+                <strong>{{ nombrePista($index + 1) }}:</strong> {{ pista }}
+              </div>
+            }
+          </div>
+
+          <div class="editor-sql-vintage">
+            <textarea
+              [value]="codigoIngresado()"
+              (input)="actualizarCodigo($event)"
+              rows="4"
+              class="entrada-sql"
+              placeholder="Escribe tu sentencia SQL aquí..."
+            ></textarea>
+            <button type="button" class="boton-ejecutar" (click)="ejecutarConsultaSql()">
+              <i class="bi bi-play-fill" aria-hidden="true"></i> EJECUTAR EN EL VALLE
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (etapaActual() === 4) {
+        <div class="caja-etapa">
+          <h3>4. Retroalimentación del Sistema</h3>
+          <div
+            [class.exito]="ejecucionExitosa()"
+            [class.fallo]="!ejecucionExitosa()"
+            class="banner-resultado"
+            role="alert"
+          >
+            <div class="banner-resultado__icono" aria-hidden="true">
+              <i
+                class="bi"
+                [class.bi-check2-circle]="ejecucionExitosa()"
+                [class.bi-exclamation-triangle-fill]="!ejecucionExitosa()"
+              ></i>
+            </div>
+            <div class="banner-resultado__contenido">
+              <span class="banner-resultado__eyebrow">{{
+                ejecucionExitosa() ? 'CONSULTA EJECUTADA' : 'EJECUCIÓN INTERRUMPIDA'
+              }}</span>
+              <p>{{ resultadoEjecucion() }}</p>
+            </div>
+            <span class="banner-resultado__led" aria-hidden="true"></span>
+          </div>
+
+          @if (ejecucionExitosa()) {
+            <section class="salida-terminal" aria-label="Resultado de la consulta SQL">
+              <div class="salida-terminal__barra">
+                <span></span><span></span><span></span> postgres@valle:5432 /
+                {{ mision.tablas[0]?.nombre ?? 'sql' }}
+              </div>
+              <div class="tabla-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      @for (columna of mision.resultadoColumnas; track columna) {
+                        <th>{{ columna }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (fila of filasResultado(); track $index) {
+                      <tr>
+                        @for (columna of mision.resultadoColumnas; track columna) {
+                          <td>{{ fila[columna] }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <small>({{ filasResultado().length }} filas)</small>
+            </section>
+
+            <div class="caja-resolucion">
+              <strong><i class="bi bi-mortarboard-fill"></i> Resolución comentada</strong>
+              <p>{{ mision.resolucionComentada }}</p>
+            </div>
+
+            <button
+              type="button"
+              class="boton-avanzar boton-avanzar--fin"
+              (click)="continuarAlCuestionario()"
+            >
+              CONTINUAR AL CUESTIONARIO <i class="bi bi-arrow-right"></i>
+            </button>
+          }
+
+          @if (!ejecucionExitosa()) {
+            <button type="button" class="boton-reintentar" (click)="etapaActual.set(3)">
+              <i class="bi bi-arrow-repeat" aria-hidden="true"></i> REVISAR CÓDIGO
             </button>
           }
         </div>
-
-        @if (prediccionCorrecta() !== null) {
-          <div class="mensaje-prediccion" [class.mensaje-prediccion--exito]="prediccionCorrecta()" [class.mensaje-prediccion--fallo]="!prediccionCorrecta()" role="status">
-            <div class="mensaje-prediccion__icono" aria-hidden="true">
-              <i class="bi" [class.bi-check2-circle]="prediccionCorrecta()" [class.bi-lightning-charge-fill]="!prediccionCorrecta()"></i>
-            </div>
-            <div class="mensaje-prediccion__contenido">
-              <span class="mensaje-prediccion__eyebrow">{{ prediccionCorrecta() ? 'SEÑAL CONFIRMADA' : 'SEÑAL INESTABLE' }}</span>
-              <p>{{ prediccionCorrecta() ? '¡Correcto! El concepto elegido filtra registros según la condición.' : '¡Casi! Revisa qué comando traduce tu idea al lenguaje SQL.' }}</p>
-            </div>
-            <button type="button" class="boton-avanzar" (click)="avanzarAEditor()">PROBAR EN LA CONSOLA →</button>
-          </div>
-        }
-      </div>
-    }
-
-    @if (etapaActual() === 3) {
-      <div class="caja-etapa">
-        <h3>3. Construye tu Consulta SQL</h3>
-        <div class="seccion-pistas">
-          <button type="button" class="boton-pista" (click)="solicitarPista()" [disabled]="pistasSolicitadas() >= 4">
-            <i class="bi bi-lightbulb-fill" aria-hidden="true"></i> SOLICITAR PISTA ({{ nombrePista(pistasSolicitadas() + 1) }})
-          </button>
-
-          @for (p of desafioActivo().pistasAndamiaje.slice(0, pistasSolicitadas()); track p.nivelPista) {
-            <div class="tarjeta-pista">
-              <strong>{{ nombrePista(p.nivelPista) }}:</strong> {{ p.textoExplicativo }}
-            </div>
-          }
-        </div>
-
-        <div class="editor-sql-vintage">
-          <textarea [value]="codigoIngresado()" (input)="actualizarCodigo($event)" rows="4" class="entrada-sql"></textarea>
-          <button type="button" class="boton-ejecutar" (click)="ejecutarConsultaSql()"><i class="bi bi-play-fill" aria-hidden="true"></i> EJECUTAR EN EL VALLE</button>
-        </div>
-      </div>
-    }
-
-    @if (etapaActual() === 4) {
-      <div class="caja-etapa">
-        <h3>4. Retroalimentación del Sistema</h3>
-        <div [class.exito]="ejecucionExitosa()" [class.fallo]="!ejecucionExitosa()" class="banner-resultado" role="alert">
-          <div class="banner-resultado__icono" aria-hidden="true">
-            <i class="bi" [class.bi-check2-circle]="ejecucionExitosa()" [class.bi-exclamation-triangle-fill]="!ejecucionExitosa()"></i>
-          </div>
-          <div class="banner-resultado__contenido">
-            <span class="banner-resultado__eyebrow">{{ ejecucionExitosa() ? 'CONSULTA EJECUTADA' : 'EJECUCIÓN INTERRUMPIDA' }}</span>
-            <p>{{ resultadoEjecucion() }}</p>
-          </div>
-          <span class="banner-resultado__led" aria-hidden="true"></span>
-        </div>
-
-        @if (ejecucionExitosa()) {
-          <section class="salida-terminal" aria-label="Resultado de la consulta SQL">
-            <div class="salida-terminal__barra"><span></span><span></span><span></span> postgres@valle:5432 / transistores</div>
-            <div class="tabla-scroll">
-              <table>
-                <thead><tr>@for (columna of columnasResultado; track columna) { <th>{{ columna }}</th> }</tr></thead>
-                <tbody>
-                  @for (fila of filasResultado(); track fila['id_transistor']) {
-                    <tr>@for (columna of columnasResultado; track columna) { <td>{{ fila[columna] }}</td> }</tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-            <small>({{ filasResultado().length }} filas)</small>
-          </section>
-
-          <button type="button" class="boton-avanzar boton-avanzar--fin" (click)="continuarAlCuestionario()">
-            CONTINUAR AL CUESTIONARIO <i class="bi bi-arrow-right"></i>
-          </button>
-        }
-
-        @if (!ejecucionExitosa()) {
-          <button type="button" class="boton-reintentar" (click)="etapaActual.set(3)">
-            <i class="bi bi-arrow-repeat" aria-hidden="true"></i> REVISAR CÓDIGO
-          </button>
-        }
-      </div>
-    }
-  </div>
+      }
+    </div>
+  } @else {
+    <div class="panel-consola-valle">
+      <p>Selecciona una misión para operar la terminal.</p>
+    </div>
+  }
 
   <div class="action-buttons">
-    <button class="sql-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER A MISIONES</button>
+    <button class="sql-back" (click)="back.emit()">
+      <i class="bi bi-arrow-left"></i> VOLVER A MISIONES
+    </button>
   </div>
 </section>
