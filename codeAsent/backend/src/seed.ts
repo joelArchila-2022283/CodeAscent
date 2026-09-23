@@ -198,7 +198,7 @@ async function runSeed() {
     const lenguajes = await client.query('SELECT id_lenguaje, nombre, slug FROM lenguaje');
     for (const r_lang of lenguajes.rows) {
       for (let i = 1; i <= 10; i++) {
-        const v_costo = i * 100;
+        const v_costo = r_lang.slug === 'sql' ? 100 : i * 100;
         await client.query(`
           INSERT INTO nivel (id_lenguaje, nombre, numero_nivel, descripcion, xp_requerida, estado)
           VALUES ($1, $2, $3, $4, $5, TRUE)
@@ -348,6 +348,19 @@ async function runSeed() {
         }
       }
     }
+
+    // Normaliza XP de misiones SQL a 100 por misión (máximo 1000 en 10 misiones)
+    await client.query(`
+      UPDATE reto SET xp_recompensa = 100
+      WHERE tipo_reto = 'codigo'
+        AND id_leccion IN (
+          SELECT l.id_leccion
+          FROM leccion l
+          JOIN nivel n ON n.id_nivel = l.id_nivel
+          JOIN lenguaje lang ON lang.id_lenguaje = n.id_lenguaje
+          WHERE lang.slug = 'sql'
+        )
+    `);
 
     // Distribuye el XP de cada misión entre sus tres preguntas.
     await client.query(`
