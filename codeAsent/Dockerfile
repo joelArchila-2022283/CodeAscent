@@ -19,7 +19,7 @@ WORKDIR /app/backend
 
 COPY backend/package.json backend/pnpm-lock.yaml backend/pnpm-workspace.yaml ./
 
-RUN corepack enable && pnpm install --frozen-lockfile --allow-build=esbuild
+RUN corepack enable && pnpm install --frozen-lockfile --ignore-scripts=false
 
 COPY backend/ ./
 
@@ -36,7 +36,7 @@ RUN corepack enable
 
 COPY backend/package.json backend/pnpm-lock.yaml backend/pnpm-workspace.yaml ./backend/
 
-RUN cd backend && pnpm install --prod --frozen-lockfile --allow-build=esbuild
+RUN cd backend && pnpm install --prod --frozen-lockfile --ignore-scripts=false
 
 COPY --from=backend-build /app/backend/dist ./backend/dist
 
