@@ -93,7 +93,7 @@
                   }}
                 </p>
               </div>
-              <button type="button" class="boton-avanzar" (click)="avanzarAEditor()">
+              <button type="button" class="boton-avanzar" [disabled]="prediccionCorrecta() !== true" (click)="avanzarAEditor()">
                 PROBAR EN LA CONSOLA →
               </button>
             </div>

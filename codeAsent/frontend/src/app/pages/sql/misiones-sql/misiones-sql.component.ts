@@ -47,8 +47,12 @@ export class MisionesSqlComponent implements OnChanges {
     if (!changes['niveles'] && !changes['nivelActivo'] && !changes['completadas']) return;
     if (this.niveles.length === 0) return;
 
+    const nivelesOrdenados = [...this.niveles].sort(
+      (a, b) => a.numero_nivel - b.numero_nivel,
+    );
+
     this.misiones.set(
-      this.niveles.map((nivel, indice) => {
+      nivelesOrdenados.map((nivel, indice) => {
         const mision =
           MISIONES_SQL.find((item) => item.numero === nivel.numero_nivel) ??
           MISIONES_SQL[Math.min(indice, MISIONES_SQL.length - 1)];
@@ -68,8 +72,12 @@ export class MisionesSqlComponent implements OnChanges {
           respuestas: retoBase?.respuestas?.length ? retoBase.respuestas : [],
         };
 
-        // Para pruebas: desbloquea todas las misiones SQL para poder probar el flujo completo sin bloqueo secuencial
-        const desbloqueada = true;
+        const nivelAnterior = nivelesOrdenados[indice - 1];
+        const idLeccionAnterior = nivelAnterior?.lecciones[0]?.id_leccion;
+        const desbloqueada = indice === 0 || (
+          idLeccionAnterior !== undefined &&
+          this.completadas.has(idLeccionAnterior)
+        );
 
         return {
           reto,

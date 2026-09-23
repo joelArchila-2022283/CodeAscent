@@ -26,11 +26,14 @@
       class="mission"
       *ngFor="let mission of missions()"
       type="button"
+      [class.done]="mission.completada"
+      [class.locked]="!mission.desbloqueada"
+      [disabled]="!mission.desbloqueada"
       (click)="seleccionarMision(mission)"
     >
 
       <span class="mission-icon">
-        <i class="bi bi-door-open"></i>
+        <i class="bi" [class]="mission.completada ? 'bi-check-circle-fill' : (mission.desbloqueada ? 'bi-door-open' : 'bi-lock-fill')"></i>
       </span>
 
       <span class="mission-copy">
@@ -50,7 +53,7 @@
       </span>
 
       <span class="mission-reward">
-        MISIÓN {{ mission.id }}
+        {{ mission.completada ? 'LISTO' : 'MISIÓN ' + mission.id }}
       </span>
 
     </button>

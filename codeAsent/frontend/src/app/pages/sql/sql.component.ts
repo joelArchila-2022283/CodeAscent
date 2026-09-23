@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { NivelSql, SeccionSql, JugadorSql, RetoNivelSql } from '../../interfaces/sql.interface';
 import { PerfilLenguaje } from '../../interfaces/usuario.interface';
 import { PanelSqlComponent } from './panel-sql/panel-sql.component';
@@ -81,10 +82,9 @@ export class SqlComponent implements OnInit {
   cargarNiveles(): void {
     this.sqlService.obtenerNiveles().subscribe({
       next: (niveles) => {
-        // Normaliza a 100 XP por nivel para SQL (máximo 1000 en 10 misiones) aunque la BD aún tenga valores viejos 50..500
-        const normalizados = niveles.map((n) => ({ ...n, xp_requerida: 100 }));
-        this.niveles.set(normalizados);
-        this.nivelActivo.set(normalizados[0] ?? null);
+        const ordenados = [...niveles].sort((a, b) => a.numero_nivel - b.numero_nivel);
+        this.niveles.set(ordenados);
+        this.nivelActivo.set(ordenados[0] ?? null);
         this.aplicarHud();
         this.sincronizarNivelActivo();
         this.precargarMisionesCompletadas();
@@ -119,21 +119,44 @@ export class SqlComponent implements OnInit {
   aplicarHud(): void {
     const perfilSql = this.infoPerfilSql();
     const xp = Number(perfilSql?.xp_actual ?? 0);
-    // Nivel SQL: 100 XP por nivel, 1..10 (0-99 =>1, 100-199=>2, ... 900-1000=>10)
-    const nivelCalculado = Math.min(10, Math.max(1, Math.floor(xp / 100) + 1));
-    // Si el backend trae nivel_actual coherente úsalo, si no usa el calculado
-    const nivelBackend = Number(perfilSql?.nivel_actual ?? nivelCalculado);
-    const nivel = Number.isFinite(nivelBackend) && nivelBackend >= 1 && nivelBackend <= 10 ? nivelBackend : nivelCalculado;
-    const nivelFinal = Math.max(nivel, nivelCalculado);
+    const nivelFinal = this.nivelPorXp(xp);
+    const niveles = this.niveles();
+    const indice = Math.max(0, Math.min(niveles.length - 1, nivelFinal - 1));
+    const nivelActual = niveles[indice];
+    const inicio = niveles
+      .slice(0, indice)
+      .reduce((total, nivel) => total + Number(nivel.xp_requerida ?? 0), 0);
+    const costo = Number(nivelActual?.xp_requerida ?? 100);
+    const xpDelNivel = Math.max(0, Math.min(costo, xp - inicio));
 
     this.datosJugador.update((jugador) => ({
       ...jugador,
       tituloRango: `Explorador SQL - Nivel ${nivelFinal}`,
       nivelProgreso: nivelFinal,
-      experienciaActual: xp,
-      experienciaSiguienteNivel: 1000,
+      experienciaActual: xpDelNivel,
+      experienciaSiguienteNivel: costo,
       transistoresActivos: Math.max(1, Math.min(5, Math.ceil(nivelFinal / 2))),
     }));
+  }
+
+  porcentajeExperiencia(): number {
+    const jugador = this.datosJugador();
+    if (jugador.experienciaSiguienteNivel <= 0) return 0;
+    return Math.min(100, Math.max(0, (jugador.experienciaActual / jugador.experienciaSiguienteNivel) * 100));
+  }
+
+  private nivelPorXp(xp: number): number {
+    let acumulado = 0;
+    let nivel = 1;
+    for (const [indice, actual] of this.niveles().entries()) {
+      const costo = Number(actual.xp_requerida ?? 0);
+      if (xp < acumulado + costo) {
+        return indice + 1;
+      }
+      acumulado += costo;
+      nivel = Math.min(this.niveles().length, indice + 2);
+    }
+    return nivel;
   }
 
   private sincronizarNivelActivo(): void {
@@ -141,9 +164,8 @@ export class SqlComponent implements OnInit {
     if (niveles.length === 0) return;
     const perfilSql = this.infoPerfilSql();
     const xp = Number(perfilSql?.xp_actual ?? 0);
-    const nivelPorXp = Math.min(10, Math.max(1, Math.floor(xp / 100) + 1));
-    const nivelActual = Number(perfilSql?.nivel_actual ?? nivelPorXp);
-    const nivelEfectivo = Math.max(nivelActual, nivelPorXp);
+    const nivelPorXp = this.nivelPorXp(xp);
+    const nivelEfectivo = Math.max(Number(perfilSql?.nivel_actual ?? nivelPorXp), nivelPorXp);
     const completadas = this.misionesCompletadas();
 
     // Nivel por XP/perfil
@@ -237,7 +259,10 @@ export class SqlComponent implements OnInit {
       this.nivelActivo.set(nivelMision);
     }
     const mision = MISIONES_SQL.find((item) => item.numero === numeroMision) ?? MISIONES_SQL[0];
-    this.misionActiva.set(mision);
+    this.misionActiva.set({
+      ...mision,
+      xpRecompensa: Number(nivelMision?.xp_requerida ?? mision.xpRecompensa),
+    });
     const missionId = reto.id_leccion;
     if (missionId) {
       this.missionProgressService
@@ -249,15 +274,22 @@ export class SqlComponent implements OnInit {
 
   consolaCompletada(resultado: ResultadoConsolaSql): void {
     const missionId = resultado.retoId;
-    if (missionId) {
-      this.missionProgressService
-        .updateTerminalStats(missionId, {
-          prediccion_correcta: resultado.prediccionCorrecta,
-          pistas_usadas: resultado.pistasUsadas,
-        })
-        .subscribe({ error: () => {} });
+    if (!missionId) {
+      this.cambiarSeccion('cuestionario');
+      return;
     }
-    this.cambiarSeccion('cuestionario');
+
+    this.missionProgressService.updateProgress(missionId, 'terminal').pipe(
+      switchMap(() => this.missionProgressService.updateTerminalStats(missionId, {
+        prediccion_correcta: resultado.prediccionCorrecta,
+        pistas_usadas: resultado.pistasUsadas,
+        codigo: resultado.codigo,
+      })),
+      switchMap(() => this.missionProgressService.updateProgress(missionId, 'quiz')),
+    ).subscribe({
+      next: () => this.cambiarSeccion('cuestionario'),
+      error: () => this.mascotDialogue.set('No se pudo registrar la consola. Ejecuta nuevamente la consulta antes de abrir el diagnóstico.'),
+    });
   }
 
   misionDiagnosticoCompletado(resultado: ResultadoCuestionarioSql): void {
@@ -278,33 +310,12 @@ export class SqlComponent implements OnInit {
         next: (respuesta) => {
           const esPerfect = respuesta?.data?.perfect !== false && respuesta?.data?.correct === respuesta?.data?.total;
           const completada = !!respuesta?.data?.completed;
-          // Desbloquea siempre la siguiente para pruebas, aunque no sea perfecto
-          this.marcarMisionCompletada(missionId);
           if (completada) {
+            this.marcarMisionCompletada(missionId);
             // Optimista: 100 XP fijo por misión SQL (máximo 1000), evita 5500 y resta fantasma
-            const awardedRaw = Number(respuesta.data.xp_awarded) || 0;
-            const awarded = 100;
-            if (awardedRaw > 0) {
-              const perfil = this.infoPerfilSql();
-              if (perfil) {
-                const baseXp = Number(perfil.xp_actual ?? this.datosJugador().experienciaActual ?? 0);
-                const nuevoXp = Math.min(1000, baseXp + awarded);
-                perfil.xp_actual = nuevoXp;
-                perfil.nivel_actual = Math.min(10, Math.max(1, Math.floor(nuevoXp / 100) + 1));
-                this.infoPerfilSql.set({ ...perfil });
-                this.aplicarHud();
-                this.sincronizarNivelActivo();
-              } else {
-                this.datosJugador.update((j) => ({
-                  ...j,
-                  experienciaActual: Math.min(1000, j.experienciaActual + awarded),
-                  nivelProgreso: Math.min(10, Math.max(1, Math.floor(Math.min(1000, j.experienciaActual + awarded) / 100) + 1)),
-                }));
-              }
-            }
           } else if (respuesta?.data && !completada && esPerfect === false) {
             this.mascotDialogue.set(
-              'Necesitas el perfecto en el diagnóstico (todas correctas) para reclamar el XP. La siguiente misión ya está desbloqueada para pruebas.',
+              'Necesitas acertar todo el diagnóstico para reclamar el XP y desbloquear la siguiente misión.',
             );
           }
           // Siempre recarga el progreso real para sincronizar con el backend (corrige 5500→1000)

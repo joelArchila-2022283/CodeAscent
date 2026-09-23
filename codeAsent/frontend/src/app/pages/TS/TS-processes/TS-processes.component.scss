@@ -50,7 +50,18 @@ header p {
 }
 
 .mission.done {
-    border-color: #00d9ff;
+    border-color: #00e676;
+    background: linear-gradient(145deg, #123447, #0d1c2a);
+}
+
+.mission.locked {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.mission.locked:hover {
+    border-color: #293b55;
+    transform: none;
 }
 
 .mission-icon {
@@ -93,7 +104,7 @@ header p {
 }
 
 .done .mission-reward {
-    color: #00d9ff;
+    color: #00e676;
 }
 
 .ts-back {

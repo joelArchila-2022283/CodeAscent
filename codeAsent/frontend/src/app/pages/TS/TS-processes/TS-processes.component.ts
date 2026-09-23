@@ -9,6 +9,8 @@ interface MisionViewTs {
   code: string;
   title: string;
   detail: string;
+  desbloqueada: boolean;
+  completada: boolean;
   mision: IMission;
 }
 
@@ -42,6 +44,8 @@ export class TSProcessesComponent implements OnInit {
               code: `TS-${String(numero).padStart(2, '0')}`,
               title: mision.titulo,
               detail: this.resumirContenido(mision.contenido),
+              desbloqueada: mision.estado !== 'locked',
+              completada: mision.estado === 'completed',
               mision
             };
           })
@@ -65,7 +69,7 @@ export class TSProcessesComponent implements OnInit {
 
   seleccionarMision(view: MisionViewTs): void {
     const mision = view.mision;
-    if (mision.estado === 'locked') return;
+    if (!view.desbloqueada) return;
 
     const retoParaDashboard: any = {
       id_leccion: mision.id_leccion,

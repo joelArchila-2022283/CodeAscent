@@ -68,7 +68,7 @@
               <div class="language-top"><div class="language-name"><span class="language-icon"><i class="bi" [class]="iconoLenguaje(lenguaje.nombre)"></i></span>{{ nombreCorto(lenguaje.nombre) }}</div><strong>{{ porcentajeLenguaje(lenguaje) }}%</strong></div>
               <p>{{ lenguaje.descripcion || 'Continúa explorando este sector de CodeAscent.' }}</p>
                <div class="progress-track"><span [style.width.%]="porcentajeLenguaje(lenguaje)"></span></div>
-               <div class="language-meta"><span>Nivel <b>{{ lenguaje.nivel_actual || 1 }}</b></span><span><b>{{ lenguaje.misiones_completadas || 0 }}/{{ lenguaje.total_niveles }}</b> misiones</span></div>
+                <div class="language-meta"><span>Nivel <b>{{ lenguaje.nivel_actual || 1 }}</b></span><span><b>{{ lenguaje.misiones_completadas || 0 }}/{{ lenguaje.total_niveles }}</b> misiones</span><span><b>{{ lenguaje.xp_actual || 0 | number }}</b> XP</span></div>
             </article>
           } @empty {
             <div class="empty-state">Todavía no hay lenguajes activos en la base de datos.</div>

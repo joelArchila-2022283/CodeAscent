@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RetoService } from '../../../services/ts-reto.service';
+import { switchMap } from 'rxjs';
 import { MissionProgressService } from '../../../core/services/mission-progress.service';
 import { IReto } from '../../../interfaces/reto.interface';
 
@@ -23,7 +23,6 @@ export class TsTerminalComponent implements OnChanges {
   @Input() retoSeleccionado: IReto | null = null;
   @Output() back = new EventEmitter<void>();
   @Output() missionCompleted = new EventEmitter<void>();
-  private readonly retoService = inject(RetoService);
   private readonly missionProgressService = inject(MissionProgressService);
 
   private readonly codigoInicial = '// Escribe aquí tu solución en TypeScript\n';
@@ -48,12 +47,6 @@ export class TsTerminalComponent implements OnChanges {
     if (!changes['retoSeleccionado'] || !this.retoSeleccionado) return;
     this.reset();
     this.lab.set(this.construirLaboratorio(this.retoSeleccionado));
-    const idLeccion = (this.retoSeleccionado as any).id_leccion;
-    if (idLeccion) {
-      this.missionProgressService.updateProgress(idLeccion, 'terminal').subscribe({
-        error: () => undefined
-      });
-    }
   }
 
   private construirLaboratorio(reto: IReto): LabTs {
@@ -206,7 +199,6 @@ export class TsTerminalComponent implements OnChanges {
       this.mostrarFeedback.set(true);
 
       this.registrarEstadisticasTerminal();
-      this.registrarIntento();
     } catch (error) {
       const mensaje = error instanceof Error ? error.message : String(error);
       this.output.set(
@@ -228,23 +220,19 @@ export class TsTerminalComponent implements OnChanges {
   private registrarEstadisticasTerminal(): void {
     const idLeccion = (this.retoSeleccionado as any)?.id_leccion;
     if (!idLeccion) return;
-    this.missionProgressService.updateTerminalStats(
-      idLeccion,
-      { prediccion_correcta: this.prediccion().trim().length > 0, pistas_usadas: this.pistasSolicitadas() }
-    ).subscribe({ error: () => undefined });
-  }
 
-  private registrarIntento(): void {
-    const reto = this.retoSeleccionado;
-    if (!reto?.id_reto) return;
-    this.retoService.registrarIntento({
-      id_reto: reto.id_reto,
-      respuesta_usuario: this.code(),
-      correcto: true,
-      xp_obtenida: 0
-    }).subscribe({
+    this.missionProgressService.updateProgress(idLeccion, 'terminal').pipe(
+      switchMap(() => this.missionProgressService.updateTerminalStats(idLeccion, {
+        prediccion_correcta: this.prediccion().trim().length > 0,
+        pistas_usadas: this.pistasSolicitadas(),
+        codigo: this.code()
+      }))
+    ).subscribe({
       next: () => this.missionCompleted.emit(),
-      error: () => this.missionCompleted.emit()
+      error: () => {
+        this.feedback.set('La solución es correcta, pero no se pudo guardar el progreso del terminal. Ejecuta nuevamente.');
+        this.mostrarFeedback.set(true);
+      }
     });
   }
 

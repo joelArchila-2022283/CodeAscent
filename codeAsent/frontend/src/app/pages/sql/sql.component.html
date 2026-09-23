@@ -39,12 +39,10 @@
           class="hud-xp-rail"
           [attr.aria-label]="datosJugador().experienciaActual + ' XP de progreso'"
         >
-          <div
-            class="hud-xp-fill"
-            [style.width.%]="
-              (datosJugador().experienciaActual / datosJugador().experienciaSiguienteNivel) * 100
-            "
-          ></div>
+            <div
+              class="hud-xp-fill"
+              [style.width.%]="porcentajeExperiencia()"
+            ></div>
         </div>
         <div class="hud-meta-row">
           <span>{{
@@ -200,7 +198,7 @@
               <p class="leccion-metas">
                 <span class="sql-tag"
                   ><i class="bi bi-star-fill"></i> Recompensa:
-                  {{ retoSeleccionado()?.xp_recompensa || mision.xpRecompensa }} XP</span
+                  {{ nivelActivo()?.xp_requerida || mision.xpRecompensa }} XP</span
                 >
                 <span class="sql-tag"
                   ><i class="bi bi-diagram-3-fill"></i> Tema: {{ mision.tema }}</span

@@ -79,12 +79,12 @@ $tinta-oscura: #102019;
       width: 4.3rem;
       height: 4.3rem;
       margin-bottom: 0.5rem;
-      border: 1px solid currentColor;
-      border-radius: 18px;
-      background: rgba(4, 15, 11, .55);
+      border: 2px solid currentColor;
+      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(31, 62, 49, .95), rgba(8, 20, 16, .95));
       font-size: 2rem;
       color: $cobre-transistor;
-      box-shadow: 0 0 12px rgba(217, 164, 65, .18);
+      box-shadow: 4px 4px 0 $tinta-oscura, 0 0 14px rgba(217, 164, 65, .2);
       transition: transform .3s ease, box-shadow .3s ease;
       animation: iconoFlotante 3.2s ease-in-out infinite;
 

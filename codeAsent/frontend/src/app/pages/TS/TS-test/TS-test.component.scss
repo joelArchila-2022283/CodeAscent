@@ -71,24 +71,36 @@ header p {
     display: flex;
     align-items: center;
     gap: .75rem;
-    padding: .8rem;
+    min-height: 52px;
+    padding: .85rem 1rem;
     color: #e1e9f5;
     text-align: left;
-    background: #0d1622;
+    background: linear-gradient(145deg, #16263a, #0d1622);
     border: 2px solid #293b55;
-    border-radius: 7px;
-    font: .9rem monospace;
+    border-radius: 9px;
+    box-shadow: 0 3px 0 #080b12;
+    font: 700 .9rem 'Baloo 2', sans-serif;
     cursor: pointer;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
 }
 
 .options button:hover,
 .options button.selected {
     border-color: #168cff;
+    background: #1b3552;
+    transform: translateY(-1px);
 }
 
 .options button.correct {
     border-color: #00d9ff;
     color: #9fe8ff;
+    background: #123447;
+}
+
+.options button.incorrect {
+    border-color: #d66b5b;
+    color: #ffd0c4;
+    background: #42231f;
 }
 
 .options button span {
@@ -98,6 +110,10 @@ header p {
 
 .options button i {
     margin-left: auto;
+}
+
+.options button:disabled {
+    cursor: default;
 }
 
 .answer-note {

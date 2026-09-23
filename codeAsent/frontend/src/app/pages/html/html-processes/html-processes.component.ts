@@ -2,6 +2,19 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
 import { HtmlDataService, HtmlMision } from '../../../services/html-data.service';
 
+const MISIONES_HTML = [
+  ['Estructura fundamental', 'Construye el documento HTML5 con doctype, html, head y body.'],
+  ['Jerarquía de texto', 'Organiza títulos, subtítulos y párrafos con una lectura clara.'],
+  ['Hipervínculos', 'Conecta la expedición con otros destinos usando href.'],
+  ['Imágenes', 'Inserta recursos visuales con src y texto alternativo alt.'],
+  ['Listas', 'Agrupa HTML, CSS y SQL con ul, ol y li.'],
+  ['Tablas', 'Representa nombres y niveles con filas, encabezados y celdas.'],
+  ['Formularios', 'Recoge el correo del jugador con label, input y button.'],
+  ['Inputs avanzados', 'Declara controles email, number y date según el dato.'],
+  ['Semántica', 'Divide la página en header, main, section y footer.'],
+  ['Accesibilidad global', 'Declara idioma, identidad y clasificación del documento.']
+] as const;
+
 @Component({
   selector: 'app-html-processes',
   standalone: true,
@@ -22,7 +35,13 @@ export class HtmlProcessesComponent implements OnInit {
   ngOnInit(): void {
     this.htmlDataService.obtenerMisiones().subscribe({
       next: misiones => {
-        this.missions.set(misiones);
+        this.missions.set(misiones.map((mision, indice) => {
+          const [nombre, descripcion] = MISIONES_HTML[indice] ?? [mision.nivel.nombre, mision.nivel.descripcion];
+          return {
+            ...mision,
+            nivel: { ...mision.nivel, nombre, descripcion }
+          };
+        }));
         this.cargando.set(false);
       },
       error: error => {

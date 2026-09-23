@@ -15,6 +15,7 @@ export interface ResultadoConsolaSql {
   xp: number;
   prediccionCorrecta: boolean;
   pistasUsadas: number;
+  codigo: string;
 }
 
 @Component({
@@ -65,6 +66,7 @@ export class ConsolaSqlComponent implements OnChanges {
   }
 
   avanzarAEditor(): void {
+    if (this.prediccionCorrecta() !== true) return;
     this.etapaActual.set(3);
   }
 
@@ -119,6 +121,7 @@ export class ConsolaSqlComponent implements OnChanges {
       xp: this.mision?.xpRecompensa ?? 0,
       prediccionCorrecta: this.prediccionCorrecta() === true,
       pistasUsadas: this.pistasSolicitadas(),
+      codigo: this.codigoIngresado(),
     });
   }
 }
