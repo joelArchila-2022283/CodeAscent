@@ -1,62 +1,70 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
+import { MissionProgressService } from '../../../core/services/mission-progress.service';
 
-import {
-    TsDataService,
-    TodasLasLeccionesTS
-} from '../../../services/ts-data.service';
+export interface ManualParsed {
+  conceptual: string;
+  logico: string;
+  sintactico: string;
+}
 
 @Component({
-    selector: 'app-ts-data',
-    standalone: true,
-    imports: [CommonModule],
-    templateUrl: './TS-data.component.html',
-    styleUrl: './TS-data.component.scss'
+  selector: 'app-ts-data',
+  templateUrl: './TS-data.component.html',
+  styleUrls: ['./TS-data.component.scss']
 })
-export class TSDataComponent implements OnInit {
+export class TSDataComponent implements OnChanges {
+  @Input() mission: any = null;
+  @Output() back = new EventEmitter<void>();
+  @Output() next = new EventEmitter<void>();
 
-    @Output() back = new EventEmitter<void>();
+  private readonly missionProgressService = inject(MissionProgressService);
 
-    private tsDataService = inject(TsDataService);
+  manual = signal<ManualParsed>({ conceptual: 'Selecciona una misión para cargar el manual.', logico: '...', sintactico: '...' });
 
-    cargando = signal<boolean>(true);
-    errorCarga = signal<string | null>(null);
-
-    lecciones = signal<TodasLasLeccionesTS[]>([]);
-
-    ngOnInit(): void {
-        this.cargarDatos();
-    }
-
-    cargarDatos(): void {
-        this.cargando.set(true);
-        this.errorCarga.set(null);
-
-        this.tsDataService.obtenerTodasLasLecciones().subscribe({
-            next: (datos) => {
-                this.lecciones.set(datos);
-                this.cargando.set(false);
-            },
-
-            error: (err) => {
-                console.error(
-                    'Error al cargar las lecciones TypeScript:',
-                    err
-                );
-
-                this.errorCarga.set(
-                    'No se pudieron cargar las lecciones de TypeScript.'
-                );
-
-                this.cargando.set(false);
-            }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mission']) {
+      this.procesarLeccion();
+      if (this.mission?.id_leccion) {
+        this.missionProgressService.updateProgress(this.mission.id_leccion, 'manual').subscribe({
+          error: () => undefined
         });
+      }
+    }
+  }
+
+  procesarLeccion(): void {
+    const contenido = this.mission?.contenido ?? this.mission?.leccionContenido ?? '';
+    if (!contenido) return;
+
+    const extraer = (inicio: string, fin?: string) => {
+      const idxInicio = contenido.indexOf(inicio);
+      if (idxInicio === -1) return '';
+      const start = idxInicio + inicio.length;
+      if (!fin) return contenido.substring(start).trim();
+      const idxFin = contenido.indexOf(fin, start);
+      return idxFin === -1 ? contenido.substring(start).trim() : contenido.substring(start, idxFin).trim();
+    };
+
+    if (contenido.includes('NIVEL CONCEPTUAL:')) {
+      this.manual.set({
+        conceptual: extraer('NIVEL CONCEPTUAL:', 'NIVEL LOGICO:') || contenido,
+        logico: extraer('NIVEL LOGICO:', 'NIVEL SINTACTICO:'),
+        sintactico: extraer('NIVEL SINTACTICO:', 'PROBLEMA ABP:')
+      });
+      return;
     }
 
-    cantidadLecciones(): number {
-        return this.lecciones().reduce(
-            (total, grupo) => total + grupo.lecciones.length,
-            0
-        );
-    }
+    const oraciones = contenido
+      .trim()
+      .split(/(?<=[.!?])\s+/)
+      .map((oracion: string) => oracion.trim())
+      .filter(Boolean);
+    const codigosEnLinea = contenido.match(/`([^`]+)`/g)?.map((codigo: string) => codigo.replace(/`/g, '').trim()).filter(Boolean) ?? [];
+
+    this.manual.set({
+      conceptual: oraciones[0] || contenido,
+      logico: oraciones.slice(1).join(' ') || contenido,
+      sintactico: codigosEnLinea.length ? codigosEnLinea.join('\n') : contenido
+    });
+  }
 }

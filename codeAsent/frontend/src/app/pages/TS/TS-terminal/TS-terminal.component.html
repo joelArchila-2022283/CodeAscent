@@ -1,383 +1,82 @@
 <section class="ts-section terminal-section">
-
   <header>
-
-    <span class="section-kicker">
-      <i class="bi bi-terminal-fill"></i>
-      CRT-VGA / PUERTO 02
-    </span>
-
+    <span class="section-kicker"><i class="bi bi-terminal-fill"></i> CRT-VGA / PUERTO 02</span>
     <h2>TERMINAL DE TYPESCRIPT</h2>
-
-    <p>
-      Resuelve problemas, predice resultados,
-      ejecuta tu código y aprende de tus errores.
-    </p>
-
+    <p>Escribe TypeScript, predice el resultado y observa cómo se ejecuta tu solución.</p>
   </header>
 
-
   @if (cargando()) {
-
-  <div class="text-center py-4">
-
-    <div class="spinner-border text-info" role="status">
-    </div>
-
-    <p class="mt-2">
-      Cargando recorrido TypeScript...
-    </p>
-
-  </div>
-
+    <div class="text-center py-4"><div class="spinner-border text-info" role="status"></div><p class="mt-2">Cargando laboratorio TypeScript...</p></div>
   }
-
 
   @if (!cargando() && errorCarga()) {
-
-  <div class="lesson-strip">
-
-    <span>
-      <i class="bi bi-exclamation-triangle"></i>
-      ERROR
-    </span>
-
-    <p>
-      {{ errorCarga() }}
-    </p>
-
-  </div>
-
+    <div class="lesson-strip"><span><i class="bi bi-exclamation-triangle"></i> ERROR</span><p>{{ errorCarga() }}</p></div>
   }
-
 
   @if (!cargando() && !errorCarga() && !finalizado()) {
-
-  <!-- PROGRESO -->
-
-  <div class="lesson-strip">
-
-    <span>
-      <i class="bi bi-signpost-split"></i>
-      RECORRIDO TYPESCRIPT
-    </span>
-
-    <p>
-      NIVEL {{ obtenerNumeroNivel() }}
-      /
-      {{ contenidos().length }}
-
-      —
-      {{ obtenerTituloNivel() }}
-    </p>
-
-  </div>
-
-
-  <!-- PROBLEMA -->
-
-  <div class="terminal-challenge">
-
-    <span class="preview-label">
-      <i class="bi bi-crosshair"></i>
-      RETO
-    </span>
-
-    <h3>
-      {{ obtenerTituloReto() }}
-    </h3>
-
-    <p>
-      {{ obtenerProblema() }}
-    </p>
-
-
-    @if (obtenerConcepto()) {
-
-    <details>
-
-      <summary>
-        <i class="bi bi-book"></i>
-        CONSULTAR LECCIÓN
-      </summary>
-
-      <p>
-        {{ obtenerConcepto() }}
-      </p>
-
-    </details>
-
-    }
-
-
-    @if (obtenerEjemplo()) {
-
-    <button type="button" class="secondary" (click)="cargarEjemploEnEditor()">
-
-      <i class="bi bi-code-square"></i>
-
-      VER EJEMPLO
-
-    </button>
-
-    }
-
-  </div>
-
-
-  <!-- TERMINAL -->
-
-  <div class="terminal-grid">
-
-
-    <!-- EDITOR -->
-
-    <div class="terminal-window">
-
-      <div class="terminal-bar">
-
-        <span>
-
-          <i class="bi bi-circle-fill"></i>
-          <i class="bi bi-circle-fill"></i>
-          <i class="bi bi-circle-fill"></i>
-
-        </span>
-
-        <small>
-          typescript-shell / main.ts
-        </small>
-
-        <i class="bi bi-cpu-fill"></i>
-
-      </div>
-
-
-      <textarea [ngModel]="code()" (ngModelChange)="code.set($event)" spellcheck="false" aria-label="Editor TypeScript">
-        </textarea>
-
-
-      <div class="terminal-actions">
-
-        <button class="ignite" type="button" (click)="prepararEjecucion()">
-
-          <i class="bi bi-play-fill"></i>
-          PREPARAR EJECUCIÓN
-
-        </button>
-
-
-        <button class="secondary" type="button" (click)="reset()">
-
-          <i class="bi bi-arrow-clockwise"></i>
-          RESTAURAR
-
-        </button>
-
-
-        <button class="danger" type="button" (click)="clear()">
-
-          <i class="bi bi-trash-fill"></i>
-          LIMPIAR
-
-        </button>
-
-      </div>
-
+    <div class="flow-steps" aria-label="Flujo de la misión">
+      <span class="flow-step flow-step--done">01 LECCIÓN</span><span class="flow-line"></span>
+      <span class="flow-step flow-step--done">02 PREDICCIÓN</span><span class="flow-line"></span>
+      <span class="flow-step flow-step--active">03 TERMINAL</span>
     </div>
 
-
-    <!-- SALIDA -->
-
-    <div class="preview-window">
-
-      <span class="preview-label">
-
-        <i class="bi bi-terminal"></i>
-        SALIDA DEL PROGRAMA
-
-      </span>
-
-
-      <div class="preview-content">
-
-        @if (!output()) {
-
-        <div class="terminal-waiting">
-
-          <i class="bi bi-cpu"></i>
-
-          <p>
-            ESPERANDO CÓDIGO TYPESCRIPT...
-          </p>
-
-          <small>
-            Resuelve el reto y ejecuta
-            tu solución.
-          </small>
-
+    <div class="terminal-challenge">
+      <span class="preview-label"><i class="bi bi-crosshair"></i> RETO TYPESCRIPT</span>
+      <h3>{{ obtenerTituloReto() }}</h3>
+      <p>{{ obtenerProblema() }}</p>
+      @if (obtenerConcepto()) {
+        <details><summary><i class="bi bi-book"></i> CONSULTAR LECCIÓN</summary><p>{{ obtenerConcepto() }}</p></details>
+      }
+      @if (lab()?.pistas?.length) {
+        <div class="html-hints">
+          <span>PISTAS: {{ pistasSolicitadas() }}/{{ lab()?.pistas?.length }}</span>
+          <button type="button" (click)="solicitarPista()" [disabled]="pistasSolicitadas() >= (lab()?.pistas?.length ?? 0)">PISTA {{ pistasSolicitadas() + 1 }}</button>
+          @if (pistasSolicitadas() > 0) { <p>{{ obtenerPista() }}</p> }
         </div>
-
-        }
-
-        @else {
-
-        <pre class="compiler-output" [class.compiler-error]="error()"
-          [class.compiler-success]="compiled()">{{ output() }}</pre>
-
-        }
-
-      </div>
-
-
-      @if (compiled()) {
-
-      <span class="render-status success">
-
-        <i class="bi bi-check-circle-fill"></i>
-
-        EJECUCIÓN OK
-
-      </span>
-
       }
-
-
-      @if (error()) {
-
-      <span class="render-status error">
-
-        <i class="bi bi-x-circle-fill"></i>
-
-        ERROR TS
-
-      </span>
-
-      }
-
     </div>
 
-  </div>
+    <div class="terminal-grid">
+      <div class="terminal-window">
+        <div class="terminal-bar"><span><i class="bi bi-circle-fill"></i><i class="bi bi-circle-fill"></i><i class="bi bi-circle-fill"></i></span><small>{{ retoSeleccionado?.titulo || 'Selecciona una misión' }}</small><i class="bi bi-cpu-fill"></i></div>
+        <textarea [ngModel]="code()" (ngModelChange)="actualizarCodigo($event)" spellcheck="false" aria-label="Editor TypeScript"></textarea>
+        <div class="terminal-actions">
+          <button class="ignite" type="button" (click)="prepararEjecucion()"><i class="bi bi-play-fill"></i> PREPARAR EJECUCIÓN</button>
+          <button class="secondary" type="button" (click)="reset()"><i class="bi bi-arrow-clockwise"></i> RESTAURAR</button>
+          <button class="danger" type="button" (click)="clear()"><i class="bi bi-trash-fill"></i> LIMPIAR</button>
+        </div>
+      </div>
 
+      <div class="preview-window">
+        <span class="preview-label"><i class="bi bi-terminal"></i> SALIDA DEL PROGRAMA</span>
+        <div class="preview-content">
+          @if (!output()) {
+            <div class="terminal-waiting"><i class="bi bi-cpu"></i><p>ESPERANDO CÓDIGO TYPESCRIPT...</p><small>Resuelve el reto y ejecuta tu solución.</small></div>
+          } @else {
+            <pre class="compiler-output" [class.compiler-error]="error()" [class.compiler-success]="compiled()">{{ output() }}</pre>
+          }
+        </div>
+        @if (compiled()) { <span class="render-status success"><i class="bi bi-check-circle-fill"></i> EJECUCIÓN OK</span> }
+        @if (error()) { <span class="render-status error"><i class="bi bi-x-circle-fill"></i> ERROR TS</span> }
+      </div>
+    </div>
 
-  <!-- PREDICCIÓN -->
+    @if (mostrarPrediccion() && !ejecutado()) {
+      <div class="lesson-strip"><span><i class="bi bi-eye"></i> PREDICE EL RESULTADO</span><p>¿Qué crees que aparecerá en la terminal?</p><input type="text" [ngModel]="prediccion()" (ngModelChange)="prediccion.set($event)" placeholder="Escribe tu predicción..." aria-label="Predicción" /><button class="ignite" type="button" (click)="compile()"><i class="bi bi-play-fill"></i> EJECUTAR TS</button></div>
+    }
 
-  @if (mostrarPrediccion() && !ejecutado()) {
+    @if (mostrarFeedback()) {
+      <div class="lesson-strip"><span><i class="bi bi-chat-square-text"></i> RETROALIMENTACIÓN</span><p>{{ feedback() }}</p></div>
+    }
 
-  <div class="lesson-strip">
-
-    <span>
-
-      <i class="bi bi-eye"></i>
-      PREDICE EL RESULTADO
-
-    </span>
-
-    <p>
-      ¿Qué crees que aparecerá
-      en la terminal?
-    </p>
-
-
-    <input type="text" [ngModel]="prediccion()" (ngModelChange)="prediccion.set($event)"
-      placeholder="Escribe tu predicción..." aria-label="Predicción" />
-
-
-    <button class="ignite" type="button" (click)="compile()">
-
-      <i class="bi bi-play-fill"></i>
-
-      EJECUTAR TS
-
-    </button>
-
-  </div>
-
+    @if (ejecutado() && !error()) {
+      <button class="ignite" type="button" (click)="siguienteReto()"><i class="bi bi-check-circle"></i> CONTINUAR AL CUESTIONARIO</button>
+    }
   }
-
-
-  <!-- FEEDBACK -->
-
-  @if (mostrarFeedback()) {
-
-  <div class="lesson-strip">
-
-    <span>
-
-      <i class="bi bi-chat-square-text"></i>
-      RETROALIMENTACIÓN
-
-    </span>
-
-    <p>
-      {{ feedback() }}
-    </p>
-
-  </div>
-
-  }
-
-
-  <!-- SIGUIENTE -->
-
-  @if (ejecutado() && !error()) {
-
-  <button class="ignite" type="button" (click)="siguienteReto()">
-
-    @if (
-    indiceActual() + 1 < contenidos().length ) { <i class="bi bi-arrow-right"></i>
-
-      SIGUIENTE RETO
-
-      }
-      @else {
-
-      <i class="bi bi-check-circle"></i>
-
-      FINALIZAR RECORRIDO
-
-      }
-
-  </button>
-
-  }
-
-  }
-
-
-  <!-- FINAL -->
 
   @if (finalizado()) {
-
-  <div class="lesson-strip">
-
-    <span>
-
-      <i class="bi bi-trophy-fill"></i>
-      RECORRIDO COMPLETADO
-
-    </span>
-
-    <h3>
-      ¡Has completado los 10 niveles de
-      práctica TypeScript!
-    </h3>
-
-    <p>
-      Has recorrido desde tipos primitivos
-      hasta narrowing y type guards.
-    </p>
-
-  </div>
-
+    <div class="lesson-strip"><span><i class="bi bi-trophy-fill"></i> RECORRIDO COMPLETADO</span><h3>Laboratorio TypeScript completado.</h3><p>Tu ejecución fue registrada. Continúa con el cuestionario de la misión.</p></div>
   }
 
-
-  <button class="ts-back" type="button" (click)="back.emit()">
-
-    <i class="bi bi-arrow-left"></i>
-    VOLVER AL PANEL
-
-  </button>
-
+  <button class="ts-back" type="button" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER A LA LECCIÓN</button>
 </section>

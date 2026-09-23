@@ -5,6 +5,16 @@
     <p>Responde las preguntas de la misión. Cada respuesta correcta otorga su XP una sola vez.</p>
   </header>
 
+  <div class="quiz-menu" aria-label="Progreso del cuestionario">
+    <div class="quiz-menu__brand"><i class="bi bi-cpu-fill"></i><span>NÚCLEO DE EVALUACIÓN</span></div>
+    <div class="quiz-steps">
+      @for (item of preguntas(); track item.id_reto; let i = $index) {
+        <span class="quiz-step" [class.quiz-step--active]="i === preguntaActual()" [class.quiz-step--done]="i < preguntaActual() || finalizado()"><b>{{ i + 1 }}</b><small>{{ i < preguntaActual() || finalizado() ? 'VALIDADA' : i === preguntaActual() ? 'ACTIVA' : 'PENDIENTE' }}</small></span>
+      }
+    </div>
+    <span class="quiz-menu__counter">{{ preguntaActual() + 1 }}/{{ preguntas().length || 0 }}</span>
+  </div>
+
   @if (cargando()) {
     <div class="test-panel"><h3>Cargando preguntas...</h3></div>
   } @else if (!preguntas().length) {
@@ -16,7 +26,8 @@
       <p class="answer-note good">XP obtenido en este intento: {{ xpGanado() }}</p>
     </div>
   } @else {
-    <div class="test-progress">Pregunta {{ preguntaActual() + 1 }} de {{ preguntas().length }}</div>
+    @if (mensajeError()) { <p class="answer-note" role="alert">{{ mensajeError() }}</p> }
+    <div class="test-progress"><span>Pregunta {{ preguntaActual() + 1 }} de {{ preguntas().length }}</span><i class="bi bi-patch-question-fill" aria-hidden="true"></i></div>
     <div class="test-panel">
       <div class="html-orb"><i class="bi bi-question-lg"></i></div>
       <h3>{{ pregunta()?.enunciado }}</h3>
@@ -44,11 +55,11 @@
   <div class="action-buttons" style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
     <button class="html-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER AL MANUAL</button>
     @if (respondida() && !esCorrecta()) {
-      <button class="html-next" (click)="reintentar()">INTENTAR DE NUEVO</button>
+      <button class="quiz-action" (click)="reintentar()">INTENTAR DE NUEVO</button>
     } @else if (respondida() && esCorrecta()) {
-      <button class="html-next" (click)="siguiente()">{{ preguntaActual() === preguntas().length - 1 ? 'FINALIZAR' : 'SIGUIENTE' }} <i class="bi bi-arrow-right"></i></button>
+      <button class="quiz-action quiz-action--primary" (click)="siguiente()">{{ preguntaActual() === preguntas().length - 1 ? 'FINALIZAR' : 'SIGUIENTE' }} <i class="bi bi-arrow-right"></i></button>
     } @else if (finalizado()) {
-      <button class="html-next" (click)="next.emit()">VOLVER AL DASHBOARD</button>
+      <button class="quiz-action quiz-action--primary" (click)="next.emit()">VOLVER AL DASHBOARD</button>
     }
   </div>
 </section>

@@ -47,6 +47,21 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       ORDER BY l.id_lenguaje
     `, [idUsuario]);
 
+    // Mantener la respuesta antigua sincronizada con el perfil HTML, sin usarla
+    // como fuente global para los cuatro lenguajes.
+    const perfilHtml = resPerfil.rows.find((lenguaje: any) =>
+      String(lenguaje.nombre).toLowerCase() === 'html'
+    );
+    if (perfilHtml) {
+      progreso = {
+        ...progreso,
+        id_lenguaje: perfilHtml.id_lenguaje,
+        id_nivel_actual: perfilHtml.nivel_actual,
+        xp_actual: perfilHtml.xp_actual,
+        porcentaje: perfilHtml.porcentaje
+      };
+    }
+
     const resEstadisticas = await pool.query(`
       SELECT
         (SELECT COUNT(*)::int FROM nivel_usuario WHERE id_usuario = $1 AND completado = TRUE) AS niveles_completados,
@@ -109,14 +124,8 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       'TypeScript': 'bi-filetype-tsx'
     };
 
-    // Mapear progresos por id_lenguaje
-    const resProgresosUser = await pool.query(
-      'SELECT id_lenguaje, porcentaje FROM progreso WHERE id_usuario = $1',
-      [idUsuario]
-    );
-
     const mapProgresos = new Map<number, number>();
-    resProgresosUser.rows.forEach((p: any) => mapProgresos.set(p.id_lenguaje, p.porcentaje));
+    resPerfil.rows.forEach((p: any) => mapProgresos.set(p.id_lenguaje, Number(p.porcentaje || 0)));
 
     // Construir los nodos en la secuencia exacta requerida
     const nodosMapa = resLenguajes.rows.map((lenguaje: any, index: number) => {

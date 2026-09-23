@@ -14,7 +14,9 @@ router.get('/:leccionId/quiz', async (req, res) => {
                     ORDER BY a.id_respuesta) FILTER (WHERE a.id_respuesta IS NOT NULL), '[]'::json) AS respuestas
          FROM reto r
          LEFT JOIN respuesta a ON a.id_reto = r.id_reto
-         WHERE r.id_leccion = $1 AND r.estado = TRUE
+         WHERE r.id_leccion = $1
+           AND r.estado = TRUE
+           AND r.tipo_reto = 'opcion_multiple'
          GROUP BY r.id_reto, r.titulo
          ORDER BY r.id_reto
           LIMIT 3`,
@@ -31,6 +33,7 @@ router.post('/:missionId/complete', async (req, res) => {
         const missionId = Number(req.params.missionId);
         const correct = Number(req.body.correct ?? 0);
         const total = Number(req.body.total ?? 0);
+        const source = req.body.source === 'terminal' ? 'terminal' : 'quiz';
         const progress = await client.query(
             `SELECT mp.*, n.xp_requerida, n.id_lenguaje, l.slug
              FROM mission_progress mp
@@ -43,7 +46,16 @@ router.post('/:missionId/complete', async (req, res) => {
         );
         const row = progress.rows[0];
         if (!row) return res.status(404).json({ status: 'error', message: 'Progreso no encontrado.' });
-        if (row.reached_step !== 'quiz') return res.status(409).json({ status: 'error', message: 'El cuestionario aún no está desbloqueado.' });
+        if (source === 'terminal') {
+            await client.query('COMMIT');
+            return res.json({ status: 'success', data: { completed: false, xp_awarded: 0, message: 'La consola quedó registrada. Completa el cuestionario para obtener tus puntos.' } });
+        }
+        if (!row.terminal_code || !row.prediccion_correcta) {
+            return res.status(409).json({ status: 'error', message: 'Recuerda realizar el ejercicio de la consola para obtener tus puntos' });
+        }
+        if (source === 'quiz' && row.reached_step !== 'quiz') {
+            return res.status(409).json({ status: 'error', message: 'El cuestionario aún no está desbloqueado.' });
+        }
 
         const perfect = total > 0 && correct === total;
         if (!perfect) {

@@ -3,17 +3,19 @@ import { pool } from '../config/conexion';
 export interface LenguajeCatalogo {
     id_lenguaje: number;
     nombre: string;
-    slug: string;
     descripcion: string | null;
 }
 
 export class LanguageService {
     static async resolverPorSlug(slug: string): Promise<LenguajeCatalogo> {
+        const nombre = slug.trim().toLowerCase();
+
         const resultado = await pool.query<LenguajeCatalogo>(
-            `SELECT id_lenguaje, nombre, slug, descripcion
+            `SELECT id_lenguaje, nombre, descripcion
              FROM lenguaje
-             WHERE slug = $1 AND estado = TRUE`,
-            [slug.trim().toLowerCase()]
+             WHERE LOWER(nombre) = $1
+               AND estado = TRUE`,
+            [nombre]
         );
 
         if (resultado.rows.length !== 1) {

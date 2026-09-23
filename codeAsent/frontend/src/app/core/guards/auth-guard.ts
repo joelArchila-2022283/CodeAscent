@@ -8,7 +8,7 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (authService.estaAutenticado()) {
-    return true; 
+    return true;
   } else {
     router.navigate(['/login']);
     return false;
@@ -20,8 +20,8 @@ export const guestGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (authService.estaAutenticado()) {
-    router.navigate(['/dashboard']); 
-    return false; 
+    router.navigate(['/dashboard']);
+    return false;
   }
   return true;
 };

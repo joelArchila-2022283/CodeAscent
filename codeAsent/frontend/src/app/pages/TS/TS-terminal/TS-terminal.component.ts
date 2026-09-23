@@ -1,871 +1,417 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-import { forkJoin, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
-
-import { TsDataService } from '../../../services/ts-data.service';
-import { EjemploService } from '../../../services/ts-ejemplo.service';
 import { RetoService } from '../../../services/ts-reto.service';
-
-import { ILeccion } from '../../../interfaces/leccion.interface';
-import { IEjemplo } from '../../../interfaces/ejemplo.interface';
+import { MissionProgressService } from '../../../core/services/mission-progress.service';
 import { IReto } from '../../../interfaces/reto.interface';
 
-interface ContenidoTerminal {
-
-  leccion: ILeccion;
-
-  ejemplo: IEjemplo | null;
-
-  reto: IReto | null;
-
+interface PistaTs {
+  texto: string;
 }
 
-@Component({
-  selector: 'app-ts-terminal',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './TS-terminal.component.html',
-  styleUrl: './TS-terminal.component.scss'
-})
-export class TsTerminalComponent implements OnInit {
+interface LabTs {
+  titulo_leccion: string;
+  contenido_leccion: string;
+  pistas: PistaTs[];
+}
 
-  @Input()
-  retoSeleccionado: IReto | null = null;
+interface ReglaTs {
+  busquedas: Array<{ patron: string; descripcion: string }>;
+}
 
-  @Output()
-  back =
-    new EventEmitter<void>();
+@Component({ selector: 'app-ts-terminal', standalone: true, imports: [FormsModule], templateUrl: './TS-terminal.component.html', styleUrl: './TS-terminal.component.scss' })
+export class TsTerminalComponent implements OnChanges {
+  @Input() retoSeleccionado: IReto | null = null;
+  @Output() back = new EventEmitter<void>();
+  @Output() missionCompleted = new EventEmitter<void>();
+  private readonly retoService = inject(RetoService);
+  private readonly missionProgressService = inject(MissionProgressService);
 
-  private tsDataService =
-    inject(TsDataService);
+  private readonly codigoInicial = '// Escribe aquí tu solución en TypeScript\n';
 
-  private ejemploService =
-    inject(EjemploService);
+  cargando = signal(false);
+  errorCarga = signal<string | null>(null);
+  lab = signal<LabTs | null>(null);
+  code = signal(this.codigoInicial);
+  output = signal('');
+  compiled = signal(false);
+  error = signal(false);
+  ejecutado = signal(false);
+  finalizado = signal(false);
+  prediccion = signal('');
+  mostrarPrediccion = signal(false);
+  feedback = signal('');
+  mostrarFeedback = signal(false);
+  pistasSolicitadas = signal(0);
+  estrellasRestantes = signal(3);
 
-  private retoService =
-    inject(RetoService);
-
-  cargando =
-    signal(true);
-
-  errorCarga =
-    signal<string | null>(null);
-
-  contenidos =
-    signal<ContenidoTerminal[]>([]);
-
-  indiceActual =
-    signal(0);
-
-  code =
-    signal('');
-
-  output =
-    signal('');
-
-  compiled =
-    signal(false);
-
-  error =
-    signal(false);
-
-  ejecutado =
-    signal(false);
-
-  prediccion =
-    signal('');
-
-  mostrarPrediccion =
-    signal(false);
-
-  feedback =
-    signal('');
-
-  mostrarFeedback =
-    signal(false);
-
-  finalizado =
-    signal(false);
-
-  codigoInicial = '';
-
-  ngOnInit(): void {
-    this.cargarContenidos();
-  }
-
-  private cargarContenidos(): void {
-
-    this.cargando.set(true);
-
-    this.errorCarga.set(null);
-
-    this.tsDataService
-      .obtenerContexto()
-      .pipe(
-
-        switchMap(contexto => {
-
-          const niveles =
-            contexto.niveles || [];
-
-          if (
-            niveles.length === 0
-          ) {
-            return of([]);
-          }
-
-          const peticionesNiveles =
-            niveles
-
-              .filter(
-                nivel =>
-                  !!nivel.id_nivel
-              )
-
-              .sort(
-                (a, b) =>
-                  a.numero_nivel -
-                  b.numero_nivel
-              )
-
-              .map(
-                nivel =>
-                  this.obtenerContenidoNivel(
-                    nivel.id_nivel!
-                  )
-              );
-
-          return forkJoin(
-            peticionesNiveles
-          );
-
-        })
-
-      )
-
-      .subscribe({
-
-        next: contenidos => {
-
-          const lista =
-            contenidos.filter(
-              (
-                contenido
-              ): contenido is ContenidoTerminal =>
-                contenido !== null
-            );
-
-          this.contenidos.set(lista);
-
-          if (
-            this.retoSeleccionado?.id_reto
-          ) {
-
-            const indice =
-              lista.findIndex(
-                contenido =>
-                  contenido.reto?.id_reto ===
-                  this.retoSeleccionado?.id_reto
-              );
-
-            if (indice >= 0) {
-
-              this.indiceActual.set(
-                indice
-              );
-
-            } else {
-
-              this.indiceActual.set(0);
-
-            }
-
-          } else {
-
-            this.indiceActual.set(0);
-
-          }
-
-          if (
-            lista.length > 0
-          ) {
-
-            this.cargarContenidoActual();
-
-          } else {
-
-            this.errorCarga.set(
-              'No existen contenidos TypeScript configurados.'
-            );
-
-            this.cargando.set(false);
-          }
-
-        },
-
-        error: err => {
-
-          console.error(
-            'Error al cargar contenidos TypeScript:',
-            err
-          );
-
-          this.errorCarga.set(
-            'No se pudo cargar el contenido del Terminal.'
-          );
-
-          this.cargando.set(false);
-        }
-
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['retoSeleccionado'] || !this.retoSeleccionado) return;
+    this.reset();
+    this.lab.set(this.construirLaboratorio(this.retoSeleccionado));
+    const idLeccion = (this.retoSeleccionado as any).id_leccion;
+    if (idLeccion) {
+      this.missionProgressService.updateProgress(idLeccion, 'terminal').subscribe({
+        error: () => undefined
       });
-  }
-
-  private obtenerContenidoNivel(
-    idNivel: number
-  ) {
-
-    return this.tsDataService
-      .obtenerLeccionesPorNivel(
-        idNivel
-      )
-
-      .pipe(
-
-        switchMap(lecciones => {
-
-          const leccion =
-            lecciones[0];
-
-          if (
-            !leccion?.id_leccion
-          ) {
-
-            return of(null);
-
-          }
-
-          return forkJoin({
-
-            ejemplo:
-              this.ejemploService
-                .obtenerPorLeccion(
-                  leccion.id_leccion
-                )
-                .pipe(
-
-                  map(
-                    ejemplos =>
-                      ejemplos[0] ?? null
-                  ),
-
-                  catchError(
-                    () => of(null)
-                  )
-
-                ),
-
-            reto:
-              this.retoService
-                .obtenerRetosDeLecciones([
-                  leccion.id_leccion
-                ])
-
-                .pipe(
-
-                  map(
-                    retos =>
-                      retos.find(
-                        reto =>
-                          reto.tipo_reto ===
-                          'codigo'
-                      ) ?? null
-                  ),
-
-                  catchError(
-                    () => of(null)
-                  )
-
-                )
-
-          })
-
-            .pipe(
-
-              map(
-                ({ ejemplo, reto }) => ({
-
-                  leccion,
-
-                  ejemplo,
-
-                  reto
-
-                })
-
-              )
-
-            );
-
-        }),
-
-        catchError(
-          () => of(null)
-        )
-
-      );
-  }
-
-  private cargarContenidoActual(): void {
-
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    if (!contenido) {
-      return;
     }
-
-    this.codigoInicial =
-      '// Escribe aquí tu solución TypeScript\n\n';
-
-    this.code.set(
-      this.codigoInicial
-    );
-
-    this.output.set('');
-
-    this.prediccion.set('');
-
-    this.feedback.set('');
-
-    this.compiled.set(false);
-
-    this.error.set(false);
-
-    this.ejecutado.set(false);
-
-    this.mostrarPrediccion.set(false);
-
-    this.mostrarFeedback.set(false);
-
-    this.finalizado.set(false);
-
-    this.cargando.set(false);
   }
 
-  obtenerNumeroNivel(): number {
-
-    return (
-      this.indiceActual() + 1
-    );
+  private construirLaboratorio(reto: IReto): LabTs {
+    return {
+      titulo_leccion: reto.titulo,
+      contenido_leccion: (reto as any).contenido || (reto as any).leccionContenido || reto.descripcion || '',
+      pistas: this.generarPistas(reto.titulo).map(texto => ({ texto }))
+    };
   }
 
-  obtenerTituloNivel(): string {
-
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    return (
-      contenido?.leccion?.titulo ||
-      `Nivel TypeScript ${this.obtenerNumeroNivel()}`
-    );
+  private generarPistas(titulo: string): string[] {
+    const nombre = titulo.toLowerCase();
+    if (nombre.includes('interfaz') || nombre.includes('interface')) {
+      return ['Describe la forma de un objeto con la palabra interface.', 'Define cada propiedad con un tipo.', 'Tipa la variable con el nombre de la interface.', 'Usa la variable dentro de console.log.'];
+    }
+    if (nombre.includes('arreglo') || nombre.includes('array') || nombre.includes('lista') || nombre.includes('masiv')) {
+      return ['Los datos agrupados se escriben entre corchetes.', 'Tipa el arreglo con [] o Array<tipo>.', 'Accede a un elemento por su índice.', 'Itera el arreglo para imprimir cada elemento.'];
+    }
+    if (nombre.includes('objeto') || nombre.includes('objet')) {
+      return ['Un objeto se define entre llaves.', 'Cada propiedad recibe un tipo.', 'Separa propiedades con coma.', 'Imprime el objeto o una propiedad.'];
+    }
+    if (nombre.includes('condicion') || nombre.includes('decis') || nombre.includes('if')) {
+      return ['Evalúa una condición con la palabra if.', 'Compara valores con operadores como === o >.', 'Dentro del bloque, decide qué imprimir.', 'Cierra el bloque con su llave.'];
+    }
+    if (nombre.includes('ciclo') || nombre.includes('bucle') || nombre.includes('for') || nombre.includes('repet')) {
+      return ['Repite instrucciones con for o while.', 'Declara una variable de control contador.', 'Define la condición que detiene el ciclo.', 'Imprime los resultados dentro del ciclo.'];
+    }
+    if (nombre.includes('clase') || nombre.includes('class')) {
+      return ['Define un molde con la palabra class.', 'Incluye el constructor y sus propiedades.', 'Crea una instancia con la palabra new.', 'Llama a un método o propiedad de la instancia.'];
+    }
+    if (nombre.includes('funcion') || nombre.includes('funci') || nombre.includes('method')) {
+      return ['Declara un bloque reutilizable con function.', 'Tipa los parámetros y el tipo de retorno.', 'Devuelve el resultado con return.', 'Imprime el resultado con console.log.'];
+    }
+    if (nombre.includes('tipo') || nombre.includes('tipado') || nombre.includes('dato')) {
+      return ['Elige el tipo correcto para cada dato.', 'Anota los parámetros con : number o : string.', 'Anota el retorno de la función.', 'Imprime el resultado con console.log.'];
+    }
+    if (nombre.includes('estructura') || nombre.includes('estruct') || nombre.includes('firm')) {
+      return ['Organiza el código en una función principal.', 'Tipa los parámetros y el retorno.', 'Separa la lógica en pasos claros.', 'Cierra cada bloque con su llave.'];
+    }
+    if (nombre.includes('retorno') || nombre.includes('return') || nombre.includes('devolver')) {
+      return ['Usa la palabra return para entregar un valor.', 'Asegúrate de que el tipo coincida.', 'Llama a la función y captura su retorno.', 'Imprime el valor devuelto.'];
+    }
+    return ['El programa necesita una función principal.', 'Tipa los parámetros y el retorno.', 'Usa console.log para mostrar el resultado.', 'Revisa la llave de cierre de cada bloque.'];
   }
 
   obtenerTituloReto(): string {
-
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    return (
-      contenido?.reto?.titulo ||
-      'RETO TYPESCRIPT'
-    );
+    return this.lab()?.titulo_leccion ?? this.retoSeleccionado?.titulo ?? 'RETO TYPESCRIPT';
   }
 
   obtenerProblema(): string {
-
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    return (
-      contenido?.reto?.descripcion ||
-      'Resuelve el problema utilizando TypeScript.'
-    );
+    return this.lab()?.contenido_leccion ?? 'Resuelve el problema utilizando TypeScript.';
   }
 
   obtenerConcepto(): string {
-
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    return (
-      contenido?.leccion?.contenido ||
-      ''
-    );
+    return this.lab()?.contenido_leccion ?? '';
   }
 
-  obtenerEjemplo(): string {
-
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    return (
-      contenido?.ejemplo?.codigo ||
-      ''
-    );
+  solicitarPista(): void {
+    const total = this.lab()?.pistas?.length ?? 0;
+    if (total === 0 || this.pistasSolicitadas() >= total) return;
+    this.pistasSolicitadas.update(valor => valor + 1);
+    this.estrellasRestantes.update(valor => Math.max(0, valor - 1));
   }
 
-  obtenerXpReto(): number {
+  obtenerPista(): string {
+    const indice = this.pistasSolicitadas() - 1;
+    if (indice < 0) return '';
+    return this.lab()?.pistas?.[indice]?.texto ?? '';
+  }
 
-    const contenido =
-      this.contenidos()[
-      this.indiceActual()
-      ];
-
-    return (
-      contenido?.reto?.xp_recompensa ?? 0
-    );
+  actualizarCodigo(codigo: string): void {
+    this.code.set(codigo);
+    this.error.set(false);
+    this.mostrarFeedback.set(false);
   }
 
   prepararEjecucion(): void {
-
-    if (
-      !this.code().trim()
-    ) {
-
-      this.output.set(
-        `[TS-TERMINAL]
-
-ERROR: El editor está vacío.
-
-Escribe una solución antes de ejecutar.`
-      );
-
-      this.compiled.set(false);
-
+    if (!this.code().trim()) {
+      this.output.set('[TS-TERMINAL]\n\nERROR: El editor está vacío.\n\nEscribe una solución antes de ejecutar.');
       this.error.set(true);
-
       return;
     }
-
-    this.mostrarPrediccion.set(
-      true
-    );
-
-    this.output.set(
-      `[TS-TERMINAL]
-
-Antes de ejecutar tu programa:
-
-¿Qué resultado crees que aparecerá
-en la terminal?
-
-Escribe tu predicción y después
-pulsa "EJECUTAR TS".`
-    );
+    this.mostrarPrediccion.set(true);
+    this.output.set('[TS-TERMINAL]\n\nAntes de ejecutar tu programa, escribe una predicción y después pulsa EJECUTAR TS.');
   }
 
   compile(): void {
-
-    const codigo =
-      this.code().trim();
-
-    if (!codigo) {
-      return;
-    }
+    const codigo = this.code().trim();
+    if (!codigo) return;
 
     try {
-      // El editor antiguo se mantiene sin importar el compilador de TypeScript
-      // en el bundle del navegador. La ejecución queda aislada en el runner
-      // compartido; aquí se eliminan únicamente anotaciones simples para
-      // conservar el flujo visual existente.
       const codigoEjecutable = codigo
         .replace(/interface\s+[A-Za-z0-9_]+\s*\{[^}]*\}/g, '')
         .replace(/:\s*(string|number|boolean|any|unknown|never|void)\b/g, '')
         .replace(/\bas\s+(string|number|boolean|any|unknown)\b/g, '');
 
-      const resultados:
-        string[] = [];
-
-      const consoleOriginal =
-        console.log;
-
-      console.log =
-        (...args: unknown[]) => {
-
-          resultados.push(
-            args
-              .map(
-                valor =>
-                  this.formatearResultado(
-                    valor
-                  )
-              )
-              .join(' ')
-          );
-
-        };
+      const resultados: string[] = [];
+      const consoleOriginal = console.log;
+      console.log = (...args: unknown[]) => {
+        resultados.push(args.map(valor => this.formatearResultado(valor)).join(' '));
+      };
 
       try {
-
-        const ejecutar = new Function(codigoEjecutable);
-
-        ejecutar();
-
+        new Function(codigoEjecutable)();
       } finally {
-
-        console.log =
-          consoleOriginal;
-
+        console.log = consoleOriginal;
       }
 
-      const salida =
-        resultados.join('\n');
+      const salida = resultados.join('\n');
+
+      if (this.retoSeleccionado && !this.validarCodigoTS(codigo)) {
+        this.output.set(
+          `[TS-TERMINAL]\n\n` +
+          `> COMPILANDO TYPESCRIPT...\n\n` +
+          `COMPILACIÓN CORRECTA.\n\n` +
+          `> VERIFICANDO REQUISITOS DE LA MISIÓN...\n\n` +
+          `--------------------------------\n\n` +
+          `${salida || 'El programa no produjo ninguna salida.'}\n\n` +
+          `--------------------------------\n\n` +
+          `REQUISITOS PENDIENTES\n\n` +
+          `${this.obtenerRequisitosPendientes().join('\n')}\n\n` +
+          `--------------------------------`
+        );
+        this.compiled.set(false);
+        this.error.set(true);
+        this.ejecutado.set(true);
+        this.feedback.set(this.obtenerDiagnostico());
+        this.mostrarFeedback.set(true);
+        return;
+      }
 
       this.output.set(
-        `[TS-TERMINAL]
-
-> COMPILANDO TYPESCRIPT...
-
-COMPILACIÓN CORRECTA.
-
-> EJECUTANDO main.ts...
-
---------------------------------
-
-SALIDA DEL PROGRAMA
-
---------------------------------
-
-${salida || 'El programa no produjo ninguna salida.'}
-
---------------------------------
-
-> PROCESO FINALIZADO
-
---------------------------------`
+        `[TS-TERMINAL]\n\n` +
+        `> COMPILANDO TYPESCRIPT...\n\n` +
+        `COMPILACIÓN CORRECTA.\n\n` +
+        `> EJECUTANDO main.ts...\n\n` +
+        `--------------------------------\n\n` +
+        `SALIDA DEL PROGRAMA\n\n` +
+        `--------------------------------\n\n` +
+        `${salida || 'El programa no produjo ninguna salida.'}\n\n` +
+        `--------------------------------\n\n` +
+        `> MISIÓN CUMPLIDA\n\n` +
+        `--------------------------------`
       );
 
       this.compiled.set(true);
-
       this.error.set(false);
-
       this.ejecutado.set(true);
+      this.feedback.set('¡Excelente! Tu solución cumple el objetivo de la misión.');
+      this.mostrarFeedback.set(true);
 
-      this.generarFeedback(
-        salida
-      );
-
-      this.registrarIntento(
-        true
-      );
-
-    } catch (e) {
-
-      const mensaje =
-        e instanceof Error
-          ? e.message
-          : String(e);
-
+      this.registrarEstadisticasTerminal();
+      this.registrarIntento();
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : String(error);
       this.output.set(
-        `[TS-TERMINAL]
-
-> COMPILANDO TYPESCRIPT...
-
-ERROR
-
---------------------------------
-
-${mensaje}
-
---------------------------------
-
-Revisa el código e inténtalo
-nuevamente.`
+        `[TS-TERMINAL]\n\n` +
+        `> COMPILANDO TYPESCRIPT...\n\n` +
+        `ERROR\n\n` +
+        `--------------------------------\n\n` +
+        `${mensaje}\n\n` +
+        `--------------------------------`
       );
-
       this.compiled.set(false);
-
       this.error.set(true);
-
       this.ejecutado.set(true);
-
-      this.feedback.set(
-        'El código no pudo ejecutarse. Revisa el mensaje de error y encuentra qué parte de tu solución está provocando el problema.'
-      );
-
-      this.mostrarFeedback.set(
-        true
-      );
-
-      this.registrarIntento(
-        false
-      );
+      this.feedback.set('El código no pudo ejecutarse. Revisa el mensaje y encuentra qué parte de tu solución provoca el error.');
+      this.mostrarFeedback.set(true);
     }
   }
 
-  private generarFeedback(
-    salida: string
-  ): void {
+  private registrarEstadisticasTerminal(): void {
+    const idLeccion = (this.retoSeleccionado as any)?.id_leccion;
+    if (!idLeccion) return;
+    this.missionProgressService.updateTerminalStats(
+      idLeccion,
+      { prediccion_correcta: this.prediccion().trim().length > 0, pistas_usadas: this.pistasSolicitadas() }
+    ).subscribe({ error: () => undefined });
+  }
 
-    if (
-      !salida.trim()
-    ) {
-
-      this.feedback.set(
-        'Tu código se ejecutó correctamente, pero no produjo ninguna salida. Revisa el problema y piensa qué información necesitas mostrar mediante console.log().'
-      );
-
-      this.mostrarFeedback.set(
-        true
-      );
-
-      return;
-    }
-
-    if (
-      this.prediccion().trim()
-    ) {
-
-      const prediccion =
-        this.prediccion()
-          .trim()
-          .toLowerCase();
-
-      const resultado =
-        salida
-          .trim()
-          .toLowerCase();
-
-      if (
-        resultado.includes(
-          prediccion
-        )
-      ) {
-
-        this.feedback.set(
-          'Tu predicción coincide con parte del resultado. Pudiste anticipar correctamente el comportamiento del programa.'
-        );
-
-      } else {
-
-        this.feedback.set(
-          'El programa se ejecutó correctamente, pero el resultado fue diferente a tu predicción. Compara ambos y descubre qué instrucción produjo la diferencia.'
-        );
-
-      }
-
-    } else {
-
-      this.feedback.set(
-        'Tu programa se ejecutó correctamente. Analiza la salida y explica mentalmente por qué obtuviste ese resultado.'
-      );
-
-    }
-
-    this.mostrarFeedback.set(
-      true
-    );
+  private registrarIntento(): void {
+    const reto = this.retoSeleccionado;
+    if (!reto?.id_reto) return;
+    this.retoService.registrarIntento({
+      id_reto: reto.id_reto,
+      respuesta_usuario: this.code(),
+      correcto: true,
+      xp_obtenida: 0
+    }).subscribe({
+      next: () => this.missionCompleted.emit(),
+      error: () => this.missionCompleted.emit()
+    });
   }
 
   siguienteReto(): void {
-
-    const siguiente =
-      this.indiceActual() + 1;
-
-    if (
-      siguiente >=
-      this.contenidos().length
-    ) {
-
-      this.finalizado.set(
-        true
-      );
-
-      this.feedback.set(
-        'Has recorrido todos los retos disponibles de TypeScript.'
-      );
-
-      this.mostrarFeedback.set(
-        true
-      );
-
-      return;
-    }
-
-    this.indiceActual.set(
-      siguiente
-    );
-
-    this.cargarContenidoActual();
+    if (!this.retoSeleccionado) return;
+    this.finalizado.set(true);
+    this.missionCompleted.emit();
   }
 
-  cargarEjemploEnEditor(): void {
+  private validarCodigoTS(codigo: string): boolean {
+    if (!this.retoSeleccionado) return false;
+    const regla = this.obtenerReglaTS(this.retoSeleccionado.titulo);
+    return regla.busquedas.every(({ patron }) => this.coincide(codigo, patron));
+  }
 
-    const ejemplo =
-      this.obtenerEjemplo();
+  private obtenerRequisitosPendientes(): string[] {
+    if (!this.retoSeleccionado) return [];
+    return this.obtenerReglaTS(this.retoSeleccionado.titulo)
+      .busquedas
+      .filter(({ patron }) => !this.coincide(this.code(), patron))
+      .map(({ descripcion }) => `- ${descripcion}`);
+  }
 
-    if (!ejemplo) {
-      return;
+  private obtenerDiagnostico(): string {
+    const pendientes = this.obtenerRequisitosPendientes();
+    return pendientes.length
+      ? `Tu solución compila pero no cumple el objetivo de la misión. Revisa los requisitos pendientes:\n${pendientes.join('\n')}`
+      : 'El código todavía no cumple el objetivo. Usa una pista si lo necesitas.';
+  }
+
+  private coincide(codigo: string, patron: string): boolean {
+    try {
+      return new RegExp(patron).test(codigo);
+    } catch {
+      return false;
     }
+  }
 
-    this.code.set(
-      ejemplo
-    );
-
-    this.output.set('');
-
-    this.feedback.set('');
-
-    this.compiled.set(false);
-
-    this.error.set(false);
-
-    this.ejecutado.set(false);
-
-    this.mostrarPrediccion.set(false);
-
-    this.mostrarFeedback.set(false);
+  private obtenerReglaTS(titulo: string): ReglaTs {
+    const nombre = titulo.toLowerCase();
+    if (nombre.includes('interfaz') || nombre.includes('interface')) {
+      return {
+        busquedas: [
+          { patron: 'interface', descripcion: 'Define una interface' },
+          { patron: '\\w+\\s*:\\s*(string|number|boolean|any)', descripcion: 'Tipa al menos una propiedad' },
+          { patron: 'console\\.log|function|const|let', descripcion: 'Usa la interface en el programa' }
+        ]
+      };
+    }
+    if (nombre.includes('arreglo') || nombre.includes('array') || nombre.includes('lista') || nombre.includes('masiv')) {
+      return {
+        busquedas: [
+          { patron: '\\[\\]|Array<', descripcion: 'Usa un arreglo tipado con [] o Array<tipo>' },
+          { patron: 'for\\s*\\(|forEach|\\.map\\(|while\\s*\\(', descripcion: 'Itera los elementos del arreglo' },
+          { patron: 'console\\.log', descripcion: 'Imprime los elementos con console.log' }
+        ]
+      };
+    }
+    if (nombre.includes('objeto') || nombre.includes('objet')) {
+      return {
+        busquedas: [
+          { patron: '\\{[\\s\\S]*\\}', descripcion: 'Crea un objeto con llaves' },
+          { patron: ':\\s*(string|number|boolean|any)', descripcion: 'Tipa las propiedades del objeto' },
+          { patron: 'console\\.log|function', descripcion: 'Usa el objeto en el programa' }
+        ]
+      };
+    }
+    if (nombre.includes('condicion') || nombre.includes('decis') || nombre.includes('if')) {
+      return {
+        busquedas: [
+          { patron: 'if\\s*\\(', descripcion: 'Evalúa una condición con if' },
+          { patron: '===|==|!==|!=|>|<|>=|<=|&&|\\|\\|', descripcion: 'Compara valores en la condición' },
+          { patron: 'console\\.log', descripcion: 'Imprime el resultado con console.log' }
+        ]
+      };
+    }
+    if (nombre.includes('ciclo') || nombre.includes('bucle') || nombre.includes('for') || nombre.includes('repet')) {
+      return {
+        busquedas: [
+          { patron: 'for\\s*\\(|while\\s*\\(', descripcion: 'Repite instrucciones con for o while' },
+          { patron: '\\b(i|j|contador|indice|elemento)\\b', descripcion: 'Usa una variable de control' },
+          { patron: 'console\\.log', descripcion: 'Imprime los resultados con console.log' }
+        ]
+      };
+    }
+    if (nombre.includes('clase') || nombre.includes('class')) {
+      return {
+        busquedas: [
+          { patron: 'class', descripcion: 'Define una clase con class' },
+          { patron: 'constructor', descripcion: 'Incluye el constructor' },
+          { patron: 'new ', descripcion: 'Crea una instancia con new' }
+        ]
+      };
+    }
+    if (nombre.includes('funcion') || nombre.includes('funci') || nombre.includes('method')) {
+      return {
+        busquedas: [
+          { patron: 'function', descripcion: 'Declara una función con function' },
+          { patron: 'return', descripcion: 'Devuelve un valor con return' },
+          { patron: 'console\\.log', descripcion: 'Imprime el resultado con console.log' }
+        ]
+      };
+    }
+    if (nombre.includes('tipo') || nombre.includes('tipado') || nombre.includes('dato')) {
+      return {
+        busquedas: [
+          { patron: ':\\s*(string|number|boolean|any)', descripcion: 'Anota el tipo de al menos una variable o parámetro' },
+          { patron: 'function', descripcion: 'Declara una función' },
+          { patron: 'console\\.log', descripcion: 'Imprime el resultado con console.log' }
+        ]
+      };
+    }
+    if (nombre.includes('estructura') || nombre.includes('estruct') || nombre.includes('firm')) {
+      return {
+        busquedas: [
+          { patron: 'function', descripcion: 'Organiza el código en una función principal' },
+          { patron: ':', descripcion: 'Tipa los parámetros o el retorno' },
+          { patron: 'console\\.log', descripcion: 'Imprime el resultado con console.log' }
+        ]
+      };
+    }
+    if (nombre.includes('retorno') || nombre.includes('return') || nombre.includes('devolver')) {
+      return {
+        busquedas: [
+          { patron: 'return', descripcion: 'Devuelve un valor con return' },
+          { patron: 'function', descripcion: 'Declara la función que devuelve el valor' },
+          { patron: 'console\\.log', descripcion: 'Imprime el valor devuelto' }
+        ]
+      };
+    }
+    return {
+      busquedas: [
+        { patron: 'function', descripcion: 'Declara una función principal' },
+        { patron: ':\\s*(string|number|boolean|any)', descripcion: 'Tipa los parámetros o el retorno' },
+        { patron: 'console\\.log', descripcion: 'Imprime el resultado con console.log' }
+      ]
+    };
   }
 
   reset(): void {
-
-    this.code.set(
-      this.codigoInicial
-    );
-
+    this.code.set(this.codigoInicial);
     this.output.set('');
-
     this.prediccion.set('');
-
-    this.feedback.set('');
-
     this.compiled.set(false);
-
     this.error.set(false);
-
     this.ejecutado.set(false);
-
+    this.finalizado.set(false);
     this.mostrarPrediccion.set(false);
-
     this.mostrarFeedback.set(false);
+    this.pistasSolicitadas.set(0);
+    this.estrellasRestantes.set(3);
   }
 
   clear(): void {
-
     this.code.set('');
-
     this.output.set('');
-
     this.prediccion.set('');
-
-    this.feedback.set('');
-
     this.compiled.set(false);
-
     this.error.set(false);
-
     this.ejecutado.set(false);
-
     this.mostrarPrediccion.set(false);
-
     this.mostrarFeedback.set(false);
   }
 
-  private registrarIntento(
-    correcto: boolean
-  ): void {
-
-    const reto =
-      this.contenidos()[
-        this.indiceActual()
-      ]?.reto;
-
-    if (
-      !reto?.id_reto
-    ) {
-      return;
-    }
-
-    this.retoService
-      .registrarIntento({
-
-        id_reto:
-          reto.id_reto,
-
-        respuesta_usuario:
-          this.code(),
-
-        correcto,
-
-        xp_obtenida:
-          0
-
-      })
-      .subscribe({
-
-        next: resultado => {
-
-          if (
-            resultado &&
-            correcto
-          ) {
-
-            this.feedback.set(
-              `${this.feedback()}\n\nMisión registrada correctamente. Recompensa: +${reto.xp_recompensa ?? 0} XP.`
-            );
-
-          }
-
-        },
-
-        error: err =>
-          console.error(
-            'Error al registrar intento:',
-            err
-          )
-
-      });
-  }
-
-  private formatearResultado(
-    valor: unknown
-  ): string {
-
-    if (
-      typeof valor === 'object' &&
-      valor !== null
-    ) {
-
-      try {
-
-        return JSON.stringify(
-          valor,
-          null,
-          2
-        );
-
-      } catch {
-
-        return '[Objeto]';
-
-      }
-
-    }
-
+  private formatearResultado(valor: unknown): string {
+    if (typeof valor === 'string') return valor;
+    if (typeof valor === 'object') return JSON.stringify(valor);
     return String(valor);
   }
 }

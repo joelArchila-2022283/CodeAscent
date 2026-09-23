@@ -34,7 +34,10 @@ export interface PerfilLenguaje {
   porcentaje: number;
   xp_actual: number;
   nivel_actual: number;
+  xp_siguiente_nivel?: number;
+  xp_inicio_nivel?: number;
   total_niveles: number;
+  misiones_completadas: number;
 }
 
 export interface PerfilData {

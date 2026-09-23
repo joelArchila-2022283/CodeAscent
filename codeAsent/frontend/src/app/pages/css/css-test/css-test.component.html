@@ -27,9 +27,17 @@
   } @else if (finished()) {
 
     <article class="result">
-      <span>DIAGNÓSTICO COMPLETADO</span>
-
-      <h3>{{ score() }} / {{ levels.length }}</h3>
+      <div class="completion-alert" role="alert">
+        <i class="bi bi-trophy-fill" aria-hidden="true"></i>
+        <div>
+          <strong>¡FELICIDADES!</strong>
+          <span>Terminaste la lección {{ mission?.nivel?.numero_nivel }}.</span>
+        </div>
+      </div>
+      <h3>{{ score() }} / {{ preguntas().length }}</h3>
+      <p>Tu progreso se guardó correctamente. Ve a misiones para continuar tu recorrido.</p>
+      <p>XP obtenido en el cuestionario: {{ xpGanado() }}.</p>
+      <button class="next mission-next" type="button" (click)="goToMissions.emit()"><i class="bi bi-map-fill" aria-hidden="true"></i> IR A LAS MISIONES <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
 
       <button
         class="next"
@@ -40,77 +48,74 @@
       </button>
     </article>
 
-  } @else if (current(); as level) {
+  } @else if (pregunta(); as pregunta) {
 
-    @if (quiz(level); as pregunta) {
+    <article class="quiz">
 
-      <article class="quiz">
+      <div class="quiz-top">
+        <span>
+          MISIÓN CSS
+        </span>
 
-        <div class="quiz-top">
-          <span>
-            NIVEL {{ level.numero_nivel }} · {{ level.nombre }}
-          </span>
+        <small>
+          PREGUNTA {{ index() + 1 }} / {{ preguntas().length }}
+        </small>
+      </div>
 
-          <small>
-            PREGUNTA {{ index() + 1 }} / {{ levels.length }}
-          </small>
+      <h3>{{ pregunta.enunciado }}</h3>
+
+      @for (
+        opcion of pregunta.respuestas;
+        track opcion.id_respuesta;
+        let i = $index
+      ) {
+
+        <button
+          class="answer"
+          type="button"
+          [class.ok]="selected() === i && opcion.es_correcta"
+          [class.bad]="selected() === i && !opcion.es_correcta"
+          [disabled]="selected() !== null && pregunta.respuestas[selected()!]?.es_correcta"
+          (click)="answer(i)"
+        >
+          {{ opcion.texto_respuesta }}
+        </button>
+
+      }
+
+      @if (selected() !== null) {
+
+        <div
+          class="feedback"
+          [class.correct]="pregunta.respuestas[selected()!]?.es_correcta"
+        >
+          <b>
+            {{
+              pregunta.respuestas[selected()!]?.es_correcta
+                ? '✓ CORRECTO'
+                : '✕ REVISA ESTE CONCEPTO'
+            }}
+          </b>
         </div>
 
-        <h3>{{ pregunta.descripcion }}</h3>
+        <button
+          class="next"
+          type="button"
+          [disabled]="saving() || savingAnswer()"
+          (click)="next()"
+        >
+          {{
+            saving() || savingAnswer()
+              ? 'GUARDANDO RESPUESTA...'
+              : pregunta.respuestas[selected()!]?.es_correcta && index() === preguntas().length - 1
+              ? 'COMPLETAR CUESTIONARIO'
+              : pregunta.respuestas[selected()!]?.es_correcta ? 'SIGUIENTE →' : 'ELIGE OTRA OPCIÓN'
+          }}
+        </button>
 
-        @for (
-          opcion of pregunta.respuestas;
-          track opcion.id_respuesta;
-          let i = $index
-        ) {
+      }
 
-          <button
-            class="answer"
-            type="button"
-            [class.ok]="selected() === i && opcion.es_correcta"
-            [class.bad]="selected() === i && !opcion.es_correcta"
-            [disabled]="selected() !== null"
-            (click)="answer(i)"
-          >
-            {{ opcion.contenido }}
-          </button>
-
-        }
-
-        @if (selected() !== null) {
-
-          <div
-            class="feedback"
-            [class.correct]="
-              pregunta.respuestas[selected()!]?.es_correcta
-            "
-          >
-            <b>
-              {{
-                pregunta.respuestas[selected()!]?.es_correcta
-                  ? '✓ CORRECTO'
-                  : '✕ REVISA ESTE CONCEPTO'
-              }}
-            </b>
-          </div>
-
-          <button
-            class="next"
-            type="button"
-            (click)="next()"
-          >
-            {{
-              index() === levels.length - 1
-                ? 'VER RESULTADO'
-                : 'SIGUIENTE →'
-            }}
-          </button>
-
-        }
-
-      </article>
-
-    }
+    </article>
 
   } @else {
 
