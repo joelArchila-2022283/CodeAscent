@@ -16,19 +16,38 @@
         [class.done]="mision.completada"
         [class.locked]="!mision.desbloqueada"
         [disabled]="!mision.desbloqueada"
-        (click)="seleccionarMision(mision)">
+        (click)="seleccionarMision(mision)"
+      >
         <span class="mission-icon">
-          <i class="bi" [class]="mision.completada ? 'bi-check-circle-fill' : (mision.desbloqueada ? 'bi-door-open' : 'bi-lock-fill')"></i>
+          <i
+            class="bi"
+            [class]="
+              mision.completada
+                ? 'bi-check-circle-fill'
+                : mision.desbloqueada
+                  ? 'bi-door-open'
+                  : 'bi-lock-fill'
+            "
+          ></i>
         </span>
         <span class="mission-copy">
-          <small>{{ mision.codigoIdentificador }}</small>
-          <strong>{{ mision.nivel.nombre }}</strong>
-          <span>{{ mision.nivel.descripcion || 'Resuelve el reto, consulta el manual y demuestra lo aprendido.' }}</span>
+          <small>{{ mision.codigoIdentificador }} · {{ mision.mision.tema }}</small>
+          <strong
+            >{{ mision.mision.titulo }}
+            @if (mision.nivel.nombre && mision.nivel.nombre !== mision.mision.titulo) {
+              ({{ mision.nivel.nombre }})
+            }
+          </strong>
+          <span>{{ mision.mision.objetivoClaro }}</span>
         </span>
-        <span class="mission-reward">{{ mision.completada ? 'LISTO' : '+' + (mision.nivel.xp_requerida || 0) + ' XP' }}</span>
+        <span class="mission-reward">{{
+          mision.completada ? 'LISTO' : '+' + mision.xpRecompensa + ' XP'
+        }}</span>
       </button>
     }
   </div>
 
-  <button class="sql-back" (click)="back.emit()"><i class="bi bi-arrow-left"></i> VOLVER AL PANEL</button>
+  <button class="sql-back" (click)="back.emit()">
+    <i class="bi bi-arrow-left"></i> VOLVER AL PANEL
+  </button>
 </section>
