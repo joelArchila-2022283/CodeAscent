@@ -22,7 +22,7 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
       WITH progreso_misiones AS (
         SELECT
           l.id_lenguaje,
-          COALESCE(SUM(CASE WHEN mp.completed THEN CASE WHEN LOWER(l.nombre) = 'sql' THEN 100 ELSE n.numero_nivel * 100 END ELSE 0 END), 0)::int AS xp_misiones,
+          COALESCE(SUM(CASE WHEN mp.completed THEN n.numero_nivel * 100 ELSE 0 END), 0)::int AS xp_misiones,
           COUNT(DISTINCT n.id_nivel)::int AS total_niveles,
           COUNT(DISTINCT n.id_nivel) FILTER (WHERE mp.completed = TRUE)::int AS misiones_completadas
         FROM lenguaje l
@@ -39,10 +39,10 @@ export const obtenerResumenDashboard = async (req: Request, res: Response) => {
           SELECT LEAST(10, COALESCE(MAX(nivel.numero_nivel), 0) + 1)
           FROM nivel nivel
           WHERE nivel.id_lenguaje = l.id_lenguaje
-            AND (SELECT CASE WHEN LOWER(l.nombre) = 'sql' THEN COUNT(*) * 100 ELSE COALESCE(SUM(anterior.numero_nivel * 100), 0) END FROM nivel anterior WHERE anterior.id_lenguaje = l.id_lenguaje AND anterior.numero_nivel <= nivel.numero_nivel) <= COALESCE(NULLIF(pm.xp_misiones, 0), p.xp_actual, uxp.xp, 0)
+            AND (SELECT COALESCE(SUM(anterior.numero_nivel * 100), 0) FROM nivel anterior WHERE anterior.id_lenguaje = l.id_lenguaje AND anterior.numero_nivel <= nivel.numero_nivel) <= COALESCE(NULLIF(pm.xp_misiones, 0), p.xp_actual, uxp.xp, 0)
         ), 1)::int AS nivel_actual,
-        COALESCE((SELECT CASE WHEN LOWER(l.nombre) = 'sql' THEN COUNT(*) * 100 ELSE SUM(siguiente.numero_nivel * 100) END FROM nivel siguiente WHERE siguiente.id_lenguaje = l.id_lenguaje AND siguiente.estado = TRUE AND siguiente.numero_nivel <= COALESCE(pm.misiones_completadas, 0) + 1), 0)::int AS xp_siguiente_nivel,
-        COALESCE((SELECT CASE WHEN LOWER(l.nombre) = 'sql' THEN COUNT(*) * 100 ELSE SUM(actual.numero_nivel * 100) END FROM nivel actual WHERE actual.id_lenguaje = l.id_lenguaje AND actual.estado = TRUE AND actual.numero_nivel <= COALESCE(pm.misiones_completadas, 0)), 0)::int AS xp_inicio_nivel,
+        COALESCE((SELECT SUM(siguiente.numero_nivel * 100) FROM nivel siguiente WHERE siguiente.id_lenguaje = l.id_lenguaje AND siguiente.estado = TRUE AND siguiente.numero_nivel <= COALESCE(pm.misiones_completadas, 0) + 1), 0)::int AS xp_siguiente_nivel,
+        COALESCE((SELECT SUM(actual.numero_nivel * 100) FROM nivel actual WHERE actual.id_lenguaje = l.id_lenguaje AND actual.estado = TRUE AND actual.numero_nivel <= COALESCE(pm.misiones_completadas, 0)), 0)::int AS xp_inicio_nivel,
         COALESCE(
           CASE WHEN COALESCE(pm.misiones_completadas, 0) > 0
             THEN LEAST(100, ROUND((pm.misiones_completadas::numeric / NULLIF(pm.total_niveles, 0)) * 100, 2))
