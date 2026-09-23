@@ -119,6 +119,22 @@ export class PerfilComponent implements OnInit {
     return nombre.toLowerCase().replace('typescript', 'ts');
   }
 
+  claseLogro(dificultad?: string): string {
+    const valor = (dificultad || 'facil').toLowerCase();
+    if (valor === 'facil' || valor === 'fácil') return 'bronce';
+    if (valor === 'medio' || valor === 'intermedio') return 'plata';
+    return 'dorado';
+  }
+
+  etiquetaDificultad(dificultad?: string): string {
+    const clases: Record<string, string> = {
+      bronce: 'BRONCE',
+      plata: 'PLATA',
+      dorado: 'DORADO'
+    };
+    return clases[this.claseLogro(dificultad)];
+  }
+
   maxActividad(): number {
     const actividad = this.datos()?.perfil?.actividadSemanal || [];
     return Math.max(...actividad.map(item => Number(item.xp)), 1);

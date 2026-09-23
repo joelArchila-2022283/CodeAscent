@@ -89,7 +89,7 @@
       <section class="perfil-section">
         <div class="section-heading"><div><span class="perfil-kicker">COLECCIÓN DEL JUGADOR</span><h2>LOGROS</h2></div><span>{{ data.logrosObtenidos || 0 }} CONSEGUIDOS</span></div>
         <div class="achievements-grid">
-          @for (logro of data.perfil?.logros || []; track logro.id_logro) { <article class="perfil-card achievement" [class.achievement--locked]="logro.obtenido === false"><div class="achievement-icon"><i class="bi bi-award-fill"></i></div><strong>{{ (logro.titulo || logro.nombre) | uppercase }}</strong><small>{{ logro.descripcion || 'Logro conseguido durante tu recorrido.' }}</small><span>{{ logro.dificultad || 'facil' }}</span></article> } @empty { <div class="empty-state">Aún no hay logros registrados. Tu próxima insignia está esperando.</div> }
+          @for (logro of data.perfil?.logros || []; track logro.id_logro) { <article class="perfil-card achievement" [class]="'perfil-card achievement achievement--' + claseLogro(logro.dificultad)" [class.achievement--locked]="logro.obtenido === false"><div class="achievement-icon"><i class="bi bi-award-fill"></i></div><strong>{{ (logro.titulo || logro.nombre) | uppercase }}</strong><small>{{ logro.descripcion || 'Logro conseguido durante tu recorrido.' }}</small><span class="achievement-difficulty">{{ etiquetaDificultad(logro.dificultad) }}</span></article> } @empty { <div class="empty-state">Aún no hay logros registrados. Tu próxima insignia está esperando.</div> }
         </div>
       </section>
 
