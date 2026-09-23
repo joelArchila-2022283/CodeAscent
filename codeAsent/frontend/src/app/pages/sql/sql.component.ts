@@ -18,8 +18,6 @@ import { MissionProgressService } from '../../core/services/mission-progress.ser
 import { MISIONES_SQL, MisionSqlConfig } from './misiones-sql.data';
 import { obtenerUrlAvatar } from '../../utils/avatar.util';
 
-const XP_POR_MISION_SQL = 100;
-
 @Component({
   selector: 'app-sql',
   standalone: true,
@@ -128,7 +126,7 @@ export class SqlComponent implements OnInit {
     const inicio = niveles
       .slice(0, indice)
       .reduce((total, nivel) => total + Number(nivel.xp_requerida ?? 0), 0);
-    const costo = XP_POR_MISION_SQL;
+    const costo = Number(nivelActual?.xp_requerida ?? 100);
     const xpDelNivel = Math.max(0, Math.min(costo, xp - inicio));
 
     this.datosJugador.update((jugador) => ({
@@ -271,7 +269,7 @@ export class SqlComponent implements OnInit {
     }
     this.misionActiva.set({
       ...mision,
-      xpRecompensa: XP_POR_MISION_SQL,
+      xpRecompensa: Number(nivelMision.xp_requerida ?? mision.xpRecompensa),
     });
     const missionId = reto.id_leccion;
     if (missionId) {
