@@ -73,11 +73,39 @@ router.post('/:missionId/complete', async (req, res) => {
              WHERE user_id = $1 AND mission_id = $2`,
             [userId, missionId]
         );
-        const xpAward = row.slug === 'sql' ? 100 : Number(row.numero_nivel) * 100;
+        if (row.slug === 'sql') {
+            await client.query(
+                `INSERT INTO nivel_usuario
+                    (id_usuario, id_nivel, desbloqueado, completado, fecha_desbloqueo, fecha_completado)
+                 VALUES ($1, $2, TRUE, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                 ON CONFLICT (id_usuario, id_nivel) DO UPDATE SET
+                    desbloqueado = TRUE,
+                    completado = TRUE,
+                    fecha_completado = COALESCE(nivel_usuario.fecha_completado, CURRENT_TIMESTAMP)`,
+                [userId, row.id_nivel]
+            );
+
+            await client.query(
+                `INSERT INTO nivel_usuario
+                    (id_usuario, id_nivel, desbloqueado, completado, fecha_desbloqueo)
+                 SELECT $1, siguiente.id_nivel, TRUE, FALSE, CURRENT_TIMESTAMP
+                 FROM nivel siguiente
+                 WHERE siguiente.id_lenguaje = $2
+                   AND siguiente.numero_nivel > $3
+                   AND siguiente.estado = TRUE
+                 ORDER BY siguiente.numero_nivel
+                 LIMIT 1
+                 ON CONFLICT (id_usuario, id_nivel) DO UPDATE SET
+                    desbloqueado = TRUE,
+                    fecha_desbloqueo = COALESCE(nivel_usuario.fecha_desbloqueo, CURRENT_TIMESTAMP)`,
+                [userId, row.id_lenguaje, row.numero_nivel]
+            );
+        }
+        const xpAward = Number(row.numero_nivel) * 100;
         const progresoLenguaje = await client.query(
             `SELECT
                 n.id_lenguaje,
-                COALESCE(SUM(CASE WHEN mp.completed THEN CASE WHEN l.slug = 'sql' THEN 100 ELSE n.numero_nivel * 100 END ELSE 0 END), 0)::int AS xp,
+                COALESCE(SUM(CASE WHEN mp.completed THEN n.numero_nivel * 100 ELSE 0 END), 0)::int AS xp,
                 COUNT(DISTINCT n.id_nivel)::int AS total_niveles,
                 COUNT(DISTINCT n.id_nivel) FILTER (WHERE mp.completed = TRUE)::int AS niveles_completados,
                 COALESCE(
