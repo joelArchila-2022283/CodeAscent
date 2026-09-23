@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { switchMap } from 'rxjs';
+import { catchError, of, switchMap } from 'rxjs';
 import { NivelSql, SeccionSql, JugadorSql, RetoNivelSql } from '../../interfaces/sql.interface';
 import { PerfilLenguaje } from '../../interfaces/usuario.interface';
 import { PanelSqlComponent } from './panel-sql/panel-sql.component';
@@ -288,7 +288,7 @@ export class SqlComponent implements OnInit {
         prediccion_correcta: resultado.prediccionCorrecta,
         pistas_usadas: resultado.pistasUsadas,
         codigo: resultado.codigo,
-      })),
+      }).pipe(catchError(() => of(null)))),
       switchMap(() => this.missionProgressService.updateProgress(missionId, 'quiz')),
     ).subscribe({
       next: () => this.cambiarSeccion('cuestionario'),

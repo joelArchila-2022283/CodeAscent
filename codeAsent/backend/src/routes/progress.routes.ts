@@ -65,11 +65,11 @@ router.post('/:missionId/terminal-stats', async (req, res) => {
                        < array_position(ARRAY['manual','lesson','terminal','quiz'], 'terminal')
                     THEN 'terminal' ELSE reached_step END,
                 updated_at = CURRENT_TIMESTAMP
-          WHERE user_id = $1 AND mission_id = $2 AND completed = FALSE
+          WHERE user_id = $1 AND mission_id = $2
           RETURNING *`,
         [req.usuario!.id_usuario, Number(req.params.missionId), Boolean(req.body.prediccion_correcta), Number(req.body.pistas_usadas ?? 0), req.body.codigo ?? null]
     );
-    if (!resultado.rows[0]) return res.status(404).json({ status: 'error', message: 'Progreso no encontrado o misión completada.' });
+    if (!resultado.rows[0]) return res.status(404).json({ status: 'error', message: 'Progreso no encontrado para esta misión.' });
     res.json({ status: 'success', data: resultado.rows[0] });
 });
 
