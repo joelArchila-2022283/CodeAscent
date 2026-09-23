@@ -273,7 +273,7 @@ export class SqlComponent implements OnInit {
 
   private enviarComplete(missionId: number, resultado: ResultadoCuestionarioSql): void {
     this.missionProgressService
-      .completeMission(missionId, resultado.correct, resultado.total)
+      .completeMission(missionId, resultado.correct, resultado.total, 'quiz')
       .subscribe({
         next: (respuesta) => {
           const esPerfect = respuesta?.data?.perfect !== false && respuesta?.data?.correct === respuesta?.data?.total;
@@ -317,7 +317,7 @@ export class SqlComponent implements OnInit {
             this.missionProgressService.updateProgress(missionId, 'quiz').subscribe({
               next: () =>
                 this.missionProgressService
-                  .completeMission(missionId, resultado.correct, resultado.total)
+                  .completeMission(missionId, resultado.correct, resultado.total, 'quiz')
                   .subscribe({
                     next: (r2) => {
                       if (r2?.data?.completed) this.marcarMisionCompletada(missionId);
