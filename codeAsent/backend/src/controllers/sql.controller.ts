@@ -65,7 +65,8 @@ export const obtenerNivelesSql = async (_req: Request, res: Response): Promise<v
 
     const niveles = resultado.rows.map((nivel: any) => ({
       ...nivel,
-      xp_requerida: Number(nivel.numero_nivel) * 100,
+      // Cada misión SQL entrega 100 XP; el siguiente desbloqueo depende de completarla.
+      xp_requerida: 100,
     }));
     res.status(200).json({ status: 'success', data: niveles });
   } catch (error: any) {

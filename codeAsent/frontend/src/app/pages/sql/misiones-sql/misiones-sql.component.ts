@@ -11,6 +11,8 @@ import { CommonModule } from '@angular/common';
 import { NivelSql, RetoNivelSql } from '../../../interfaces/sql.interface';
 import { MISIONES_SQL, MisionSqlConfig } from '../misiones-sql.data';
 
+const XP_POR_MISION_SQL = 100;
+
 export interface MisionSqlSeleccionada {
   reto: RetoNivelSql;
   nivel: NivelSql;
@@ -61,11 +63,11 @@ export class MisionesSqlComponent implements OnChanges {
 
         const reto: RetoNivelSql = {
           id_reto: retoBase?.id_reto ?? mision.numero,
-          id_leccion: leccion?.id_leccion ?? retoBase?.id_leccion ?? mision.numero,
+          id_leccion: leccion?.id_leccion ?? retoBase?.id_leccion ?? 0,
           titulo: retoBase?.titulo ?? mision.titulo,
           descripcion: retoBase?.descripcion ?? mision.objetivoClaro,
           tipo_reto: 'codigo',
-          xp_recompensa: Number(nivel.xp_requerida ?? 0) || mision.xpRecompensa,
+          xp_recompensa: XP_POR_MISION_SQL,
           dificultad:
             retoBase?.dificultad ??
             (mision.numero <= 3 ? 'facil' : mision.numero <= 7 ? 'medio' : 'dificil'),
@@ -86,7 +88,7 @@ export class MisionesSqlComponent implements OnChanges {
           leccionContenido: leccion?.contenido || mision.contexto,
           respuestas: reto.respuestas,
           codigoIdentificador: mision.codigo,
-          idLeccion: reto.id_leccion,
+          idLeccion: leccion?.id_leccion ?? null,
           xpRecompensa: reto.xp_recompensa,
           desbloqueada,
           completada: this.completadas.has(reto.id_leccion),
