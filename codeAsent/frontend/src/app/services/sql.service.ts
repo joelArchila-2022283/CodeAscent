@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { NivelSql } from '../interfaces/sql.interface';
+import { environment } from '../../environments/environment';
 
 interface RespuestaNivelesSql {
   status: string;
@@ -11,7 +12,7 @@ interface RespuestaNivelesSql {
 @Injectable({ providedIn: 'root' })
 export class SqlService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/sql';
+  private readonly apiUrl = `${environment.apiUrl}/sql`;
 
   obtenerNiveles(): Observable<NivelSql[]> {
     return this.http.get<RespuestaNivelesSql>(`${this.apiUrl}/niveles`).pipe(
